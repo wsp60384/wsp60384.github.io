@@ -2390,7 +2390,7 @@
         ]
       }
     }
-  // 全平台支援「完全離線 / 斷網」Google Maps App 喚醒與導航
+  // 全平台支援「完全離線 / 斷網」Google Maps App 喚醒（相容 iOS Chrome / Safari / Android）
 document.addEventListener('click', function (e) {
   const targetLink = e.target.closest('a');
   if (!targetLink) return;
@@ -2409,7 +2409,7 @@ document.addEventListener('click', function (e) {
 
       let query = '';
 
-      // 1. 若為標準搜尋網址，直接提取關鍵字
+      // 1. 提取關鍵字
       if (href.includes('?q=')) {
         query = href.split('?q=')[1].split('&')[0];
       } else if (href.includes('search/')) {
@@ -2417,7 +2417,7 @@ document.addEventListener('click', function (e) {
         query = parts[1] ? parts[1].split('/')[0].split('?')[0] : '';
       }
 
-      // 2. 若為短網址或無參數網址，精準取得節點純文字作為離線搜尋標的
+      // 2. 短網址或無參數網址，提取乾淨文字
       if (!query || query.trim() === '') {
         const rawText = targetLink.textContent || targetLink.innerText || '';
         query = encodeURIComponent(rawText.replace(/[\n\r\t]/g, ' ').replace(/🚻|🚗|🏠|🎫|⚠️|地圖|[\u{1F300}-\u{1F9FF}]/gu, '').trim());
@@ -2427,13 +2427,21 @@ document.addEventListener('click', function (e) {
         query = encodeURIComponent('New Zealand');
       }
 
-      // 3. iOS 離線呼叫：使用 comgooglemaps 協議直接查詢離線圖資
+      // 3. iOS 離線呼叫（針對 iOS Chrome 採用模擬原生點擊，避開恐龍頁面）
       if (isIOS) {
-        window.location.href = `comgooglemaps://?q=${query}&zoom=16`;
+        const schemeUrl = `comgooglemaps://?q=${query}&zoom=16`;
+        const tempLink = document.createElement('a');
+        tempLink.href = schemeUrl;
+        tempLink.style.display = 'none';
+        document.body.appendChild(tempLink);
+        tempLink.click();
+        setTimeout(() => {
+          document.body.removeChild(tempLink);
+        }, 300);
         return;
       }
 
-      // 4. Android 離線呼叫：使用 geo 協議直接查詢離線圖資
+      // 4. Android 離線呼叫：使用 geo 協議
       if (isAndroid) {
         window.location.href = `geo:0,0?q=${query}`;
         return;
