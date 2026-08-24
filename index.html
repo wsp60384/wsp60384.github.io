@@ -2390,7 +2390,7 @@
         ]
       }
     }
-  // 全平台地圖 App 喚醒（保留原行程頁面不被覆蓋）
+  // 全平台支援「完全離線 / 斷網」Google Maps App 喚醒與導航
 document.addEventListener('click', function (e) {
   const targetLink = e.target.closest('a');
   if (!targetLink) return;
@@ -2398,7 +2398,7 @@ document.addEventListener('click', function (e) {
   const href = targetLink.getAttribute('href');
   if (!href) return;
 
-  // 判斷是否為 Google 地圖相關連結
+  // 判斷是否為地圖連結
   if (href.includes('maps.google.com') || href.includes('maps.app.goo.gl') || href.includes('google.com/maps')) {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isAndroid = /Android/.test(navigator.userAgent);
@@ -2407,28 +2407,28 @@ document.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
 
-      // 1. 如果是搜尋關鍵字連結 (?q=xxx)
+      // 1. 取得目的地關鍵字（若為短網址，抓取按鈕上的景點文字）
+      let query = '';
       if (href.includes('?q=')) {
-        const query = href.split('?q=')[1].split('&')[0];
-        
-        if (isIOS) {
-          // iOS 嘗試喚醒 App，若無回應則在新分頁開網頁
-          window.location.href = `comgooglemaps://?q=${query}&zoom=16`;
-          setTimeout(() => {
-            window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
-          }, 800);
-        } else {
-          // Android 嘗試喚醒 App，失敗則在新分頁開網頁
-          window.location.href = `geo:0,0?q=${query}`;
-          setTimeout(() => {
-            window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
-          }, 800);
-        }
+        query = href.split('?q=')[1].split('&')[0];
+      } else {
+        // 短網址離線無法解析，直接抓取 <a> 標籤內的純文字作為搜尋標的
+        query = encodeURIComponent(targetLink.innerText.trim().replace(/🚻|🚗|🏠|🎫|⚠️/g, ''));
+      }
+
+      // 2. iOS：強制使用 comgooglemaps Scheme 直通 App 本機離線圖資
+      if (isIOS) {
+        window.location.href = `comgooglemaps://?q=${query}&zoom=16`;
         return;
       }
 
-      // 2. 短網址與一般完整網址：一律在新分頁/新視窗開啟
-      // 這樣系統仍會跳出詢問「是否在 Google Maps 打開」，即便選網頁版，原本的行程表分頁也不會被蓋掉
+      // 3. Android：使用標準 geo 協議直通 Google Maps App
+      if (isAndroid) {
+        window.location.href = `geo:0,0?q=${query}`;
+        return;
+      }
+
+      // 電腦端或其他環境：新分頁開啟
       window.open(href, '_blank');
     }
   }
