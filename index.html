@@ -2390,77 +2390,91 @@
         ]
       }
     }
-  // 全平台支援「完全斷網 / 離線座標 & 地名」Google Maps App 喚醒
+  // 1. iOS 專用：頁面載入與每次渲染時，預先將地圖連結替換為原生 Scheme，完全避開 JS 轉址與 Chrome 斷網恐龍
+function fixIOSMapLinks() {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  if (!isIOS) return;
+
+  const links = document.querySelectorAll('a[href*="maps.google.com"], a[href*="maps.app.goo.gl"], a[href*="google.com/maps"], a[href*="maps.apple.com"]');
+  links.forEach(link => {
+    const href = link.getAttribute('href');
+    if (!href || href.startsWith('comgooglemaps://')) return;
+
+    let query = '';
+    if (href.includes('?q=')) {
+      query = href.split('?q=')[1].split('&')[0];
+    } else if (href.includes('search/')) {
+      const parts = href.split('search/');
+      query = parts[1] ? parts[1].split('/')[0].split('?')[0] : '';
+    }
+
+    if (!query || query.trim() === '') {
+      const rawText = link.textContent || link.innerText || '';
+      query = encodeURIComponent(rawText.replace(/[\n\r\t]/g, ' ').replace(/🚻|🚗|🏠|🎫|⚠️|地圖|[\u{1F300}-\u{1F9FF}]/gu, '').trim());
+    }
+
+    if (!query) query = encodeURIComponent('New Zealand');
+
+    const cleanQuery = decodeURIComponent(query).trim();
+    const coordPattern = /^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/;
+    const isCoord = coordPattern.test(cleanQuery);
+
+    // 依據是否為座標設定專屬離線參數
+    let schemeUrl = '';
+    if (isCoord) {
+      schemeUrl = `comgooglemaps://?center=${cleanQuery}&q=${cleanQuery}&zoom=16`;
+    } else {
+      schemeUrl = `comgooglemaps://?q=${query}&zoom=16`;
+    }
+
+    link.setAttribute('href', schemeUrl);
+    link.removeAttribute('target'); // 必須移除 target="_blank"，否則 Chrome 會開新分頁報錯
+  });
+}
+
+// 頁面載入與切換分頁時自動執行替換
+window.addEventListener('load', fixIOSMapLinks);
+document.addEventListener('DOMContentLoaded', fixIOSMapLinks);
+setInterval(fixIOSMapLinks, 1000); // 持續監聽 Alpine.js 切換天數動態生成的節點
+
+// 2. Android 專用：維持原先 100% 正常的 geo 協議轉址
 document.addEventListener('click', function (e) {
+  const isAndroid = /Android/.test(navigator.userAgent);
+  if (!isAndroid) return; // iOS 已由上方靜態替換處理，此處直接放行
+
   const targetLink = e.target.closest('a');
   if (!targetLink) return;
 
   const href = targetLink.getAttribute('href');
   if (!href) return;
 
-  // 判斷是否為地圖相關連結
   if (href.includes('maps.google.com') || href.includes('maps.app.goo.gl') || href.includes('google.com/maps') || href.includes('maps.apple.com')) {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const isAndroid = /Android/.test(navigator.userAgent);
+    e.preventDefault();
+    e.stopPropagation();
 
-    if (isIOS || isAndroid) {
-      e.preventDefault();
-      e.stopPropagation();
+    let query = '';
+    if (href.includes('?q=')) {
+      query = href.split('?q=')[1].split('&')[0];
+    } else if (href.includes('search/')) {
+      const parts = href.split('search/');
+      query = parts[1] ? parts[1].split('/')[0].split('?')[0] : '';
+    }
 
-      let query = '';
+    if (!query || query.trim() === '') {
+      const rawText = targetLink.textContent || targetLink.innerText || '';
+      query = encodeURIComponent(rawText.replace(/[\n\r\t]/g, ' ').replace(/🚻|🚗|🏠|🎫|⚠️|地圖|[\u{1F300}-\u{1F9FF}]/gu, '').trim());
+    }
 
-      // 1. 提取關鍵字或座標
-      if (href.includes('?q=')) {
-        query = href.split('?q=')[1].split('&')[0];
-      } else if (href.includes('search/')) {
-        const parts = href.split('search/');
-        query = parts[1] ? parts[1].split('/')[0].split('?')[0] : '';
-      }
+    if (!query) query = encodeURIComponent('New Zealand');
 
-      // 若未抓到 query，提取純文字
-      if (!query || query.trim() === '') {
-        const rawText = targetLink.textContent || targetLink.innerText || '';
-        query = encodeURIComponent(rawText.replace(/[\n\r\t]/g, ' ').replace(/🚻|🚗|🏠|🎫|⚠️|地圖|[\u{1F300}-\u{1F9FF}]/gu, '').trim());
-      }
+    const cleanQuery = decodeURIComponent(query).trim();
+    const coordPattern = /^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/;
+    const isCoord = coordPattern.test(cleanQuery);
 
-      if (!query) {
-        query = encodeURIComponent('New Zealand');
-      }
-
-      const cleanQuery = decodeURIComponent(query).trim();
-      const coordPattern = /^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/;
-      const isCoord = coordPattern.test(cleanQuery);
-
-      // 2. iOS：使用 iframe 載入 Scheme，徹底避開 iOS Chrome 斷網恐龍檢查
-      if (isIOS) {
-        let schemeUrl = '';
-        if (isCoord) {
-          schemeUrl = `comgooglemaps://?center=${cleanQuery}&q=${cleanQuery}&zoom=16`;
-        } else {
-          schemeUrl = `comgooglemaps://?q=${query}&zoom=16`;
-        }
-
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = schemeUrl;
-        document.body.appendChild(iframe);
-        setTimeout(() => {
-          document.body.removeChild(iframe);
-        }, 500);
-        return;
-      }
-
-      // 3. Android：維持原先正常的 geo 協議轉址
-      if (isAndroid) {
-        if (isCoord) {
-          window.location.href = `geo:${cleanQuery}?q=${cleanQuery}`;
-        } else {
-          window.location.href = `geo:0,0?q=${query}`;
-        }
-        return;
-      }
-
-      window.open(href, '_blank');
+    if (isCoord) {
+      window.location.href = `geo:${cleanQuery}?q=${cleanQuery}`;
+    } else {
+      window.location.href = `geo:0,0?q=${query}`;
     }
   }
 }, true);
