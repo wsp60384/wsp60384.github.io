@@ -2390,76 +2390,74 @@
         ]
       }
     }
-  // 全平台支援「完全斷網 / 離線座標 & 地名」地圖 App 喚醒
-document.addEventListener('click', function (e) {
-  const targetLink = e.target.closest('a');
-  if (!targetLink) return;
+  // 全平台支援「完全斷網 / 離線座標 & 地名」Google Maps App 喚醒（方法一：採用 comgooglemapsurl 協議）
+  document.addEventListener('click', function (e) {
+    const targetLink = e.target.closest('a');
+    if (!targetLink) return;
 
-  const href = targetLink.getAttribute('href');
-  if (!href) return;
+    const href = targetLink.getAttribute('href');
+    if (!href) return;
 
-  // 判斷是否為地圖相關連結
-  if (href.includes('maps.google.com') || href.includes('maps.app.goo.gl') || href.includes('google.com/maps') || href.includes('maps.apple.com')) {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const isAndroid = /Android/.test(navigator.userAgent);
+    // 判斷是否為地圖相關連結
+    if (href.includes('maps.google.com') || href.includes('maps.app.goo.gl') || href.includes('google.com/maps') || href.includes('maps.apple.com')) {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const isAndroid = /Android/.test(navigator.userAgent);
 
-    if (isIOS || isAndroid) {
-      e.preventDefault();
-      e.stopPropagation();
+      if (isIOS || isAndroid) {
+        e.preventDefault();
+        e.stopPropagation();
 
-      let query = '';
+        let query = '';
 
-      // 1. 提取關鍵字或座標
-      if (href.includes('?q=')) {
-        query = href.split('?q=')[1].split('&')[0];
-      } else if (href.includes('search/')) {
-        const parts = href.split('search/');
-        query = parts[1] ? parts[1].split('/')[0].split('?')[0] : '';
-      }
-
-      // 若未抓到 query，提取乾淨純文字
-      if (!query || query.trim() === '') {
-        const rawText = targetLink.textContent || targetLink.innerText || '';
-        query = encodeURIComponent(rawText.replace(/[\n\r\t]/g, ' ').replace(/🚻|🚗|🏠|🎫|⚠️|地圖|[\u{1F300}-\u{1F9FF}]/gu, '').trim());
-      }
-
-      if (!query) {
-        query = encodeURIComponent('New Zealand');
-      }
-
-      const cleanQuery = decodeURIComponent(query).trim();
-      const coordPattern = /^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/;
-      const isCoord = coordPattern.test(cleanQuery);
-
-      // 2. iOS：使用 maps:// 系統原生協議（唯一能穿透 iOS Chrome 斷網小恐龍的協議）
-      if (isIOS) {
-        let schemeUrl = '';
-        if (isCoord) {
-          // 座標格式：使用 ll (Lat/Long) 與 q 參數精確插旗
-          schemeUrl = `maps://?ll=${cleanQuery}&q=${cleanQuery}`;
-        } else {
-          // 地名格式
-          schemeUrl = `maps://?q=${query}`;
+        // 1. 提取關鍵字或座標
+        if (href.includes('?q=')) {
+          query = href.split('?q=')[1].split('&')[0];
+        } else if (href.includes('search/')) {
+          const parts = href.split('search/');
+          query = parts[1] ? parts[1].split('/')[0].split('?')[0] : '';
         }
 
-        window.location.href = schemeUrl;
-        return;
-      }
-
-      // 3. Android：使用標準 geo: 協議
-      if (isAndroid) {
-        if (isCoord) {
-          window.location.href = `geo:${cleanQuery}?q=${cleanQuery}`;
-        } else {
-          window.location.href = `geo:0,0?q=${query}`;
+        // 若未抓到 query，提取純文字
+        if (!query || query.trim() === '') {
+          const rawText = targetLink.textContent || targetLink.innerText || '';
+          query = encodeURIComponent(rawText.replace(/[\n\r\t]/g, ' ').replace(/🚻|🚗|🏠|🎫|⚠️|地圖|[\u{1F300}-\u{1F9FF}]/gu, '').trim());
         }
-        return;
-      }
 
-      window.open(href, '_blank');
+        if (!query) {
+          query = encodeURIComponent('New Zealand');
+        }
+
+        const cleanQuery = decodeURIComponent(query).trim();
+        const coordPattern = /^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/;
+        const isCoord = coordPattern.test(cleanQuery);
+
+        // 2. iOS：使用 Google Chrome 專用 comgooglemapsurl 協議直通 Google Maps App
+        if (isIOS) {
+          let googleMapsUrl = '';
+          if (isCoord) {
+            googleMapsUrl = `maps.google.com/?q=${cleanQuery}`;
+          } else {
+            googleMapsUrl = `maps.google.com/?q=${query}`;
+          }
+
+          window.location.href = `comgooglemapsurl://${googleMapsUrl}`;
+          return;
+        }
+
+        // 3. Android：使用標準 geo: 協議直通 Google Maps App
+        if (isAndroid) {
+          if (isCoord) {
+            window.location.href = `geo:${cleanQuery}?q=${cleanQuery}`;
+          } else {
+            window.location.href = `geo:0,0?q=${query}`;
+          }
+          return;
+        }
+
+        window.open(href, '_blank');
+      }
     }
-  }
-}, true);
+  }, true);
   </script>
 </body>
 </html>
