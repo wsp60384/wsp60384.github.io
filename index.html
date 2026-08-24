@@ -2390,7 +2390,7 @@
         ]
       }
     }
-  // 全瀏覽器（Safari / Chrome / PWA）地圖喚醒優化
+  // 全平台（iOS / Android / PWA）地圖 App 深度喚醒
 document.addEventListener('click', function (e) {
   const targetLink = e.target.closest('a');
   if (!targetLink) return;
@@ -2402,42 +2402,39 @@ document.addEventListener('click', function (e) {
   if (href.includes('maps.google.com') || href.includes('maps.app.goo.gl') || href.includes('google.com/maps')) {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isAndroid = /Android/.test(navigator.userAgent);
-    const isChrome = /CriOS|Chrome/.test(navigator.userAgent);
 
     if (isIOS || isAndroid) {
       e.preventDefault();
       e.stopPropagation();
 
-      // 提取搜尋關鍵字
-      let query = '';
+      // 1. 如果是短網址 (如 Beacon Sky: https://maps.app.goo.gl/...)
+      // 直接在當前頁面導向，手機系統會自動以 Universal Link 喚醒 App 並解析出正確地點
+      if (href.includes('maps.app.goo.gl')) {
+        window.location.href = href;
+        return;
+      }
+
+      // 2. 如果是關鍵字搜尋連結 (?q=xxx)
       if (href.includes('?q=')) {
-        query = href.split('?q=')[1].split('&')[0];
-      }
-
-      if (isAndroid) {
-        // Android Chrome 專用：使用 Intent 協議強制喚醒 Google Maps App
-        if (query) {
-          window.location.href = `intent://maps.google.com/maps?q=${query}#Intent;scheme=https;package=com.google.android.apps.maps;end`;
+        const query = href.split('?q=')[1].split('&')[0];
+        if (isIOS) {
+          // iOS: 使用 Google Maps 專用 Scheme 帶入地點，未安裝則開標準網址
+          window.location.href = `comgooglemaps://?q=${query}&zoom=16`;
+          setTimeout(() => {
+            window.location.href = `https://www.google.com/maps/search/?api=1&query=${query}`;
+          }, 600);
         } else {
-          // 短網址或完整 URL
-          const cleanUrl = href.replace(/^https?:\/\//, '');
-          window.location.href = `intent://${cleanUrl}#Intent;scheme=https;package=com.google.android.apps.maps;end`;
+          // Android: 使用標準 Geo / Google Maps 查詢
+          window.location.href = `geo:0,0?q=${query}`;
+          setTimeout(() => {
+            window.location.href = `https://www.google.com/maps/search/?api=1&query=${query}`;
+          }, 600);
         }
         return;
       }
 
-      if (isIOS) {
-        if (query) {
-          // iOS (Safari & Chrome)：標準 Universal Link 格式
-          window.location.href = `https://maps.apple.com/?q=${query}`;
-          // 或強制使用 Google Maps Scheme:
-          // window.location.href = `comgooglemaps://?q=${query}&zoom=16`;
-        } else {
-          // 短網址在 iOS Chrome 需直接更換當前 location
-          window.location.href = href;
-        }
-        return;
-      }
+      // 3. 其他格式網址：直接當前視窗轉址，避免彈出分頁詢問
+      window.location.href = href;
     }
   }
 }, true);
