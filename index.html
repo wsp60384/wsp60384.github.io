@@ -2390,7 +2390,7 @@
         ]
       }
     }
-  // 全平台支援「完全斷網 / 離線座標 & 地名」Google Maps App 喚醒（方法一：採用 comgooglemapsurl 協議）
+  // 全平台精準喚醒 Google Maps App（斷網/座標/地名皆適用，絕不跳 Apple Maps）
   document.addEventListener('click', function (e) {
     const targetLink = e.target.closest('a');
     if (!targetLink) return;
@@ -2399,7 +2399,7 @@
     if (!href) return;
 
     // 判斷是否為地圖相關連結
-    if (href.includes('maps.google.com') || href.includes('maps.app.goo.gl') || href.includes('google.com/maps') || href.includes('maps.apple.com')) {
+    if (href.includes('maps.google.com') || href.includes('maps.app.goo.gl') || href.includes('google.com/maps')) {
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
       const isAndroid = /Android/.test(navigator.userAgent);
 
@@ -2417,7 +2417,7 @@
           query = parts[1] ? parts[1].split('/')[0].split('?')[0] : '';
         }
 
-        // 若未抓到 query，提取純文字
+        // 若未抓到 query，提取乾淨純文字
         if (!query || query.trim() === '') {
           const rawText = targetLink.textContent || targetLink.innerText || '';
           query = encodeURIComponent(rawText.replace(/[\n\r\t]/g, ' ').replace(/🚻|🚗|🏠|🎫|⚠️|地圖|[\u{1F300}-\u{1F9FF}]/gu, '').trim());
@@ -2428,28 +2428,20 @@
         }
 
         const cleanQuery = decodeURIComponent(query).trim();
-        const coordPattern = /^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/;
-        const isCoord = coordPattern.test(cleanQuery);
 
-        // 2. iOS：使用 Google Chrome 專用 comgooglemapsurl 協議直通 Google Maps App
+        // 2. iOS：強制呼叫 Google Maps 專用原生協定 (comgooglemaps://)
         if (isIOS) {
-          let googleMapsUrl = '';
-          if (isCoord) {
-            googleMapsUrl = `maps.google.com/?q=${cleanQuery}`;
-          } else {
-            googleMapsUrl = `maps.google.com/?q=${query}`;
-          }
-
-          window.location.href = `comgooglemapsurl://${googleMapsUrl}`;
+          window.location.href = `comgooglemaps://?q=${encodeURIComponent(cleanQuery)}`;
           return;
         }
 
-        // 3. Android：使用標準 geo: 協議直通 Google Maps App
+        // 3. Android：使用標準 geo 協定喚醒 Google Maps
         if (isAndroid) {
-          if (isCoord) {
+          const coordPattern = /^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/;
+          if (coordPattern.test(cleanQuery)) {
             window.location.href = `geo:${cleanQuery}?q=${cleanQuery}`;
           } else {
-            window.location.href = `geo:0,0?q=${query}`;
+            window.location.href = `geo:0,0?q=${encodeURIComponent(cleanQuery)}`;
           }
           return;
         }
