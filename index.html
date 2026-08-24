@@ -7,6 +7,7 @@
 
   <!-- PWA 設定與圖示宣告 -->
   <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/826/826070.png">
   <meta name="theme-color" content="#c86428">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1627,7 +1628,7 @@
           if (this.activeDay === 'notice') return null;
           return this.itinerary[this.activeDay];
         },
-
+        
         init() {
           this.updateClocks();
           setInterval(() => this.updateClocks(), 1000);
