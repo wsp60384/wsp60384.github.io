@@ -2175,7 +2175,7 @@
             title: "瓦納卡 Wanaka → 箭鎮 → 皇后鎮 Queenstown",
             startLocation: "Wanaka",
             stay: "Beacon Sky (Queenstown)",
-            stayUrl: "https://maps.google.com/?q=-45.034517,168.653428",
+            stayUrl: "https://maps.google.com/?q=-45.034791, 168.652370",
             meals: { 
               b: "Scroggin Coffee and Eatery", bUrl: "https://maps.google.com/?q=Scroggin+Coffee+and+Eatery+Wanaka", 
               l: "The Fork And Tap", lUrl: "https://maps.google.com/?q=The+Fork+And+Tap+Arrowtown", 
@@ -2211,7 +2211,7 @@
                 ]
               },                      
               { name: "Essence Restaurant by ROKI Collection", tag: "美食", note: "晚餐, 米其林＊＊ <br> 07:30pm, TSAICHEN, KAO (6人） <br> 08:00pm, MEIYUEH, KAO（4人） <br> 08:30pm, CHIACHUN, KAO（4人）" , url: "https://maps.google.com/?q=Essence+Restaurant+by+ROKI+Collection" },                    
-              { name: "Beacon Sky (Queenstown)", tag: "住宿", note: "當日住宿飯店 (民宿), <a href='https://m.duve.co/g/MV4Kev3qhV?id=post&gId=7qCxirqY-&affType=100&nflp=1' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>停車場車位號與鑰匙密碼 <i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a> , Wi-Fi: Luxe Stay 1002345 / QTownView03", url: "https://maps.google.com/?q=-45.034517,168.653428" }
+              { name: "Beacon Sky (Queenstown)", tag: "住宿", note: "當日住宿飯店 (民宿), <a href='https://m.duve.co/g/MV4Kev3qhV?id=post&gId=7qCxirqY-&affType=100&nflp=1' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>停車場車位號與鑰匙密碼 <i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a> , Wi-Fi: Luxe Stay 1002345 / QTownView03", url: "https://maps.google.com/?q=-45.034791, 168.652370" }
             ]
           },
           {
@@ -2390,7 +2390,7 @@
         ]
       }
     }
-  // 全平台支援「完全離線 / 斷網」Google Maps App 喚醒（相容 iOS Chrome / Safari / Android）
+  // 全平台支援「完全斷網 / 離線座標 & 地名」Google Maps App 喚醒
 document.addEventListener('click', function (e) {
   const targetLink = e.target.closest('a');
   if (!targetLink) return;
@@ -2409,7 +2409,7 @@ document.addEventListener('click', function (e) {
 
       let query = '';
 
-      // 1. 提取關鍵字
+      // 1. 提取關鍵字或座標
       if (href.includes('?q=')) {
         query = href.split('?q=')[1].split('&')[0];
       } else if (href.includes('search/')) {
@@ -2417,7 +2417,7 @@ document.addEventListener('click', function (e) {
         query = parts[1] ? parts[1].split('/')[0].split('?')[0] : '';
       }
 
-      // 2. 短網址或無參數網址，提取乾淨文字
+      // 若未抓到 query，提取純文字
       if (!query || query.trim() === '') {
         const rawText = targetLink.textContent || targetLink.innerText || '';
         query = encodeURIComponent(rawText.replace(/[\n\r\t]/g, ' ').replace(/🚻|🚗|🏠|🎫|⚠️|地圖|[\u{1F300}-\u{1F9FF}]/gu, '').trim());
@@ -2427,9 +2427,22 @@ document.addEventListener('click', function (e) {
         query = encodeURIComponent('New Zealand');
       }
 
-      // 3. iOS 離線呼叫（針對 iOS Chrome 採用模擬原生點擊，避開恐龍頁面）
+      // 判斷是否為純經緯度座標（例如 -45.034517,168.653428）
+      const coordPattern = /^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/;
+      const isCoord = coordPattern.test(decodeURIComponent(query).trim());
+      const cleanCoord = decodeURIComponent(query).trim();
+
+      // 2. iOS 離線專用喚醒
       if (isIOS) {
-        const schemeUrl = `comgooglemaps://?q=${query}&zoom=16`;
+        let schemeUrl = '';
+        if (isCoord) {
+          // 座標格式：使用 center + q 雙參數，斷網時直接插旗
+          schemeUrl = `comgooglemaps://?center=${cleanCoord}&q=${cleanCoord}&zoom=16`;
+        } else {
+          // 地名格式
+          schemeUrl = `comgooglemaps://?q=${query}&zoom=16`;
+        }
+
         const tempLink = document.createElement('a');
         tempLink.href = schemeUrl;
         tempLink.style.display = 'none';
@@ -2441,13 +2454,16 @@ document.addEventListener('click', function (e) {
         return;
       }
 
-      // 4. Android 離線呼叫：使用 geo 協議
+      // 3. Android 離線專用喚醒
       if (isAndroid) {
-        window.location.href = `geo:0,0?q=${query}`;
+        if (isCoord) {
+          window.location.href = `geo:${cleanCoord}?q=${cleanCoord}`;
+        } else {
+          window.location.href = `geo:0,0?q=${query}`;
+        }
         return;
       }
 
-      // 電腦端環境
       window.open(href, '_blank');
     }
   }
