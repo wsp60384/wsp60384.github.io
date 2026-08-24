@@ -2377,49 +2377,48 @@
         ]
       }
     }
-    // 自動將 Google Maps 網頁連結轉為 App 喚醒模式
-    document.addEventListener('click', function (e) {
-    const targetLink = e.target.closest('a');
-    if (!targetLink) return;
+  // 自動將所有 Google Maps 連結直接直連喚醒 App
+  document.addEventListener('click', function (e) {
+  const targetLink = e.target.closest('a');
+  if (!targetLink) return;
 
-      const href = targetLink.getAttribute('href');
-    if (!href) return;
+  const href = targetLink.getAttribute('href');
+  if (!href) return;
 
-      // 判斷是否為 Google Maps 相關連結
-    if (href.includes('maps.google.com') || href.includes('maps.app.goo.gl') || href.includes('google.com/maps')) {
+  // 判斷是否為 Google 地圖連結
+  if (href.includes('maps.google.com') || href.includes('maps.app.goo.gl') || href.includes('google.com/maps')) {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isAndroid = /Android/.test(navigator.userAgent);
 
     if (isIOS || isAndroid) {
-      e.preventDefault(); // 阻止原先開啟空白網頁分頁
+      e.preventDefault(); // 阻擋預設開啟網頁行爲
+      e.stopPropagation();
 
-      // 1. 若為短網址 (maps.app.goo.gl)，直接導向讓系統 Universal Links 觸發 App
-      if (href.includes('maps.app.goo.gl')) {
-        window.location.href = href;
-        return;
-      }
-
-      // 2. 若為關鍵字搜尋連結 (?q=xxx)
+      // 1. 如果是搜尋關鍵字 (?q=xxx)
       if (href.includes('?q=')) {
-        const query = href.split('?q=')[1];
+        const query = href.split('?q=')[1].split('&')[0];
         if (isIOS) {
-          // iOS 喚醒 Google Maps App (若無則開啟 Apple Maps)
-          window.location.href = `comgooglemaps://?q=${query}`;
+          // iOS 直接以 App 協議開啟，無詢問直跳 App
+          window.location.href = `comgooglemaps://?q=${query}&zoom=16`;
           setTimeout(() => {
+            // 若手機未安裝 Google Maps，退回 Apple Maps
             window.location.href = `maps://?q=${query}`;
-          }, 800);
+          }, 1000);
         } else {
-          // Android 喚醒 Google Maps App
-          window.location.href = `geo:0,0?q=${query}`;
+          // Android 喚醒 Google Maps
+          window.location.href = `google.navigation:q=${query}`;
+          setTimeout(() => {
+            window.location.href = href;
+          }, 1000);
         }
         return;
       }
 
-      // 3. 其他標準 Google Maps 網址直接使用原視窗轉址喚醒 App
+      // 2. 如果是短網址或完整網址，直接在當前頁轉址（避免開新分頁彈窗）
       window.location.href = href;
-        }
     }
-    });
+  }
+}, true);
   </script>
 </body>
 </html>
