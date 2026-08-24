@@ -2390,7 +2390,7 @@
         ]
       }
     }
-  // 全平台支援「完全斷網 / 離線座標 & 地名」Google Maps App 喚醒（完美相容 iOS Chrome/Safari & Android）
+  // 全平台支援「完全斷網 / 離線座標 & 地名」Google Maps App 喚醒
 document.addEventListener('click', function (e) {
   const targetLink = e.target.closest('a');
   if (!targetLink) return;
@@ -2404,6 +2404,9 @@ document.addEventListener('click', function (e) {
     const isAndroid = /Android/.test(navigator.userAgent);
 
     if (isIOS || isAndroid) {
+      e.preventDefault();
+      e.stopPropagation();
+
       let query = '';
 
       // 1. 提取關鍵字或座標
@@ -2414,7 +2417,7 @@ document.addEventListener('click', function (e) {
         query = parts[1] ? parts[1].split('/')[0].split('?')[0] : '';
       }
 
-      // 若未抓到 query，提取乾淨純文字
+      // 若未抓到 query，提取純文字
       if (!query || query.trim() === '') {
         const rawText = targetLink.textContent || targetLink.innerText || '';
         query = encodeURIComponent(rawText.replace(/[\n\r\t]/g, ' ').replace(/🚻|🚗|🏠|🎫|⚠️|地圖|[\u{1F300}-\u{1F9FF}]/gu, '').trim());
@@ -2428,7 +2431,7 @@ document.addEventListener('click', function (e) {
       const coordPattern = /^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/;
       const isCoord = coordPattern.test(cleanQuery);
 
-      // 2. iOS：直接修改當前 <a> 的 href 為 App Scheme，避免 JS 轉址觸發 Chrome 斷網恐龍
+      // 2. iOS：使用 iframe 載入 Scheme，徹底避開 iOS Chrome 斷網恐龍檢查
       if (isIOS) {
         let schemeUrl = '';
         if (isCoord) {
@@ -2437,18 +2440,18 @@ document.addEventListener('click', function (e) {
           schemeUrl = `comgooglemaps://?q=${query}&zoom=16`;
         }
 
-        // 移除 target 避免開新網頁分頁，直接將超連結指向 App Scheme
-        targetLink.removeAttribute('target');
-        targetLink.setAttribute('href', schemeUrl);
-        // 不執行 e.preventDefault()，讓 iOS 系統以原生行為觸發開啟 App
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = schemeUrl;
+        document.body.appendChild(iframe);
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+        }, 500);
         return;
       }
 
       // 3. Android：維持原先正常的 geo 協議轉址
       if (isAndroid) {
-        e.preventDefault();
-        e.stopPropagation();
-
         if (isCoord) {
           window.location.href = `geo:${cleanQuery}?q=${cleanQuery}`;
         } else {
@@ -2456,6 +2459,8 @@ document.addEventListener('click', function (e) {
         }
         return;
       }
+
+      window.open(href, '_blank');
     }
   }
 }, true);
