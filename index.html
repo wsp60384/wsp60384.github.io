@@ -2390,7 +2390,7 @@
         ]
       }
     }
-  // 全平台（iOS / Android / PWA）地圖 App 深度喚醒
+  // 全平台地圖 App 喚醒（保留原行程頁面不被覆蓋）
 document.addEventListener('click', function (e) {
   const targetLink = e.target.closest('a');
   if (!targetLink) return;
@@ -2407,34 +2407,29 @@ document.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
 
-      // 1. 如果是短網址 (如 Beacon Sky: https://maps.app.goo.gl/...)
-      // 直接在當前頁面導向，手機系統會自動以 Universal Link 喚醒 App 並解析出正確地點
-      if (href.includes('maps.app.goo.gl')) {
-        window.location.href = href;
-        return;
-      }
-
-      // 2. 如果是關鍵字搜尋連結 (?q=xxx)
+      // 1. 如果是搜尋關鍵字連結 (?q=xxx)
       if (href.includes('?q=')) {
         const query = href.split('?q=')[1].split('&')[0];
+        
         if (isIOS) {
-          // iOS: 使用 Google Maps 專用 Scheme 帶入地點，未安裝則開標準網址
+          // iOS 嘗試喚醒 App，若無回應則在新分頁開網頁
           window.location.href = `comgooglemaps://?q=${query}&zoom=16`;
           setTimeout(() => {
-            window.location.href = `https://www.google.com/maps/search/?api=1&query=${query}`;
-          }, 600);
+            window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+          }, 800);
         } else {
-          // Android: 使用標準 Geo / Google Maps 查詢
+          // Android 嘗試喚醒 App，失敗則在新分頁開網頁
           window.location.href = `geo:0,0?q=${query}`;
           setTimeout(() => {
-            window.location.href = `https://www.google.com/maps/search/?api=1&query=${query}`;
-          }, 600);
+            window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+          }, 800);
         }
         return;
       }
 
-      // 3. 其他格式網址：直接當前視窗轉址，避免彈出分頁詢問
-      window.location.href = href;
+      // 2. 短網址與一般完整網址：一律在新分頁/新視窗開啟
+      // 這樣系統仍會跳出詢問「是否在 Google Maps 打開」，即便選網頁版，原本的行程表分頁也不會被蓋掉
+      window.open(href, '_blank');
     }
   }
 }, true);
