@@ -40,8 +40,15 @@
   <!-- Alpine.js -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-  <!-- Service Worker 註冊腳本 -->
+  <!-- Service Worker 註冊與強制置頂腳本 -->
   <script>
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+    window.addEventListener('load', () => {
+      window.scrollTo(0, 0);
+    });
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
@@ -54,6 +61,11 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
     
+    html, body {
+      overscroll-behavior-y: contain;
+      scroll-behavior: auto;
+    }
+
     body {
       font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif;
       color: #221a15;
