@@ -1,0 +1,2382 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>紐西蘭南島自駕之旅 2026 🇳🇿</title>
+
+  <!-- PWA 設定與圖示宣告 -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#c86428">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="NZ 2026">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cozy: {
+              bg: '#fcfbf7',
+              card: 'rgba(255, 255, 255, 0.92)',
+              border: 'rgba(226, 220, 208, 0.7)',
+              primary: '#7a5c48',
+              accent: '#c86428',
+              text: '#221a15',
+              sub: '#5d5047'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <!-- Service Worker 註冊腳本 -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('離線快取 Service Worker 註冊成功！範圍:', reg.scope))
+          .catch((err) => console.log('Service Worker 註冊失敗:', err));
+      });
+    }
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+    
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif;
+      color: #221a15;
+      background-color: #fcfbf7;
+    }
+
+    .bg-image-container {
+      position: fixed;
+      inset: 0;
+      z-index: -10;
+      background-image: url('https://images.unsplash.com/photo-1719031716651-6c9c7339c3f3?auto=format&fit=crop&w=1920&q=95');
+      background-size: cover;
+      background-position: center 30%;
+      background-repeat: no-repeat;
+      transform: translateZ(0);
+      will-change: transform;
+    }
+
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: -9;
+      background: rgba(252, 251, 247, 0.88);
+      transform: translateZ(0);
+    }
+
+    .dash-card {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .timeline-line {
+      position: absolute;
+      left: 19px;
+      top: 36px;
+      bottom: -16px;
+      width: 2px;
+      background: linear-gradient(to bottom, #d8cebe, rgba(216, 206, 190, 0.2));
+      z-index: 0;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #d8cebe;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-16 relative" x-data="itineraryApp()">
+
+  <!-- 固定背景與遮罩 -->
+  <div class="bg-image-container"></div>
+  <div class="bg-overlay"></div>
+
+  <!-- 頂端 Header / 旅遊 Dashboard -->
+  <header class="pt-6 pb-4 px-4 max-w-5xl mx-auto">
+    <div class="text-center mb-6">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-100/90 text-amber-900 text-xs font-bold mb-2.5 border border-amber-300/60 shadow-sm">
+        <i class="fa-solid fa-compass text-amber-600 animate-spin-slow"></i> 紐西蘭 2026 ROAD TRIP
+      </div>
+      <h1 class="text-3xl md:text-5xl font-extrabold text-cozy-text tracking-tight mb-1.5 drop-shadow-sm">
+        New Zealand Road Trip
+      </h1>
+      <p class="text-cozy-sub text-xs md:text-sm max-w-md mx-auto mb-4 font-semibold">
+        從基督城到冰河，峽灣、湖泊與星空的 12 天南島之旅
+      </p>
+
+      <!-- 頂部 Dashboard 快捷操作區 -->
+      <div class="flex items-center justify-center gap-3 flex-wrap">
+        <button 
+        @click="showNoticeModal = true"
+        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-600/90 hover:bg-rose-700 text-white text-xs font-bold shadow-sm transition-all cursor-pointer"
+      >
+      <i class="fa-solid fa-shield-halved"></i> ⚠️ 注意事項
+      </button>
+
+        <!-- 租車與自駕資訊快捷按鈕 -->
+        <button 
+          @click="showCarModal = true"
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600/90 hover:bg-amber-700 text-white text-xs font-bold shadow-sm transition-all cursor-pointer"
+        >
+          <i class="fa-solid fa-car"></i> 🚗 自駕注意事項 & 交通規則
+        </button>
+
+        <!-- 住宿資訊快捷按鈕 -->
+        <button 
+          @click="showStayModal = true"
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600/90 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm transition-all cursor-pointer"
+        >
+          <i class="fa-solid fa-bed"></i> 🏠 住宿詳細資訊 (點擊展開)
+        </button>
+
+        <!-- 活動資訊快捷按鈕 -->
+        <button 
+          @click="showActivityModal = true"
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600/90 hover:bg-purple-700 text-white text-xs font-bold shadow-sm transition-all cursor-pointer"
+        >
+          <i class="fa-solid fa-ticket"></i> 🎫 活動詳細資訊
+        </button>
+
+        <a 
+          href="https://www.google.com/maps/search/public+toilet+South+Island+New+Zealand/" 
+          target="_blank" 
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-700/90 text-white text-xs font-bold shadow-sm hover:bg-emerald-800 transition-all"
+        >
+          <i class="fa-solid fa-restroom"></i> 🚻 公廁地圖 (Google Maps)
+          <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-80"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- 頂端 3 欄 Dashboard 資訊卡片 -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 max-w-4xl mx-auto">
+      
+      <!-- 1. 動態時間 & 時區 -->
+      <div class="bg-cozy-card p-4 rounded-2xl border border-cozy-border dash-card flex flex-col justify-between min-w-0">
+        <div class="text-xs font-bold text-cozy-sub flex items-center justify-between mb-2">
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-clock text-amber-600"></i> 即時雙時區</span>
+          <span class="text-[10px] bg-amber-100/80 text-amber-900 px-2 py-0.5 rounded-full font-bold" x-text="nzOffsetLabel"></span>
+        </div>
+        <div class="space-y-1.5 text-xs">
+          <div class="flex justify-between items-center">
+            <span class="text-slate-600 font-semibold">🇹🇼 台北時間:</span>
+            <span class="font-extrabold text-cozy-text tracking-wide" x-text="taipeiTime">--:--:--</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-600 font-semibold">🇳🇿 紐西蘭時間:</span>
+            <span class="font-extrabold text-cozy-accent tracking-wide" x-text="nzTime">--:--:--</span>
+          </div>
+          <div class="flex justify-between items-center pt-2 border-t border-dashed border-cozy-border text-[11px] text-cozy-sub font-bold">
+            <span class="flex items-center gap-1"><i class="fa-solid fa-sun text-amber-500"></i> 日出 <span x-text="sunRise">--:--</span></span>
+            <span class="flex items-center gap-1"><i class="fa-solid fa-moon text-indigo-400"></i> 日落 <span x-text="sunSet">--:--</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. 即時氣溫 -->
+      <div class="bg-cozy-card p-4 rounded-2xl border border-cozy-border dash-card flex flex-col justify-between min-w-0">
+        <div class="text-xs font-bold text-cozy-sub flex items-center justify-between mb-1 gap-1">
+          <span class="flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"><i class="fa-solid fa-cloud-sun text-sky-600"></i> 即時出發地氣溫</span>
+          
+          <select 
+            x-model="selectedCityKey" 
+            @change="onCitySelectChange()"
+            class="text-[11px] font-bold bg-emerald-100/90 text-emerald-900 px-2 py-0.5 rounded-lg border border-emerald-300/80 focus:outline-none cursor-pointer truncate max-w-[130px] sm:max-w-[150px]"
+          >
+            <template x-for="(city, key) in cityCoords" :key="key">
+              <option :value="key" x-text="city.name"></option>
+            </template>
+          </select>
+        </div>
+        <div class="flex items-baseline justify-between my-1">
+          <div class="text-3xl font-black text-cozy-text tracking-tight">
+            <span x-text="currentWeather.temp">--</span>°C
+          </div>
+          <div class="text-xs text-cozy-sub font-bold flex items-center gap-1 bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200/60">
+            <i class="fa-solid fa-umbrella text-sky-500"></i>降雨率 <span x-text="currentWeather.rain">--</span>%
+          </div>
+        </div>
+        <div class="text-[10px] text-slate-400 text-right font-medium">10 分鐘自動更新</div>
+      </div>
+
+      <!-- 3. 匯率試算 -->
+      <div class="bg-cozy-card p-4 rounded-2xl border border-cozy-border dash-card flex flex-col justify-between text-xs min-w-0">
+        <div class="flex items-center justify-between mb-1">
+          <span class="font-bold text-cozy-sub flex items-center gap-1.5">
+            <i class="fa-solid fa-calculator text-emerald-600"></i> 紐幣 (NZD) 試算
+          </span>
+          <span class="text-[10px] text-emerald-800 font-bold bg-emerald-100/80 px-1.5 py-0.5 rounded">1 NZD ≈ <span x-text="visaRate">19.25</span> TWD</span>
+        </div>
+        <div class="flex items-center gap-2 my-1">
+          <div class="relative flex-1">
+            <input type="number" x-model="nzdAmt" class="w-full bg-white/95 border border-cozy-border rounded-lg px-2.5 py-1 text-xs text-cozy-text font-bold focus:outline-none focus:border-cozy-accent shadow-inner">
+            <span class="absolute right-2 top-1 text-[9px] text-cozy-sub font-bold">NZD</span>
+          </div>
+          <i class="fa-solid fa-arrow-right text-slate-400 text-[10px]"></i>
+          <div class="flex-1 bg-amber-50/95 border border-amber-200/90 rounded-lg px-2.5 py-1 font-extrabold text-cozy-accent text-right shadow-sm">
+            NT$ <span x-text="(nzdAmt * visaRate).toFixed(0)" class="text-xs"></span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-[10px] pt-1">
+          <span class="text-slate-400">快捷:</span>
+          <div class="flex gap-1">
+            <button @click="nzdAmt = 5" class="px-1.5 py-0.5 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">5</button>
+            <button @click="nzdAmt = 10" class="px-1.5 py-0.5 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">10</button>
+            <button @click="nzdAmt = 15" class="px-1.5 py-0.5 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">15</button>
+            <button @click="nzdAmt = 25" class="px-1.5 py-0.5 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">25</button>
+            <button @click="nzdAmt = 50" class="px-1.5 py-0.5 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">50</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 固定 Tab 頁籤切換 -->
+  <nav class="sticky top-0 z-40 bg-[#fcfbf7]/95 border-y border-cozy-border py-2.5 mb-6 shadow-sm">
+    <div class="max-w-4xl mx-auto px-4">
+      <div class="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-0.5">
+        <template x-for="(day, index) in itinerary" :key="'tab-'+index">
+          <button 
+            @click="selectDay(index)"
+            :class="activeDay === index ? 'bg-cozy-accent text-white shadow' : 'bg-cozy-card text-cozy-sub hover:bg-amber-100/80 hover:text-cozy-text'"
+            class="px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 flex flex-col items-center min-w-[68px] border border-cozy-border flex-shrink-0 cursor-pointer"
+          >
+            <span x-text="day.dayCode" class="text-[10px] opacity-80"></span>
+            <span x-text="day.date"></span>
+          </button>
+        </template>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 主內容區 -->
+  <main class="max-w-4xl mx-auto px-4">
+
+    <template x-if="activeDay !== 'notice' && currentDayData">
+      <div>
+        <div class="mb-6 bg-cozy-card p-5 rounded-2xl border border-cozy-border dash-card">
+          <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-3 border-b border-cozy-border mb-3">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-xs font-extrabold px-2.5 py-0.5 rounded-md bg-amber-100/90 text-amber-900 border border-amber-300/60" x-text="currentDayData.dayCode"></span>
+                <span class="text-xs text-cozy-sub font-bold" x-text="currentDayData.weekday"></span>
+              </div>
+              <h2 class="text-xl md:text-2xl font-black text-cozy-text tracking-tight break-words" x-text="currentDayData.title"></h2>
+            </div>
+
+            <div class="bg-amber-50/90 border border-amber-200/80 px-3.5 py-2 rounded-xl text-left sm:text-right flex sm:flex-col justify-between items-center sm:items-end shadow-sm flex-shrink-0">
+              <div class="text-[11px] text-amber-950 font-bold flex items-center gap-1 whitespace-nowrap">
+                <i class="fa-solid fa-location-dot text-amber-600"></i> 當日出發地氣溫
+              </div>
+              <div class="text-sm font-black text-cozy-text mt-0.5 whitespace-nowrap">
+                <span x-text="currentDayData.startLocation"></span> : <span class="text-cozy-accent" x-text="currentWeather.temp"></span>°C
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2 text-xs text-cozy-sub pt-1">
+          <div class="flex items-center gap-1.5">
+            <i class="fa-solid fa-bed text-cozy-primary"></i>
+            <b>住宿：</b>
+            <template x-if="currentDayData.stayUrl">
+                <a :href="currentDayData.stayUrl" target="_blank" class="text-cozy-text font-bold underline decoration-indigo-400 hover:text-indigo-600 inline-flex items-center gap-1">
+                <span x-text="currentDayData.stay"></span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-indigo-600"></i>
+            </a>
+            </template>
+            <template x-if="!currentDayData.stayUrl">
+                <span class="text-cozy-text font-bold" x-text="currentDayData.stay"></span>
+            </template>
+         </div>
+            <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-dashed border-cozy-border">
+              <template x-if="currentDayData.meals.b">
+              <span class="bg-amber-50/90 text-amber-950 border border-amber-200/80 px-2.5 py-1 rounded-lg flex items-center gap-1">
+                <b>早餐：</b>
+                <template x-if="currentDayData.meals.bUrl">
+                  <a :href="currentDayData.meals.bUrl" target="_blank" class="font-bold underline decoration-amber-400 hover:text-orange-600 inline-flex items-center gap-1">
+                    <span x-text="currentDayData.meals.b"></span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-amber-600"></i>
+                  </a>
+                </template>
+                <template x-if="!currentDayData.meals.bUrl">
+                  <span x-text="currentDayData.meals.b"></span>
+                </template>
+              </span>
+              </template>
+              <template x-if="currentDayData.meals.br">
+              <span class="bg-amber-50/90 text-amber-950 border border-amber-200/80 px-2.5 py-1 rounded-lg flex items-center gap-1">
+                <b>早午餐：</b>
+                <template x-if="currentDayData.meals.brUrl">
+                  <a :href="currentDayData.meals.brUrl" target="_blank" class="font-bold underline decoration-amber-400 hover:text-orange-600 inline-flex items-center gap-1">
+                    <span x-text="currentDayData.meals.br"></span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-amber-600"></i>
+                  </a>
+                </template>
+                <template x-if="!currentDayData.meals.brUrl">
+                  <span x-text="currentDayData.meals.br"></span>
+                </template>
+              </span>
+              </template>
+              <template x-if="currentDayData.meals.l">
+              <span class="bg-amber-50/90 text-amber-950 border border-amber-200/80 px-2.5 py-1 rounded-lg flex items-center gap-1">
+                <b>午餐：</b>
+                <template x-if="currentDayData.meals.lUrl">
+                  <a :href="currentDayData.meals.lUrl" target="_blank" class="font-bold underline decoration-amber-400 hover:text-orange-600 inline-flex items-center gap-1">
+                    <span x-text="currentDayData.meals.l"></span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-amber-600"></i>
+                  </a>
+                </template>
+                <template x-if="!currentDayData.meals.lUrl">
+                  <span x-text="currentDayData.meals.l"></span>
+                </template>
+              </span>
+              </template>
+              <template x-if="currentDayData.meals.d">
+              <span class="bg-amber-50/90 text-amber-950 border border-amber-200/80 px-2.5 py-1 rounded-lg flex items-center gap-1">
+                <b>晚餐：</b>
+                <template x-if="currentDayData.meals.dUrl">
+                  <a :href="currentDayData.meals.dUrl" target="_blank" class="font-bold underline decoration-amber-400 hover:text-orange-600 inline-flex items-center gap-1">
+                    <span x-text="currentDayData.meals.d"></span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-amber-600"></i>
+                  </a>
+                </template>
+                <template x-if="!currentDayData.meals.dUrl">
+                  <span x-text="currentDayData.meals.d"></span>
+                </template>
+              </span>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-4 mb-10 relative">
+          <template x-for="(spotItem, spotIdx) in currentDayData.spots" :key="'spot-'+spotIdx">
+            <div class="relative pl-8 sm:pl-10">
+              <template x-if="spotIdx < currentDayData.spots.length - 1">
+                <div class="timeline-line"></div>
+              </template>
+
+              <div class="absolute left-2.5 top-5 -translate-x-1/2 w-6 h-6 rounded-full border-2 bg-white flex items-center justify-center text-[10px] z-10"
+                   :class="{
+                     'border-sky-500 text-sky-600 bg-sky-50': getItemTag(spotItem) === '航班',
+                     'border-indigo-500 text-indigo-600 bg-indigo-50': getItemTag(spotItem) === '住宿',
+                     'border-purple-500 text-purple-600 bg-purple-50': getItemTag(spotItem) === '預約活動',
+                     'border-emerald-500 text-emerald-600 bg-emerald-50': getItemTag(spotItem) === '健行',
+                     'border-pink-500 text-pink-600 bg-pink-50': getItemTag(spotItem) === '購物',
+                     'border-orange-500 text-orange-600 bg-orange-50': getItemTag(spotItem) === '美食',
+                     'border-red-500 text-red-600 bg-red-50': getItemTag(spotItem) === '加油',
+                     'border-amber-400 text-amber-700 bg-amber-50': ['自駕','補給','休憩'].includes(getItemTag(spotItem)),
+                     'border-slate-300 text-slate-500': !['航班','住宿','預約活動','健行','美食','自駕','補給','休憩','購物','加油'].includes(getItemTag(spotItem))
+                   }"
+              >
+                <i x-show="getItemTag(spotItem) === '航班'" class="fa-solid fa-plane text-[9px]"></i>
+                <i x-show="getItemTag(spotItem) === '住宿'" class="fa-solid fa-bed text-[9px]"></i>
+                <i x-show="getItemTag(spotItem) === '預約活動'" class="fa-solid fa-ticket text-[9px]"></i>
+                <i x-show="getItemTag(spotItem) === '健行'" class="fa-solid fa-person-hiking text-[9px]"></i>
+                <i x-show="getItemTag(spotItem) === '美食'" class="fa-solid fa-utensils text-[9px]"></i>
+                <i x-show="getItemTag(spotItem) === '購物'" class="fa-solid fa-bag-shopping text-[9px]"></i>
+                <i x-show="getItemTag(spotItem) === '加油'" class="fa-solid fa-gas-pump text-[9px]"></i>
+                <i x-show="['自駕','補給','休憩'].includes(getItemTag(spotItem))" class="fa-solid fa-car text-[9px]"></i>
+                <i x-show="!['航班','住宿','預約活動','健行','美食','自駕','補給','休憩','購物','加油'].includes(getItemTag(spotItem))" class="fa-solid fa-location-dot text-[9px]"></i>
+              </div>
+
+              <template x-if="spotItem.isGroup">
+                <div>
+                  <div class="mb-2 flex items-center gap-1.5 text-xs font-bold text-purple-900 bg-purple-100/90 px-3 py-1 rounded-lg w-fit border border-purple-300/80 shadow-xs">
+                    <i class="fa-solid fa-people-arrows text-purple-600"></i>
+                    <span>分組行動</span>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <template x-for="(group, gIdx) in spotItem.groups" :key="'grp-'+gIdx">
+                      <div class="bg-purple-50/70 border-2 border-purple-200/80 rounded-2xl p-3.5 space-y-3 flex flex-col justify-between">
+                        <div class="space-y-3">
+                          <div class="text-xs font-extrabold text-purple-950 bg-purple-200/80 px-2.5 py-1 rounded-md w-fit" x-text="group.groupTitle"></div>
+                          
+                          <template x-for="(spot, sIdx) in group.items" :key="'subspot-'+sIdx">
+                            <div>
+                              <template x-if="spot.isSubChoice">
+                                <div class="space-y-1.5 pt-1">
+                                  <div class="text-xs font-extrabold text-amber-900 flex items-center gap-1">
+                                    <i class="fa-solid fa-utensils text-amber-600"></i> 午餐可選：
+                                  </div>
+                                  <div class="grid grid-cols-2 gap-2">
+                                    <template x-for="(choice, cIdx) in spot.choices" :key="'choice-'+cIdx">
+                                      <div class="bg-amber-50/80 border border-amber-200/90 rounded-2xl p-2.5 flex flex-col justify-between shadow-xs">
+                                        <div>
+                                          <div class="text-[10px] font-black text-amber-900 bg-amber-100 px-2 py-0.5 rounded-md w-fit mb-1.5" x-text="choice.label"></div>
+                                          <a :href="choice.url" target="_blank" class="text-xs font-extrabold text-amber-950 underline decoration-amber-400 hover:text-orange-600 flex items-center gap-1">
+                                            <span x-text="choice.name"></span>
+                                            <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75"></i>
+                                          </a>
+                                        </div>
+                                        <span class="text-[9px] font-bold bg-orange-600 text-white px-2 py-0.5 rounded-md shadow-xs w-fit mt-2">美食</span>
+                                      </div>
+                                    </template>
+                                  </div>
+                                </div>
+                              </template>
+
+                              <template x-if="!spot.isSubChoice">
+                                <div 
+                                  :class="{
+                                    'bg-sky-50/90 border-sky-200/80': spot.tag === '航班',
+                                    'bg-indigo-50/90 border-indigo-200/80': spot.tag === '住宿',
+                                    'bg-purple-50/90 border-purple-200/80': spot.tag === '預約活動',
+                                    'bg-emerald-50/90 border-emerald-200/80': spot.tag === '健行',
+                                    'bg-orange-50/90 border-orange-200/80': spot.tag === '美食',
+                                    'bg-pink-50/90 border-pink-200/80': spot.tag === '購物',
+                                    'bg-amber-50/80 border-amber-200/80': ['自駕','補給','休憩'].includes(spot.tag),
+                                    'bg-cozy-card border-cozy-border': !['航班','住宿','預約活動','健行','美食','自駕','補給','休憩','購物'].includes(spot.tag)
+                                  }"
+                                  class="rounded-xl p-3 border transition-all"
+                                >
+                                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-1">
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                      <template x-if="spot.url">
+                                        <a :href="spot.url" target="_blank" class="text-sm font-extrabold flex items-center gap-1 underline underline-offset-4"
+                                           :class="{
+                                             'text-purple-950 decoration-purple-300 hover:text-purple-600': spot.tag === '預約活動',
+                                             'text-emerald-950 decoration-emerald-300 hover:text-emerald-600': spot.tag === '健行',
+                                             'text-orange-950 decoration-orange-300 hover:text-orange-600': spot.tag === '美食',
+                                             'text-cozy-text decoration-amber-300 hover:text-cozy-accent': !['預約活動','健行','美食'].includes(spot.tag)
+                                           }"
+                                        >
+                                          <span x-text="spot.name"></span>
+                                          <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75"></i>
+                                        </a>
+                                      </template>
+                                      <template x-if="!spot.url">
+                                        <span class="text-sm font-extrabold text-cozy-text" x-text="spot.name"></span>
+                                      </template>
+
+                                      <span x-show="spot.tag" x-text="spot.tag" :class="getTagClass(spot.tag)" class="text-[9px] font-bold px-2 py-0.5 rounded-md shadow-xs"></span>
+                                    </div>
+
+                                    <template x-if="spot.driveTime">
+                                      <span class="text-[10px] text-amber-900 bg-amber-100/90 px-1.5 py-0.5 rounded border border-amber-300/60 w-fit font-bold shadow-xs">
+                                        <i class="fa-solid fa-car mr-1 text-amber-600"></i><span x-text="spot.driveTime"></span>
+                                      </span>
+                                    </template>
+                                  </div>
+
+                                  <p class="text-[11px] font-semibold text-cozy-sub leading-relaxed" x-show="spot.note" x-text="spot.note"></p>
+
+                                  <template x-if="spot.alert">
+                                    <div class="mt-1.5 text-[11px] bg-rose-50/95 text-rose-800 p-1.5 rounded-lg border border-rose-200 flex items-center gap-1.5 font-bold shadow-xs">
+                                      <i class="fa-solid fa-clock text-rose-600 text-[10px]"></i>
+                                      <span x-text="spot.alert"></span>
+                                    </div>
+                                  </template>
+                                </div>
+                              </template>
+                            </div>
+                          </template>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </template>
+
+              <template x-if="!spotItem.isGroup">
+                <div 
+                  :class="{
+                    'bg-sky-50/90 border-sky-200/80': spotItem.tag === '航班',
+                    'bg-indigo-50/90 border-indigo-200/80': spotItem.tag === '住宿',
+                    'bg-purple-50/90 border-purple-200/80': spotItem.tag === '預約活動',
+                    'bg-emerald-50/90 border-emerald-200/80': spotItem.tag === '健行',
+                    'bg-orange-50/90 border-orange-200/80': spotItem.tag === '美食',
+                    'bg-pink-50/90 border-pink-200/80': spotItem.tag === '購物',
+                    'bg-red-50/80 border-red-200/80': spotItem.tag === '加油',
+                    'bg-amber-50/80 border-amber-200/80': ['自駕','補給','休憩'].includes(spotItem.tag),
+                    'bg-cozy-card border-cozy-border': !['航班','住宿','預約活動','健行','美食','自駕','補給','休憩','購物','加油'].includes(spotItem.tag)
+                  }"
+                  class="rounded-2xl p-4 border transition-all"
+                >
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1.5">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <template x-if="spotItem.url">
+                        <a :href="spotItem.url" target="_blank" class="text-base font-extrabold flex items-center gap-1.5 underline underline-offset-4"
+                           :class="{
+                             'text-sky-950 decoration-sky-300 hover:text-sky-600': spotItem.tag === '航班',
+                             'text-indigo-950 decoration-indigo-300 hover:text-indigo-600': spotItem.tag === '住宿',
+                             'text-purple-950 decoration-purple-300 hover:text-purple-600': spotItem.tag === '預約活動',
+                             'text-emerald-950 decoration-emerald-300 hover:text-emerald-600': spotItem.tag === '健行',
+                             'text-orange-950 decoration-orange-300 hover:text-orange-600': spotItem.tag === '美食',
+                             'text-pink-950 decoration-pink-300 hover:text-pink-600': spotItem.tag === '購物',
+                             'text-cozy-text decoration-amber-300 hover:text-cozy-accent': !['航班','住宿','預約活動','健行','美食','購物'].includes(spotItem.tag)
+                           }"
+                        >
+                          <span x-text="spotItem.name"></span>
+                          <i class="fa-solid fa-arrow-up-right-from-square text-xs opacity-75"></i>
+                        </a>
+                      </template>
+                      <template x-if="!spotItem.url">
+                        <span :class="{
+                          'text-sky-950 font-extrabold': spotItem.tag === '航班',
+                          'text-indigo-950 font-extrabold': spotItem.tag === '住宿',
+                          'text-purple-950 font-extrabold': spotItem.tag === '預約活動',
+                          'text-emerald-950 font-extrabold': spotItem.tag === '健行',
+                          'text-orange-950 font-extrabold': spotItem.tag === '美食',
+                          'text-pink-950 font-extrabold': spotItem.tag === '購物',
+                          'text-red-950 font-extrabold': spotItem.tag === '加油',
+                          'text-cozy-text font-bold': !['航班','住宿','預約活動','健行','美食','購物','加油'].includes(spotItem.tag)
+                        }" class="text-base" x-text="spotItem.name"></span>
+                      </template>
+
+                      <span x-show="spotItem.tag" x-text="spotItem.tag" :class="getTagClass(spotItem.tag)" class="text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs"></span>
+                    </div>
+
+                    <template x-if="spotItem.driveTime">
+                      <span class="text-xs text-amber-900 bg-amber-100/90 px-2 py-0.5 rounded-lg border border-amber-300/60 w-fit font-bold shadow-xs">
+                        <i class="fa-solid fa-car mr-1 text-amber-600"></i><span x-text="spotItem.driveTime"></span>
+                      </span>
+                    </template>
+                  </div>
+
+                  <p :class="{
+                    'text-sky-900 font-semibold': spotItem.tag === '航班',
+                    'text-indigo-900 font-semibold': spotItem.tag === '住宿',
+                    'text-purple-900 font-semibold': spotItem.tag === '預約活動',
+                    'text-emerald-900 font-semibold': spotItem.tag === '健行',
+                    'text-orange-900 font-semibold': spotItem.tag === '美食',
+                    'text-pink-900 font-semibold': spotItem.tag === '購物',
+                    'text-cozy-sub font-medium': !['航班','住宿','預約活動','健行','美食','購物'].includes(spotItem.tag)
+                  }" class="text-xs leading-relaxed" x-show="spotItem.note" x-html="spotItem.note"></p>
+
+                  <template x-if="spotItem.alert">
+                    <div class="mt-2 text-xs bg-rose-50/95 text-rose-800 p-2 rounded-lg border border-rose-200 flex items-center gap-2 font-bold shadow-xs">
+                      <i class="fa-solid fa-clock text-rose-600"></i>
+                      <span x-text="spotItem.alert"></span>
+                    </div>
+                  </template>
+                </div>
+              </template>
+            </div>
+          </template>
+        </div>
+      </div>
+    </template>
+
+    <!-- ⚠️ 注意事項視窗 (Notice Modal) -->
+    <div 
+      x-show="showNoticeModal" 
+      x-transition:enter="transition ease-out duration-300"
+      x-transition:enter-start="opacity-0 scale-95"
+      x-transition:enter-end="opacity-100 scale-100"
+      x-transition:leave="transition ease-in duration-200"
+      x-transition:leave-start="opacity-100 scale-100"
+      x-transition:leave-end="opacity-0 scale-95"
+      class="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-5 bg-black/45"
+      style="display: none;"
+    >
+    <div 
+      @click.outside="showNoticeModal = false"
+      class="bg-[#fcfbf7] border border-cozy-border rounded-3xl p-4 md:p-6 max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl relative"
+    >
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between pb-3.5 border-b border-cozy-border mb-3.5">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-rose-600 text-white flex items-center justify-center font-bold text-base shadow-sm">
+          <i class="fa-solid fa-shield-cat"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-black text-cozy-text">紐西蘭旅遊注意事項</h3>
+          <p class="text-[11px] text-cozy-sub font-semibold">出發前與旅途中重要提醒事項彙整</p>
+        </div>
+      </div>
+      <button 
+        @click="showNoticeModal = false"
+        class="w-8 h-8 rounded-full bg-stone-200/80 hover:bg-stone-300 text-stone-700 font-bold flex items-center justify-center transition-all cursor-pointer"
+      >
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="overflow-y-auto custom-scrollbar pr-1 space-y-2.5 flex-1">
+      <template x-for="(notice, idx) in notices" :key="'notice-'+idx">
+        <div class="bg-white/95 p-3.5 rounded-xl border border-cozy-border shadow-xs flex items-center gap-3 transition-all hover:border-rose-300">
+          <span class="bg-rose-100/90 text-rose-900 text-xs font-extrabold px-2.5 py-1 rounded-lg flex-shrink-0" x-text="notice.id"></span>
+          <p class="text-xs font-semibold text-cozy-text leading-relaxed flex-1" x-html="notice.text"></p>
+        </div>
+      </template>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="pt-3.5 border-t border-cozy-border mt-3.5 flex items-center justify-between">
+      <span class="text-[11px] text-stone-500 font-semibold">請仔細閱讀</span>
+      <button 
+        @click="showNoticeModal = false"
+        class="px-5 py-2 rounded-xl bg-rose-700 hover:bg-rose-800 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+      >
+        關閉視窗
+      </button>
+    </div>
+  </div>
+</div>
+
+  </main>
+
+  <!-- 🚗 租車與自駕注意事項視窗 (Car Modal) -->
+  <div 
+    x-show="showCarModal" 
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0 scale-95"
+    x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-95"
+    class="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-5 bg-black/45"
+    style="display: none;"
+  >
+    <div 
+      @click.outside="showCarModal = false"
+      class="bg-[#fcfbf7] border border-cozy-border rounded-3xl p-4 md:p-6 max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl relative"
+    >
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3.5 border-b border-cozy-border mb-3.5">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-600 text-white flex items-center justify-center font-bold text-base shadow-sm">
+            <i class="fa-solid fa-car-side"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-black text-cozy-text">紐西蘭自駕注意事項與交通規則說明</h3>
+            <p class="text-[11px] text-cozy-sub font-semibold">包含必備證件、速限與測速、圓環指南、讓路/停止標誌、禮讓、單線橋樑、超車線、特殊標誌與車道、路邊停車與緊急通報</p>
+          </div>
+        </div>
+        <button 
+          @click="showCarModal = false"
+          class="w-8 h-8 rounded-full bg-stone-200/80 hover:bg-stone-300 text-stone-700 font-bold flex items-center justify-center transition-all cursor-pointer"
+        >
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="overflow-y-auto custom-scrollbar pr-1 space-y-5 flex-1 text-xs">
+        
+        <!-- 1. 取車資訊與必備三寶 -->
+        <div class="bg-amber-50/60 border border-amber-200/90 rounded-2xl p-4 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-amber-200/80 pb-2">
+            <span class="font-extrabold text-amber-950 text-sm flex items-center gap-1.5">
+              <i class="fa-solid fa-passport text-amber-600"></i> 取車資訊與必備三寶 (缺一不可)
+            </span>
+            <span class="text-[11px] font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full">Ezi Car Rental @ 基督城國際機場 (CHC)</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div class="bg-white p-2.5 rounded-xl border border-amber-200/60 text-stone-800">
+              <div class="font-bold text-amber-900 text-[11px] mb-0.5"><i class="fa-solid fa-id-card mr-1"></i> 1. 本國駕照正本</div>
+              <div class="text-[10px] text-stone-600 font-medium">台灣駕照必須在有效期限內，不可過期。</div>
+            </div>
+            <div class="bg-white p-2.5 rounded-xl border border-amber-200/60 text-stone-800">
+              <div class="font-bold text-amber-900 text-[11px] mb-0.5"><i class="fa-solid fa-globe mr-1"></i> 2. 國際駕照正本 (IDP)</div>
+              <div class="text-[10px] text-stone-600 font-medium">國際駕照為譯本，需搭配台灣駕照同時出示。</div>
+            </div>
+            <div class="bg-white p-2.5 rounded-xl border border-amber-200/60 text-stone-800">
+              <div class="font-bold text-amber-900 text-[11px] mb-0.5"><i class="fa-solid fa-credit-card mr-1"></i> 3. 護照與主駕駛人信用卡</div>
+              <div class="text-[10px] text-stone-600 font-medium">用於櫃檯辦理取車與刷卡授權過卡。</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. 速限、解除速限與區間測速標誌圖解 -->
+        <div class="bg-white p-3.5 rounded-2xl border border-stone-200 space-y-3 shadow-2xs">
+          <div class="font-black text-stone-900 flex items-center gap-2 border-b border-stone-100 pb-1.5 text-xs">
+            <i class="fa-solid fa-gauge-high text-amber-600"></i>
+            速限、解除速限與區間測速標誌圖解
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-[11px]">
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center gap-2.5">
+              <svg class="w-12 h-12 flex-shrink-0" viewBox="0 0 60 60">
+                <circle cx="30" cy="30" r="26" fill="white" stroke="#DC2626" stroke-width="6"/>
+                <text x="30" y="38" font-size="22" fill="#1E293B" font-weight="900" text-anchor="middle">50</text>
+              </svg>
+              <div class="space-y-0.5">
+                <div class="font-extrabold text-stone-900">城鎮限制速限</div>
+                <p class="text-stone-600 font-medium text-[10px]">進入市區/城鎮預設最高限速 <b>50 km/h</b>。</p>
+              </div>
+            </div>
+
+            <div class="bg-amber-50/80 p-2.5 rounded-xl border border-amber-200 flex items-center gap-2.5">
+              <svg class="w-12 h-12 flex-shrink-0" viewBox="0 0 60 60">
+                <circle cx="30" cy="30" r="26" fill="white" stroke="#1E293B" stroke-width="3"/>
+                <line x1="12" y1="48" x2="48" y2="12" stroke="#1E293B" stroke-width="8"/>
+              </svg>
+              <div class="space-y-0.5">
+                <div class="font-extrabold text-amber-950">解除限速標誌</div>
+                <p class="text-stone-600 font-medium text-[10px]">代表無特殊限制，<b>最高安全極限為 100 km/h</b>。</p>
+              </div>
+            </div>
+
+            <div class="bg-rose-50/80 p-2.5 rounded-xl border border-rose-200 flex items-center gap-2.5">
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKHmdKSTdnaRyhWV0whhyjdmg1tmZFT75PorWHJuUy-Xij-gbE1Khw1-KM&s=10" alt="區間測速" class="w-12 h-12 object-contain flex-shrink-0 rounded-lg">
+              <div class="space-y-0.5">
+                <div class="font-extrabold text-rose-950">區間測速 (Average Speed)</div>
+                <p class="text-stone-600 font-medium text-[10px]">計算兩點間平均車速，請全程維持勻速切勿超速。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. 圓環 (Roundabout) 駕駛與方向燈指南 -->
+        <div class="bg-white border-2 border-amber-300 rounded-2xl p-4 space-y-3.5 shadow-xs">
+          <div class="flex items-center gap-2 border-b border-amber-200 pb-2">
+            <div class="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center font-bold text-xs">
+              <i class="fa-solid fa-rotate-right"></i>
+            </div>
+            <div>
+              <h4 class="text-sm font-black text-stone-900">圓環 (Roundabout) 駕駛與方向燈指南</h4>
+              <p class="text-[10px] text-stone-500 font-medium">紐西蘭交通中最重要的規則：左轉進入、完全禮讓右側來車、離開打左燈！</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-col md:flex-row items-center gap-4">
+            <div class="w-full md:w-48 flex-shrink-0 flex justify-center">
+              <svg class="w-40 h-40" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="200" height="200" fill="#E2E8F0" rx="16"/>
+                <rect x="75" y="0" width="50" height="200" fill="#94A3B8"/>
+                <rect x="0" y="75" width="200" height="50" fill="#94A3B8"/>
+                <circle cx="100" cy="100" r="35" fill="#475569"/>
+                <circle cx="100" cy="100" r="22" fill="#22C55E"/>
+                <path d="M 100 68 A 32 32 0 0 1 132 100" stroke="#F59E0B" stroke-width="4" stroke-dasharray="4 2" fill="none" />
+                <polygon points="132,102 138,94 126,94" fill="#F59E0B" />
+                <circle cx="90" cy="165" r="8" fill="#EF4444" />
+                <text x="90" y="168" font-size="8" fill="white" font-weight="bold" text-anchor="middle">我</text>
+                <circle cx="165" cy="90" r="8" fill="#3B82F6" />
+                <text x="165" y="93" font-size="8" fill="white" font-weight="bold" text-anchor="middle">讓</text>
+              </svg>
+            </div>
+            
+            <div class="space-y-2 text-[11px] text-stone-700 flex-1">
+              <div class="bg-amber-100/80 p-2 rounded-lg font-extrabold text-amber-950 flex items-center gap-1.5">
+                <i class="fa-solid fa-hand text-amber-700"></i> 第一金律：進入圓環前務必完全禮讓「右側」所有車輛！
+              </div>
+              <ul class="space-y-1 pl-1">
+                <li class="flex items-start gap-1.5">
+                  <span class="font-bold text-amber-600">●</span>
+                  <span><b>順時針繞行</b>：進圓環時一律<b>左轉進入</b>，切勿逆向繞行。</span>
+                </li>
+                <li class="flex items-start gap-1.5">
+                  <span class="font-bold text-amber-600">●</span>
+                  <span><b>絕對路權</b>：已在圓環內的車輛擁有最高路權；只要右前方有車即將穿越你的路徑，就必須減速或完全停讓。</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-[11px]">
+            <div class="bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl space-y-1">
+              <div class="font-black text-emerald-950 flex items-center justify-between">
+                <span>⬅️ 第一出口（左轉）</span>
+                <span class="text-[9px] bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded">左轉燈</span>
+              </div>
+              <p class="text-stone-600 font-medium">進圓環前全程<b>打左方向燈</b>，直到順利駛出圓環。</p>
+            </div>
+
+            <div class="bg-sky-50 border border-sky-200 p-2.5 rounded-xl space-y-1">
+              <div class="font-black text-sky-950 flex items-center justify-between">
+                <span>⬆️ 第二出口（直行）</span>
+                <span class="text-[9px] bg-sky-200 text-sky-900 px-1.5 py-0.5 rounded">出環打左燈</span>
+              </div>
+              <p class="text-stone-600 font-medium">進圓環<b>不打燈</b>；掠過第一個出口後，<b>打左方向燈</b>告示駛出。</p>
+            </div>
+
+            <div class="bg-purple-50 border border-purple-200 p-2.5 rounded-xl space-y-1">
+              <div class="font-black text-purple-950 flex items-center justify-between">
+                <span>↩️ 第三出口/迴轉</span>
+                <span class="text-[9px] bg-purple-200 text-purple-900 px-1.5 py-0.5 rounded">右燈變左燈</span>
+              </div>
+              <p class="text-stone-600 font-medium">進圓環前<b>打右方向燈</b>；繞至預備駛出出口前，<b>切換為左方向燈</b>駛出。</p>
+            </div>
+          </div>
+
+          <!-- 雙線道圓環指南 -->
+          <div class="bg-amber-50/80 border border-amber-200/90 rounded-xl p-3 space-y-1.5 text-[11px] text-stone-800">
+            <div class="font-extrabold text-amber-950 flex items-center gap-1.5">
+              <i class="fa-solid fa-road text-amber-700"></i> 若圓環內為雙線道：
+            </div>
+            <ul class="space-y-1 pl-1 font-medium leading-relaxed">
+              <li><b>左轉出口</b>：從第一個出口駛出時，通常應先進入左側車道(外側道)；若路標或路面箭頭另有指示，則依指定車道行駛。</li>
+              <li><b>直走出口</b>：先按照路標或地面箭頭選擇可直行的車道；若沒有特別標示，左右車道都可以使用，但不要進入只限轉灣的車道。</li>
+              <li><b>右轉 or 迴轉 出口</b>：通常應從右側車道(內側道)進入；若路標或路面箭頭另有指定，則依指示選擇可右轉或迴轉的車道。</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 4. GIVE WAY (讓路) & STOP (停止) 標誌 -->
+        <div class="bg-white p-3.5 rounded-2xl border border-stone-200 space-y-3 shadow-2xs">
+          <div class="font-black text-stone-900 flex items-center gap-2 border-b border-stone-100 pb-1.5 text-xs">
+            <i class="fa-solid fa-hand text-rose-600"></i>
+            GIVE WAY (讓路) & STOP (停止) 標誌
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px]">
+            <div class="bg-amber-50/60 p-3 rounded-xl border border-amber-200 flex items-center gap-3">
+              <svg class="w-16 h-16 flex-shrink-0" viewBox="0 0 100 100">
+                <polygon points="5,10 95,10 50,92" fill="#FFFFFF" stroke="#DC2626" stroke-width="8"/>
+                <text x="50" y="34" font-size="12" fill="#DC2626" font-weight="900" text-anchor="middle">GIVE</text>
+                <text x="50" y="50" font-size="12" fill="#DC2626" font-weight="900" text-anchor="middle">WAY</text>
+              </svg>
+              <div class="space-y-1">
+                <div class="font-extrabold text-amber-950">GIVE WAY 讓路標誌</div>
+                <p class="text-stone-600 font-medium text-[10px] leading-relaxed">
+                  配合路口<b>白色虛線</b>，必須減速禮讓幹道及右側來車，確認無車後通行。
+                </p>
+              </div>
+            </div>
+
+            <div class="bg-rose-50/60 p-3 rounded-xl border border-rose-200 flex items-center gap-3">
+              <svg class="w-16 h-16 flex-shrink-0" viewBox="0 0 100 100">
+                <polygon points="30,5 70,5 95,30 95,70 70,95 30,95 5,70 5,30" fill="#DC2626" stroke="#FFFFFF" stroke-width="3"/>
+                <text x="50" y="58" font-size="22" fill="white" font-weight="900" text-anchor="middle">STOP</text>
+              </svg>
+              <div class="space-y-1">
+                <div class="font-extrabold text-rose-950">STOP 停止標誌</div>
+                <p class="text-stone-600 font-medium text-[10px] leading-relaxed">
+                  配合路口<b>白色實線</b>，不論有無來車，<b>車輪必須完全靜止 3 秒</b>方可駛出。
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 禮讓 (行人、斑馬線與禮讓規則) -->
+        <div class="bg-white p-3.5 rounded-2xl border border-stone-200 space-y-3 shadow-2xs">
+          <div class="font-black text-stone-900 flex items-center gap-2 border-b border-stone-100 pb-1.5 text-xs">
+            <i class="fa-solid fa-hands-holding-child text-emerald-600"></i>
+            禮讓 (行人、斑馬線與禮讓規則)
+          </div>
+
+          <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3 space-y-2 text-[11px] text-stone-700">
+            <p class="leading-relaxed font-medium">
+              在紐西蘭開車，<b>禮讓行人與特定路口狀況</b>是極為重要的核心守則：
+            </p>
+            <ul class="space-y-1.5 pl-2 list-disc list-inside font-medium">
+              <li><b>斑馬線與行人絕對路權</b>：行經行人穿越道（斑馬線）或看見行人準備穿越時，必須完全停讓行人先行。</li>
+              <li><b>轉灣車禮讓直行車</b>：在交叉路口轉灣時，必須禮讓對向直行車與正在過馬路的行人。</li>
+              <li><b>狹窄路段與山區會車</b>：面對單線道或會車點，若對方為大型車輛或爬坡上山車輛，主動靠左停讓能使行車更順暢安全。</li>
+              <li><b>郊外動物群過馬路</b>：在郊外開車若遇上羊群或其他動物群在過馬路時，也請務必停車禮讓動物通行，不可按鳴喇叭，以免驚嚇到牠們反而造成交通大亂。</li>
+            </ul>
+          </div>
+
+          <div class="flex flex-col sm:flex-row items-center gap-4 text-xs pt-1 border-t border-stone-100">
+            <img src="https://timtingtravel.com/wp-content/uploads/2024/03/28-15_Pedestrain-walk-sign.webp" alt="斑馬線標誌" class="w-32 md:w-40 rounded-xl border border-stone-200 object-contain flex-shrink-0">
+            <div class="space-y-2 text-stone-700 font-medium leading-relaxed flex-1">
+              <p><b>斑馬線 (Pedestrian Crossing / Zebra Crossing)</b>：當看見斑馬線告示牌或是橘色圓圈標誌時，代表前方為斑馬線，行人擁有絕對路權，請務必減速慢行、優先禮讓行人。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 單線橋樑 (One-lane Bridge) 號誌與指示 -->
+        <div class="bg-white p-3.5 rounded-2xl border border-stone-200 space-y-3 shadow-2xs">
+          <div class="font-black text-stone-900 border-b border-stone-100 pb-1.5 text-xs flex items-center gap-2">
+            <i class="fa-solid fa-bridge text-sky-600"></i>
+            單線橋樑 (One-lane Bridge) 號誌與指示
+          </div>
+
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full border-collapse text-xs border border-slate-200">
+              <thead>
+                <tr class="bg-[#5b72b4] text-white font-bold">
+                  <th class="p-2.5 text-center w-28 md:w-36 border border-slate-300">號誌</th>
+                  <th class="p-2.5 text-left border border-slate-300">說明</th>
+                  <th class="p-2.5 text-left border border-slate-300">指示</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+                <!-- 項目 1 -->
+                <tr class="bg-white">
+                  <td class="p-3 text-center align-middle border border-slate-200">
+                    <img src="https://timtingtravel.com/wp-content/uploads/2019/11/28-one-lane-bridge-giveway-1.gif" alt="單線橋樑讓路號誌 1" class="mx-auto max-h-32 object-contain">
+                  </td>
+                  <td class="p-3 align-middle border border-slate-200 text-stone-800 font-medium leading-relaxed">
+                    遇上紅色小箭頭、或 GIVE WAY 警告牌
+                  </td>
+                  <td class="p-3 align-middle border border-slate-200 text-stone-800 space-y-2">
+                    <div class="flex items-start gap-2">
+                      <i class="fa-solid fa-check text-stone-700 mt-0.5"></i>
+                      <span>需讓路給對面的車輛</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                      <i class="fa-solid fa-check text-stone-700 mt-0.5"></i>
+                      <span>對向車輛擁有優先權</span>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- 項目 2 -->
+                <tr class="bg-[#f4f6fa]">
+                  <td class="p-3 text-center align-middle border border-slate-200">
+                    <img src="https://timtingtravel.com/wp-content/uploads/2019/11/28-one-lane-bridge-giveway-2.gif" alt="單線橋樑讓路號誌 2" class="mx-auto max-h-32 object-contain">
+                  </td>
+                  <td class="p-3 align-middle border border-slate-200 text-stone-800 font-medium leading-relaxed">
+                    遇上白色大箭頭、且為藍色底的告示牌
+                  </td>
+                  <td class="p-3 align-middle border border-slate-200 text-stone-800 space-y-2">
+                    <div class="flex items-start gap-2">
+                      <i class="fa-solid fa-check text-stone-700 mt-0.5"></i>
+                      <span>擁有優先權，可優先通過單向橋樑</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                      <i class="fa-solid fa-check text-stone-700 mt-0.5"></i>
+                      <span>對面來車需停車禮讓</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 超車線 (Passing Lane) -->
+        <div class="bg-white p-3.5 rounded-2xl border border-stone-200 space-y-3 shadow-2xs">
+          <div class="font-black text-stone-900 border-b border-stone-100 pb-1.5 text-xs flex items-center gap-2">
+            <i class="fa-solid fa-road text-amber-600"></i>
+            超車線 (Passing Lane) 規則與標誌
+          </div>
+
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full border-collapse text-xs border border-slate-200">
+              <thead>
+                <tr class="bg-[#5b72b4] text-white font-bold">
+                  <th class="p-2.5 text-center w-28 md:w-36 border border-slate-300">號誌</th>
+                  <th class="p-2.5 text-left border border-slate-300">說明</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+                <!-- 項目 1 -->
+                <tr class="bg-white">
+                  <td class="p-3 text-center align-middle border border-slate-200">
+                    <img src="https://timtingtravel.com/wp-content/uploads/2019/11/28-passing-lane.png" alt="超車線告示" class="mx-auto max-h-28 object-contain">
+                  </td>
+                  <td class="p-3 align-middle border border-slate-200 text-stone-800">
+                    <ul class="space-y-1.5 font-medium">
+                      <li class="flex items-start gap-2">
+                        <i class="fa-solid fa-check text-stone-600 mt-0.5"></i>
+                        <span>表示前方 200 公尺處，道路會從單線變成雙線的車道</span>
+                      </li>
+                      <li class="flex items-start gap-2">
+                        <i class="fa-solid fa-check text-stone-600 mt-0.5"></i>
+                        <span>想要超車的旅客請善用右側超車道進行超車</span>
+                      </li>
+                      <li class="flex items-start gap-2">
+                        <i class="fa-solid fa-check text-stone-600 mt-0.5"></i>
+                        <span>速度較慢的旅客請靠左側車道行駛，避免擋住後方車輛</span>
+                      </li>
+                    </ul>
+                  </td>
+                </tr>
+
+                <!-- 項目 2 -->
+                <tr class="bg-[#f4f6fa]">
+                  <td class="p-3 text-center align-middle border border-slate-200">
+                    <img src="https://timtingtravel.com/wp-content/uploads/2019/11/28-passing-lane-1.jpg" alt="禁止超車實黃線" class="mx-auto max-h-28 object-contain">
+                  </td>
+                  <td class="p-3 align-middle border border-slate-200 text-stone-800 font-medium leading-relaxed">
+                    <p class="mb-1">不論對向是否有來車，只要中線為<b>雙黃線</b>或<b>實心黃線</b>，代表禁止超車。</p>
+                    <p class="text-[10px] text-stone-500">(若前方車輛靠左禮讓，只有在確認安全，且超車過程中全程不壓線、不跨越實心黃線的情況下，才可以超車)</p>
+                  </td>
+                </tr>
+
+                <!-- 項目 3 -->
+                <tr class="bg-white">
+                  <td class="p-3 text-center align-middle border border-slate-200">
+                    <img src="https://timtingtravel.com/wp-content/uploads/2019/11/28-passing-lane-2.jpg" alt="虛線超車圖解" class="mx-auto max-h-28 object-contain">
+                  </td>
+                  <td class="p-3 align-middle border border-slate-200 text-stone-800 space-y-1.5">
+                    <p class="font-medium">若中線為<b>白色虛線</b>或<b>黃色虛線</b>，則狀況允許時是可以跨越中線超車的。</p>
+                    <p class="text-rose-700 font-bold text-[11px]">【需注意】黃色虛線表示前方即將進入黃色實線，建議不要超車。</p>
+                    <div class="pt-1 text-[11px] text-stone-600 space-y-1 border-t border-dashed border-slate-200">
+                      <p>● <b>圖解 1</b> - 對左邊車道的車輛來說：中線為白色虛線，情況允許可超車。</p>
+                      <p>● <b>圖解 2</b> - 對右邊車道的車輛來說：中線為黃色實線，不可進行超車。</p>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- 項目 4 -->
+                <tr class="bg-[#f4f6fa]">
+                  <td class="p-3 text-center align-middle border border-slate-200 font-bold text-stone-700">
+                    其他
+                  </td>
+                  <td class="p-3 align-middle border border-slate-200 text-stone-800 font-medium leading-relaxed">
+                    在任何看不見前方是否有來車的狀況下（轉灣處、坡度較大處），<b>絕對不允許跨越中線超車</b>。
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 特殊標誌與車道 -->
+        <div class="bg-white p-3.5 rounded-2xl border border-stone-200 space-y-3 shadow-2xs">
+          <div class="font-black text-stone-900 flex items-center gap-2 border-b border-stone-100 pb-1.5 text-xs">
+            <i class="fa-solid fa-road text-blue-600"></i>
+            特殊標誌與車道
+          </div>
+
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full border-collapse text-[11px]">
+              <thead>
+                <tr class="bg-blue-600 text-white font-extrabold">
+                  <th class="p-2.5 text-center w-36 border border-blue-700">號誌 / 車道</th>
+                  <th class="p-2.5 text-left border border-blue-700">說明與細節</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-stone-200 border border-stone-200">
+                <!-- 中央緩衝區 -->
+                <tr class="bg-white hover:bg-stone-50 transition-colors">
+                  <td class="p-3 text-center align-middle border-r border-stone-200">
+                    <img src="https://andyventure.com/wp-content/uploads/new_zealand/road_trip_guide/%E4%B8%AD%E5%A4%AE%E7%B7%A9%E8%A1%9D%E5%8D%80.jpg" alt="中央緩衝區" class="mx-auto max-h-28 object-contain rounded-lg border border-stone-200">
+                  </td>
+                  <td class="p-3 align-middle text-stone-700 space-y-1.5">
+                    <div class="font-extrabold text-stone-900 text-xs">中央緩衝區 (Flush Median)</div>
+                    <p class="text-[10px] text-stone-600 font-medium">道路中央畫有斜白線區域，主要用於車輛右轉時等待對向無來車，或是從支道右轉進入主幹道時作為中間暫停緩衝。切勿將其當作超車道或長時間行駛車道。</p>
+                  </td>
+                </tr>
+
+                <!-- 右轉專用道 -->
+                <tr class="bg-stone-50/70 hover:bg-stone-100 transition-colors">
+                  <td class="p-3 text-center align-middle border-r border-stone-200">
+                    <img src="https://andyventure.com/wp-content/uploads/new_zealand/road_trip_guide/%E5%8F%B3%E8%BD%89%E5%B0%88%E7%94%A8%E9%81%93.jpg" alt="右轉專用道" class="mx-auto max-h-28 object-contain rounded-lg border border-stone-200">
+                  </td>
+                  <td class="p-3 align-middle text-stone-700 space-y-1.5">
+                    <div class="font-extrabold text-stone-900 text-xs">右轉專用道 (Right Turn Bay)</div>
+                    <p class="text-[10px] text-stone-600 font-medium">路口設有獨立右轉標線車道，欲右轉車輛需提前駛入專用道等待，避免阻擋後方直行車流。</p>
+                  </td>
+                </tr>
+
+                <!-- 綠色區域 -->
+                <tr class="bg-white hover:bg-stone-50 transition-colors">
+                  <td class="p-3 text-center align-middle border-r border-stone-200">
+                    <img src="https://andyventure.com/wp-content/uploads/new_zealand/road_trip_guide/%E7%B6%A0%E8%89%B2%E5%8D%80%E5%9F%9F.jpg" alt="綠色區域" class="mx-auto max-h-28 object-contain rounded-lg border border-stone-200">
+                  </td>
+                  <td class="p-3 align-middle text-stone-700 space-y-1.5">
+                    <div class="font-extrabold text-stone-900 text-xs">綠色區域 (Green Zone / Special Lane)</div>
+                    <p class="text-[10px] text-stone-600 font-medium">市區路面上鋪設綠色的區域，通常為自行車、機車停等區或公車專用道。一般汽機車不可佔用、行駛或臨時停車。紅燈時則是到綠色格子後面停下，等待綠燈再左轉，汽車停止時不可壓到綠色區域。</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 路邊停車分類 -->
+        <div class="bg-white p-3.5 rounded-2xl border border-stone-200 space-y-3 shadow-2xs">
+          <div class="font-black text-stone-900 flex items-center gap-2 border-b border-stone-100 pb-1.5 text-xs">
+            <i class="fa-solid fa-square-parking text-blue-600"></i>
+            路邊停車
+          </div>
+
+          <div class="bg-amber-50/90 border border-amber-200/90 rounded-xl p-3 text-[11px] text-amber-950 font-medium leading-relaxed">
+            <i class="fa-solid fa-circle-info text-amber-600 mr-1"></i>
+            紐西蘭停車多數是先付款（預繳制）。停好車後，必須先預估停留時間並在繳費機台或APP完成付費，不要停完才付，否則會被視為未繳費而收到高額罰單。
+          </div>
+
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full border-collapse text-[11px]">
+              <thead>
+                <tr class="bg-blue-600 text-white font-extrabold">
+                  <th class="p-2.5 text-center w-36 border border-blue-700">號誌 / 標線</th>
+                  <th class="p-2.5 text-left border border-blue-700">說明與細節</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-stone-200 border border-stone-200">
+                <!-- 黃色虛線 -->
+                <tr class="bg-white hover:bg-stone-50 transition-colors">
+                  <td class="p-3 text-center align-middle border-r border-stone-200">
+                    <img src="https://alphaguu.com/wp-content/uploads/2025/05/no2.jpg" alt="黃色虛線" class="mx-auto max-h-28 object-contain rounded-lg border border-stone-200">
+                  </td>
+                  <td class="p-3 align-middle text-stone-700 space-y-1.5">
+                    <div class="font-extrabold text-stone-900 text-xs">黃色虛線 (Yellow Dashed Line)</div>
+                    <p class="text-[10px] text-stone-600 font-medium">黃色虛線代表禁止停車，等於台灣的紅線。</p>
+                  </td>
+                </tr>
+
+                <!-- 圖 1：P120 左箭頭 -->
+                <tr class="bg-stone-50/70 hover:bg-stone-100 transition-colors">
+                  <td class="p-3 text-center align-middle border-r border-stone-200">
+                    <svg class="w-20 h-24 mx-auto" viewBox="0 0 100 120">
+                      <rect width="90" height="110" x="5" y="5" rx="8" fill="#0066B3" stroke="#555" stroke-width="2"/>
+                      <text x="50" y="42" font-size="36" fill="white" font-weight="900" text-anchor="middle">P</text>
+                      <text x="50" y="78" font-size="32" fill="white" font-weight="900" text-anchor="middle">120</text>
+                      <path d="M 72 94 L 32 94 M 40 86 L 26 94 L 40 102" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    </svg>
+                  </td>
+                  <td class="p-3 align-middle text-stone-700 space-y-1.5">
+                    <div class="font-extrabold text-stone-900 text-xs">道路左側可免費停車 120 分鐘</div>
+                    <p class="text-[10px] text-stone-500 font-medium">(數字為可停車時間、箭頭表示哪一側可停車)</p>
+                    <p class="text-[10px] text-stone-400 italic">P.S. 若沒有特別註明確切時間，通常指 8am-6pm，其他時間不受 2hr 限制</p>
+                  </td>
+                </tr>
+
+                <!-- 圖 2：P30 Mon-Fri 雙向箭頭 -->
+                <tr class="bg-white hover:bg-stone-50 transition-colors">
+                  <td class="p-3 text-center align-middle border-r border-stone-200">
+                    <svg class="w-20 h-24 mx-auto" viewBox="0 0 100 120">
+                      <rect width="90" height="110" x="5" y="5" rx="8" fill="#0066B3" stroke="#555" stroke-width="2"/>
+                      <text x="50" y="36" font-size="30" fill="white" font-weight="900" text-anchor="middle">P</text>
+                      <text x="50" y="66" font-size="28" fill="white" font-weight="900" text-anchor="middle">30</text>
+                      <text x="50" y="86" font-size="14" fill="white" font-weight="700" text-anchor="middle">Mon-Fri</text>
+                      <path d="M 22 98 L 78 98 M 30 92 L 18 98 L 30 104 M 70 92 L 82 98 L 70 104" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    </svg>
+                  </td>
+                  <td class="p-3 align-middle text-stone-700 space-y-1.5">
+                    <div class="font-extrabold text-stone-900 text-xs">道路兩側於周一至周五可免費停車 30 分鐘</div>
+                    <p class="text-[10px] text-stone-400 italic">P.S. 若沒有特別註明確切時間，通常指 8am-6pm，其他時間不受 30min 限制</p>
+                  </td>
+                </tr>
+
+                <!-- 圖 3：P $ 240 (使用 28-parking-3.jpg) -->
+                <tr class="bg-stone-50/70 hover:bg-stone-100 transition-colors">
+                  <td class="p-3 text-center align-middle border-r border-stone-200">
+                    <img src="https://timtingtravel.com/wp-content/uploads/2019/11/28-parking-3.jpg" alt="付費停車號誌" class="mx-auto max-h-28 object-contain">
+                  </td>
+                  <td class="p-3 align-middle text-stone-700 space-y-1.5">
+                    <div class="font-extrabold text-stone-900 text-xs">道路兩側於周一至周日的 7:00 – 22:00 需付費停車，最多停 240 分鐘</div>
+                    <p class="text-[10px] text-stone-500 font-medium">(有 $ 表示需要收費)</p>
+                  </td>
+                </tr>
+
+                <!-- 圖 4：紅圈藍底紅叉禁止停車 -->
+                <tr class="bg-white hover:bg-stone-50 transition-colors">
+                  <td class="p-3 text-center align-middle border-r border-stone-200">
+                    <div class="flex flex-col items-center gap-1">
+                      <svg class="w-16 h-16" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" fill="#0066B3" stroke="#DC2626" stroke-width="10"/>
+                        <line x1="18" y1="18" x2="82" y2="82" stroke="#DC2626" stroke-width="10"/>
+                        <line x1="82" y1="18" x2="18" y2="82" stroke="#DC2626" stroke-width="10"/>
+                      </svg>
+                      <svg class="w-20 h-7" viewBox="0 0 100 35">
+                        <rect width="96" height="31" x="2" y="2" fill="white" stroke="#DC2626" stroke-width="3"/>
+                        <path d="M 15 17.5 L 85 17.5 M 25 9 L 10 17.5 L 25 26 M 75 9 L 90 17.5 L 75 26" stroke="#DC2626" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                      </svg>
+                    </div>
+                  </td>
+                  <td class="p-3 align-middle text-stone-700">
+                    <div class="font-extrabold text-rose-950 text-xs">道路兩側禁止停車 (包含臨時停車)</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 緊急求救與超速罰單警示 -->
+        <div class="bg-rose-50/90 border border-rose-200 p-3 rounded-xl text-[11px] text-rose-950 space-y-1">
+          <div class="font-bold text-rose-900 flex items-center gap-1.5">
+            <i class="fa-solid fa-triangle-exclamation text-rose-600"></i> 緊急求救電話與超速開罰警示
+          </div>
+          <p class="font-medium leading-relaxed text-[10px]">
+            ● <b>緊急求救電話</b>：撥打 <b>111</b>（警察、救護車、消防局）；非緊急事件撥打 <b>105</b>。<br>
+            ● <b>超速開罰</b>：紐西蘭警方對超速極為嚴格（容許誤差極低）！罰單會寄至租車公司並直接從信用卡扣款，且加收行政手續費，切勿超速。
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="pt-3.5 border-t border-cozy-border mt-3.5 flex items-center justify-between">
+        <span class="text-[11px] text-stone-500 font-semibold">紐西蘭自駕安全第一</span>
+        <button 
+          @click="showCarModal = false"
+          class="px-5 py-2 rounded-xl bg-amber-800 hover:bg-amber-900 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+        >
+          關閉視窗
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🏠 住宿每筆訂單詳細資訊視窗 (Modal - 預設全收合，零改動) -->
+  <div 
+    x-show="showStayModal" 
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0 scale-95"
+    x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-95"
+    class="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-5 bg-black/45"
+    style="display: none;"
+  >
+    <div 
+      @click.outside="showStayModal = false"
+      class="bg-[#fcfbf7] border border-cozy-border rounded-3xl p-4 md:p-6 max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl relative"
+    >
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3.5 border-b border-cozy-border mb-3.5">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-base shadow-sm">
+            <i class="fa-solid fa-hotel"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-black text-cozy-text">全程住宿飯店與訂單總覽</h3>
+            <p class="text-[11px] text-cozy-sub font-semibold">點擊飯店即可展開查看訂單細節</p>
+          </div>
+        </div>
+        <button 
+          @click="showStayModal = false"
+          class="w-8 h-8 rounded-full bg-stone-200/80 hover:bg-stone-300 text-stone-700 font-bold flex items-center justify-center transition-all cursor-pointer"
+        >
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="overflow-y-auto custom-scrollbar pr-1 space-y-3 flex-1">
+        <template x-for="(stay, sIdx) in accommodations" :key="'stay-'+sIdx">
+          <div class="bg-white/95 border border-indigo-200/80 rounded-2xl shadow-xs transition-all overflow-hidden">
+            
+            <div 
+              @click="toggleStay(sIdx)"
+              class="p-3.5 sm:p-4 flex items-start justify-between gap-3 cursor-pointer hover:bg-indigo-50/50 transition-colors select-none"
+            >
+              <!-- 左側資訊區：第一行日期與城市，第二行飯店名稱 -->
+              <div class="space-y-1.5 flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-xs font-black px-2.5 py-1 rounded-md bg-indigo-100 text-indigo-900" x-text="stay.date"></span>
+                  <span class="text-xs font-bold text-stone-600 bg-stone-100 px-2 py-0.5 rounded-md" x-text="stay.city"></span>
+                </div>
+                <h4 class="text-sm sm:text-base font-extrabold text-stone-900 tracking-tight leading-snug" x-text="stay.hotelName"></h4>
+              </div>
+
+              <!-- 右側按鈕區：橫向不換行 -->
+              <div class="flex items-center gap-2 flex-shrink-0 pt-0.5">
+                <template x-if="stay.mapUrl">
+                  <a 
+                    :href="stay.mapUrl" 
+                    target="_blank" 
+                    @click.stop
+                    class="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 hover:text-amber-600 bg-amber-50 hover:bg-amber-100 px-2.5 py-1 rounded-lg border border-amber-200 transition-all whitespace-nowrap flex-shrink-0"
+                  >
+                    <i class="fa-solid fa-map-location-dot text-amber-600"></i>
+                    <span>地圖</span>
+                  </a>
+                </template>
+
+                <div class="w-7 h-7 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 flex-shrink-0">
+                  <i class="fa-solid text-xs transition-transform duration-200" :class="stay.open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                </div>
+              </div>
+            </div>
+
+            <div x-show="stay.open" x-transition class="p-3.5 sm:p-4 bg-indigo-50/20 border-t border-indigo-100 space-y-3">
+              <template x-for="(group, gIdx) in getGroupedOrders(stay.orders)" :key="'staygrp-'+gIdx">
+                
+                <div class="bg-indigo-50/60 border-2 border-indigo-200/90 rounded-2xl p-3.5 space-y-3 shadow-xs">
+                  
+                  <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-indigo-200/80">
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs text-stone-600 font-bold"><i class="fa-solid fa-hashtag text-indigo-500 mr-1"></i>訂單號：</span>
+                      <template x-if="group.link">
+                        <a :href="group.link" target="_blank" class="font-extrabold text-indigo-700 hover:underline font-mono text-xs sm:text-sm inline-flex items-center gap-1">
+                          <span x-text="group.orderNo"></span>
+                          <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                        </a>
+                      </template>
+                      <template x-if="!group.link">
+                        <span class="font-extrabold font-mono text-stone-900 text-xs sm:text-sm" x-text="group.orderNo"></span>
+                      </template>
+                    </div>
+
+                    <div class="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-indigo-200">
+                      <span class="text-[10px] text-stone-500 font-bold"><i class="fa-solid fa-circle-dollar-to-slot text-emerald-600 mr-1"></i>金額：</span>
+                      <span class="font-black text-emerald-700 text-xs sm:text-sm" x-text="group.price || '—'"></span>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 gap-2.5">
+                    <template x-for="(item, iIdx) in group.items" :key="'orderitem-'+iIdx">
+                      <div class="bg-white border border-indigo-150 rounded-xl p-3 text-xs space-y-2 shadow-2xs">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                          
+                          <div>
+                            <span class="text-[10px] text-stone-400 font-bold block mb-0.5">
+                              <i class="fa-solid fa-user text-indigo-500 mr-1"></i>訂房人名 / 房型
+                            </span>
+                            <div class="font-extrabold text-indigo-950 text-xs" x-text="item.bookName"></div>
+                            <div class="text-[11px] text-stone-600 font-medium mt-0.5" x-html="item.roomType ? item.roomType.replaceAll(' / ', '<br>') : ''"></div>
+                          </div>
+
+                          <div class="sm:col-span-2">
+                            <span class="text-[10px] text-stone-400 font-bold block mb-0.5">
+                              <i class="fa-solid fa-user-tag text-indigo-500 mr-1"></i>預計入住房客
+                            </span>
+                            <div class="font-extrabold text-stone-800 bg-slate-50 px-2 py-1 rounded border border-slate-200/80 w-fit leading-relaxed" x-text="item.guests"></div>
+                          </div>
+
+                        </div>
+
+                        <template x-if="item.note">
+                          <div class="text-[10px] text-stone-600 font-medium pt-1.5 border-t border-slate-100 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-info text-amber-600"></i>
+                            <span x-text="item.note"></span>
+                          </div>
+                        </template>
+                      </div>
+                    </template>
+                  </div>
+
+                </div>
+
+              </template>
+            </div>
+
+          </div>
+        </template>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="pt-3.5 border-t border-cozy-border mt-3.5 flex items-center justify-between">
+        <span class="text-[11px] text-stone-500 font-semibold">共計列出 8 家住宿明細</span>
+        <button 
+          @click="showStayModal = false"
+          class="px-5 py-2 rounded-xl bg-stone-800 hover:bg-stone-900 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+        >
+          關閉視窗
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🎫 活動總覽與詳細資訊視窗 (Activity Modal) -->
+  <div 
+    x-show="showActivityModal" 
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0 scale-95"
+    x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-95"
+    class="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-5 bg-black/45"
+    style="display: none;"
+  >
+    <div 
+      @click.outside="showActivityModal = false"
+      class="bg-[#fcfbf7] border border-cozy-border rounded-3xl p-4 md:p-6 max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl relative"
+    >
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3.5 border-b border-cozy-border mb-3.5">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-base shadow-sm">
+            <i class="fa-solid fa-ticket"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-black text-cozy-text">全程預約活動總覽與詳細資訊</h3>
+            <p class="text-[11px] text-cozy-sub font-semibold">包含冰河健行、直升機、米佛峽灣遊船與火山口觀星 (點擊項目即可展開詳細訂單)</p>
+          </div>
+        </div>
+        <button 
+          @click="showActivityModal = false"
+          class="w-8 h-8 rounded-full bg-stone-200/80 hover:bg-stone-300 text-stone-700 font-bold flex items-center justify-center transition-all cursor-pointer"
+        >
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="overflow-y-auto custom-scrollbar pr-1 space-y-3.5 flex-1 text-xs">
+        
+        <!-- 活動卡片列表 -->
+        <template x-for="(actGroup, aIdx) in activities" :key="'actgrp-'+aIdx">
+          <div class="bg-white/95 border border-purple-200/80 rounded-2xl p-4 space-y-3 shadow-2xs">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-purple-100 pb-2">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-black px-2.5 py-1 rounded-md bg-purple-100 text-purple-900" x-text="actGroup.date"></span>
+                <span class="text-xs font-extrabold text-stone-800" x-text="actGroup.location"></span>
+              </div>
+              <span class="text-xs font-bold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200" x-text="actGroup.title"></span>
+            </div>
+
+            <div class="grid grid-cols-1 gap-2.5">
+              <template x-for="(item, iIdx) in actGroup.items" :key="'actitem-'+iIdx">
+                <div class="bg-purple-50/40 border border-purple-150 rounded-2xl overflow-hidden shadow-2xs transition-all">
+                  
+                  <!-- 卡片標頭 / 展開按鈕 -->
+                  <div 
+                    @click="item.orders ? item.open = !item.open : null"
+                    :class="item.orders ? 'cursor-pointer hover:bg-purple-100/50 select-none' : ''"
+                    class="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
+                  >
+                    <div class="space-y-1 flex-1 min-w-0">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-[10px] font-extrabold bg-purple-200 text-purple-950 px-2 py-0.5 rounded-md" x-text="item.group"></span>
+                        <template x-if="item.url">
+                          <a :href="item.url" target="_blank" @click.stop class="text-sm font-extrabold text-purple-950 hover:text-purple-600 underline decoration-purple-300 flex items-center gap-1">
+                            <span x-text="item.name"></span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-75"></i>
+                          </a>
+                        </template>
+                        <template x-if="!item.url">
+                          <span class="text-sm font-extrabold text-purple-950" x-text="item.name"></span>
+                        </template>
+
+                        <!-- 人數 (展開前顯示) -->
+                        <template x-if="item.people">
+                          <span class="text-[10px] font-extrabold bg-purple-100 text-purple-900 border border-purple-200/80 px-2 py-0.5 rounded-md shadow-2xs flex items-center gap-1">
+                            <i class="fa-solid fa-user text-purple-600 text-[9px]"></i>
+                            <span x-text="item.people"></span>
+                          </span>
+                        </template>
+                      </div>
+                      <p class="text-[11px] text-stone-600 font-medium" x-text="item.note"></p>
+                    </div>
+
+                    <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap flex-shrink-0">
+                      <!-- 金額費用 (格式比照住宿詳細資訊) -->
+                      <template x-if="item.totalPrice">
+                        <div class="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-purple-200 shadow-2xs">
+                          <span class="text-[10px] text-stone-500 font-bold"><i class="fa-solid fa-circle-dollar-to-slot text-emerald-600 mr-1"></i>金額：</span>
+                          <span class="font-black text-emerald-700 text-xs sm:text-sm" x-text="item.totalPrice"></span>
+                        </div>
+                      </template>
+
+                      <!-- 時間 -->
+                      <span class="inline-flex items-center gap-1.5 text-xs font-extrabold bg-rose-50 text-rose-800 border border-rose-200 px-3 py-1 rounded-lg shadow-2xs">
+                        <i class="fa-solid fa-clock text-rose-600 text-[10px]"></i>
+                        <span x-text="item.time"></span>
+                      </span>
+
+                      <!-- 展開箭頭Icon (如果有訂單資料) -->
+                      <template x-if="item.orders">
+                        <div class="w-7 h-7 rounded-full bg-purple-100/80 flex items-center justify-center text-purple-700 flex-shrink-0">
+                          <i class="fa-solid text-xs transition-transform duration-200" :class="item.open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- 展開內容 (訂單號、金額、參加人) -->
+                  <template x-if="item.orders">
+                    <div x-show="item.open" x-transition class="p-3.5 bg-purple-50/30 border-t border-purple-100 space-y-3">
+                      <template x-for="(order, oIdx) in item.orders" :key="'actorder-'+oIdx">
+                        <div class="bg-white border-2 border-purple-200/80 rounded-2xl p-3.5 space-y-2.5 shadow-2xs">
+                          
+                          <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-purple-100">
+                            <div class="flex items-center gap-2">
+                              <span class="text-xs text-stone-600 font-bold"><i class="fa-solid fa-hashtag text-purple-500 mr-1"></i>訂單號：</span>
+                              <template x-if="order.link">
+                                <a :href="order.link" target="_blank" class="font-extrabold text-purple-700 hover:underline font-mono text-xs sm:text-sm inline-flex items-center gap-1">
+                                  <span x-text="order.orderNo"></span>
+                                  <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                                </a>
+                              </template>
+                              <template x-if="!order.link">
+                                <span class="font-extrabold font-mono text-stone-900 text-xs sm:text-sm" x-text="order.orderNo"></span>
+                              </template>
+                            </div>
+
+                            <template x-if="order.price">
+                              <div class="flex items-center gap-1.5 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-200">
+                                <span class="text-[10px] text-stone-500 font-bold"><i class="fa-solid fa-circle-dollar-to-slot text-emerald-600 mr-1"></i>金額：</span>
+                                <span class="font-black text-emerald-700 text-xs sm:text-sm" x-text="order.price"></span>
+                              </div>
+                            </template>
+                          </div>
+
+                          <template x-if="order.participants">
+                            <div>
+                              <span class="text-[10px] text-stone-400 font-bold block mb-1">
+                                <i class="fa-solid fa-user-tag text-purple-500 mr-1"></i>預計參加人員
+                              </span>
+                              <div class="font-extrabold text-stone-800 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200/80 w-full leading-relaxed text-xs" x-text="order.participants"></div>
+                            </div>
+                          </template>
+
+                        </div>
+                      </template>
+                    </div>
+                  </template>
+
+                </div>
+              </template>
+            </div>
+          </div>
+        </template>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="pt-3.5 border-t border-cozy-border mt-3.5 flex items-center justify-between">
+        <span class="text-[11px] text-stone-500 font-semibold"></span>
+        <button 
+          @click="showActivityModal = false"
+          class="px-5 py-2 rounded-xl bg-purple-800 hover:bg-purple-900 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+        >
+          關閉視窗
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function itineraryApp() {
+      return {
+        activeDay: 0,
+        showStayModal: false,
+        showCarModal: false,
+        showActivityModal: false,
+        showNoticeModal: false,
+        taipeiTime: '',
+        nzTime: '',
+        nzOffsetLabel: '+5h (夏令)',
+        
+        cityCoords: {
+          'Christchurch': { name: '基督城 (Christchurch)', lat: -43.5321, lng: 172.6362 },
+          'Taipei': { name: '台北 (Taipei)', lat: 25.0330, lng: 121.5654 },
+          'Auckland': { name: '奧克蘭 (Auckland)', lat: -36.8485, lng: 174.7633 },
+          'Hokitika': { name: '霍基蒂卡 (Hokitika)', lat: -42.7167, lng: 170.9667 },
+          'Franz Josef': { name: '法蘭士約瑟夫 (Franz Josef)', lat: -43.3872, lng: 170.1840 },
+          'Wanaka': { name: '瓦納卡 (Wanaka)', lat: -44.7000, lng: 169.1500 },
+          'Queenstown': { name: '皇后鎮 (Queenstown)', lat: -45.0311, lng: 168.6625 },
+          'Aoraki Mount Cook National Park': { name: '庫克山國家公園 (Aoraki Mount Cook)', lat: -43.7330, lng: 170.0935 },
+          'Tekapo': { name: '蒂卡波湖 (Lake Tekapo)', lat: -44.0044, lng: 170.4771 },
+          'Milford Sound': { name: '米佛峽灣 (Milford Sound)', lat: -44.6716, lng: 167.9256 }
+        },
+        selectedCityKey: 'Christchurch',
+        currentWeather: { temp: '--', rain: '--' },
+
+        sunRise: '--:--',
+        sunSet: '--:--',
+        visaRate: 19.25,
+        nzdAmt: 100,
+
+        toggleStay(targetIndex) {
+          const targetState = !this.accommodations[targetIndex].open;
+          this.accommodations.forEach((stay, idx) => {
+            stay.open = (idx === targetIndex) ? targetState : false;
+          });
+        },
+
+        getItemTag(item) {
+          if (!item) return '';
+          if (item.isGroup && item.groups && item.groups[0] && item.groups[0].items && item.groups[0].items[0]) {
+            return item.groups[0].items[0].tag || '';
+          }
+          return item.tag || '';
+        },
+
+        getTagClass(tag) {
+          switch(tag) {
+            case '航班': return 'bg-sky-700 text-white font-black shadow-xs';
+            case '自駕': return 'bg-amber-100 text-amber-900 border border-amber-300/80';
+            case '加油': return 'bg-red-600 text-white font-black shadow-xs';
+            case '美食': return 'bg-orange-600 text-white font-black shadow-xs';
+            case '健行': return 'bg-emerald-700 text-white font-black shadow-xs';
+            case '預約活動': return 'bg-purple-700 text-white font-black shadow-xs';
+            case '住宿': return 'bg-indigo-700 text-white font-black shadow-xs';
+            case '購物': return 'bg-pink-600 text-white font-black shadow-xs'; 
+            default: return 'bg-slate-200 text-slate-800 font-bold';
+          }
+        },
+
+        getGroupedOrders(orders) {
+          if (!orders) return [];
+          const groups = [];
+          orders.forEach(order => {
+            let existing = groups.find(g => g.orderNo === order.orderNo);
+            if (!existing) {
+              existing = {
+                orderNo: order.orderNo,
+                link: order.link,
+                price: order.price,
+                items: []
+              };
+              groups.push(existing);
+            }
+            existing.items.push(order);
+          });
+          return groups;
+        },
+
+        get currentDayData() {
+          if (this.activeDay === 'notice') return null;
+          return this.itinerary[this.activeDay];
+        },
+
+        init() {
+          this.updateClocks();
+          setInterval(() => this.updateClocks(), 1000);
+
+          this.fetchWeather();
+          setInterval(() => this.fetchWeather(), 600000);
+
+          this.fetchFxRate();
+          this.updateSunTimes();
+        },
+
+        selectDay(index) {
+          this.activeDay = index;
+          if (index !== 'notice' && this.itinerary[index]) {
+            const dayLocation = this.itinerary[index].startLocation;
+            for (let key in this.cityCoords) {
+              if (dayLocation.includes(key) || key.includes(dayLocation)) {
+                this.selectedCityKey = key;
+                break;
+              }
+            }
+            this.fetchWeather();
+            this.updateSunTimes();
+          }
+        },
+
+        onCitySelectChange() {
+          this.fetchWeather();
+          this.updateSunTimes();
+        },
+
+        updateClocks() {
+          const now = new Date();
+          this.taipeiTime = now.toLocaleTimeString('zh-TW', { hour12: false, timeZone: 'Asia/Taipei' });
+          this.nzTime = now.toLocaleTimeString('zh-TW', { hour12: false, timeZone: 'Pacific/Auckland' });
+
+          try {
+            const tzFormatter = new Intl.DateTimeFormat('en-US', { timeZone: 'Pacific/Auckland', timeZoneName: 'short' });
+            const parts = tzFormatter.formatToParts(now);
+            const tzPart = parts.find(p => p.type === 'timeZoneName');
+            if (tzPart && (tzPart.value === 'NZDT' || tzPart.value.includes('13'))) {
+              this.nzOffsetLabel = '+5h (夏令)';
+            } else {
+              this.nzOffsetLabel = '+4h (冬令)';
+            }
+          } catch(e) {
+            this.nzOffsetLabel = '紐西蘭時區';
+          }
+        },
+
+        async fetchWeather() {
+          const city = this.cityCoords[this.selectedCityKey] || this.cityCoords['Christchurch'];
+          try {
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lng}&current=temperature_2m,precipitation_probability&timezone=auto`);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            if (data && data.current) {
+              this.currentWeather.temp = Math.round(data.current.temperature_2m);
+              this.currentWeather.rain = data.current.precipitation_probability !== undefined ? data.current.precipitation_probability : 0;
+            }
+          } catch (e) {
+            this.currentWeather.temp = '--';
+            this.currentWeather.rain = '--';
+          }
+        },
+
+        async fetchFxRate() {
+          try {
+            const res = await fetch('https://open.er-api.com/v6/latest/NZD');
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            if (data && data.rates && data.rates.TWD) {
+              this.visaRate = (data.rates.TWD * 1.015).toFixed(2);
+            }
+          } catch (e) {
+            this.visaRate = 19.25;
+          }
+        },
+
+        async updateSunTimes() {
+          if (this.activeDay === 'notice' || !this.currentDayData) return;
+          
+          try {
+            const currentDay = this.currentDayData;
+            const dateParts = currentDay.date.split('/');
+            const year = 2026;
+            const dateStr = `${year}-${dateParts[0].padStart(2, '0')}-${dateParts[1].padStart(2, '0')}`;
+            const city = this.cityCoords[this.selectedCityKey] || this.cityCoords['Christchurch'];
+
+            const res = await fetch(`https://api.sunrise-sunset.org/json?lat=${city.lat}&lng=${city.lng}&date=${dateStr}&formatted=0`);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+
+            if (data && data.results) {
+              const sr = new Date(data.results.sunrise);
+              const ss = new Date(data.results.sunset);
+
+              const srNz = sr.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Pacific/Auckland' });
+              const ssNz = ss.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Pacific/Auckland' });
+
+              this.sunRise = srNz;
+              this.sunSet = ssNz;
+            }
+          } catch (e) {
+            this.sunRise = '06:22';
+            this.sunSet = '20:05';
+          }
+        },
+
+        // 活動整理資料 (可展開詳細訂單與參加人)
+        activities: [
+          {
+            date: "10/26 (D4)",
+            location: "Fox Glacier 福克斯冰河",
+            title: "冰河健行 & 直升機飛行體驗",
+            items: [
+              {
+                open: false,
+                group: "Group 1",
+                name: "Fox Glacier 冰河健行",
+                tag: "預約活動",
+                time: "預約 11:50 梯次 (4hr)",
+                people: "7人",
+                note: "直升機冰川健行體驗",
+                url: "https://maps.app.goo.gl/kaZwf49GhLKy3Efd7",
+                orders: [
+                  {
+                    orderNo: "1742154630",
+                    link: "https://api.viator.com/ticket?code=1798590361:39c05d62d16bdfa2f1d9f0f6b1a56dfb08310765f92f3ec2b034388ea86fed58:1416287977",
+                    price: "NTD $ 96,944",
+                    participants: "KAO CHIACHUN, HSU CHIACHUN, KUO FONGYI, CHOU YICHI, KAO LIWEN, KAO TZUYUN, KAO MEIYUEH"
+                  }
+                ]
+              },
+              {
+                open: false,
+                group: "Group 2",
+                name: "三冰河直升機飛行 (含著陸)",
+                tag: "預約活動",
+                time: "預約 12:00 梯次 (40mins)",
+                people: "7人",
+                note: "觀覽冰河景色含冰河降落",
+                url: "https://maps.app.goo.gl/CHBDPj3CxvFm7LYR8",
+                orders: [
+                  {
+                    orderNo: "358871662",
+                    link: "https://fareharbor.com/embeds/book/thlandgh-westcoast/items/548704/booking/1174d74f-5348-4a05-b088-e12685eb9ec6/?language=en-us",
+                    price: "NTD $ 59,286",
+                    participants: "KAO LIHUA, KAOWEI YUHSIA, HSIEH TONGLIN, HSIEH MENGTING, HSIEH ICHIN"
+                  },
+                  {
+                    orderNo: "358873804",
+                    link: "https://fareharbor.com/embeds/book/thlandgh-westcoast/items/548704/booking/5b8408fe-6f75-43f2-9e3a-4f4633ef9932/?language=en-us",
+                    price: "NTD $ 23,714",
+                    participants: "KAO TSAICHEN, SUN HSIEHWEN"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            date: "10/27 (D5)",
+            location: "Franz Josef 法蘭士約瑟夫冰河",
+            title: "冰河健行 & 直升機飛行體驗",
+            items: [
+              {
+                open: false,
+                group: "Group 1",
+                name: "Franz Josef Glacier 冰河健行",
+                tag: "預約活動",
+                time: "預約 07:30 梯次 (4hr)",
+                people: "6人",
+                note: "法蘭士約瑟夫冰河健行",
+                url: "https://maps.app.goo.gl/F8juq59YZztNDSky9",
+                orders: [
+                  {
+                    orderNo: "1742490883",
+                    link: "https://api.viator.com/ticket?code=1799089785:0454e5f767abf312a9dca473d3229c1be986242ef01be5527027b53d84a8d703:1416790201",
+                    price: "NTD $ 90,282",
+                    participants: "KAO CHIACHUN, HSU CHIACHUN, KUO FONGYI, CHOU YICHI, KAO LIHUA, SUN HSIEHWEN"
+                  }
+                ]
+              },
+              {
+                open: false,
+                group: "Group 2",
+                name: "三冰河直升機飛行 (含著陸)",
+                tag: "預約活動",
+                time: "預約 08:15 梯次 (45mins)",
+                people: "8人",
+                note: "觀覽冰河景色含冰河降落",
+                url: "https://maps.app.goo.gl/gXBkiHEUVYR6Qn5n9",
+                orders: [
+                  {
+                    orderNo: "1742491583",
+                    link: "https://api.viator.com/ticket?code=1799094463:b864af5f09a194e5610e5bfaeec01de8b0d79bd4442a4f6476f6d286409e75da:1416794937",
+                    price: "NTD $ 89,711",
+                    participants: "KAOWEI YUHSIA, HSIEH TONGLIN, HSIEH MENGTING, HSIEH ICHIN, KAO TSAICHEN, KAO LIWEN, KAO TZUYUN, KAO MEIYUEH"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            date: "10/30 (D8)",
+            location: "Milford Sound 米佛峽灣",
+            title: "峽灣小型船觀光遊船",
+            items: [
+              {
+                open: false,
+                group: "全員",
+                name: "Milford Sound Boutique Small Boat Cruise",
+                tag: "預約活動",
+                time: "預約 12:45 巡航 (約 2hr)",
+                people: "14人",
+                note: "峽灣小型船巡航導覽",
+                url: "https://maps.app.goo.gl/GJuP9cpBcViVBUwX6",
+                orders: [
+                  {
+                    orderNo: "366868204",
+                    price: "NTD $ 40,718",
+                    participants: "KAO CHIACHUN, HSU CHIACHUN, KUO FONGYI, CHOU YICHI, KAO LIWEN, KAO TZUYUN, KAO MEIYUEH, KAO LIHUA, KAOWEI YUHSIA, HSIEH TONGLIN, HSIEH MENGTING, HSIEH ICHIN, KAO TSAICHEN, SUN HSIEHWEN"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            date: "11/01 (D10)",
+            location: "Lake Tekapo 蒂卡波湖",
+            title: "夜間觀星體驗",
+            items: [
+              {
+                open: false,
+                group: "全員",
+                name: "Crater Stargazing 觀星體驗（中文）",
+                tag: "預約活動",
+                time: "預約 23:30",
+                people: "14人",
+                note: "Dark Sky Project 火山口夜間專業觀星導覽",
+                url: "https://maps.google.com/?q=Dark+Sky+Project",
+                orders: [
+                  {
+                    orderNo: "1753366422",
+                    link: "https://drive.google.com/file/d/1N758-o5UlRzI_vz9t-TZuVC-pExxBGw5/view?usp=drive_link",
+                    price: "NTD $ 31,372",
+                    participants: "KAO CHIACHUN, HSU CHIACHUN, KUO FONGYI, CHOU YICHI, KAO LIWEN, KAO TZUYUN, KAO MEIYUEH, KAO LIHUA, KAOWEI YUHSIA, HSIEH TONGLIN, HSIEH MENGTING, HSIEH ICHIN, KAO TSAICHEN, SUN HSIEHWEN"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+
+        // 住宿預設全收合 (open: false)
+        accommodations: [
+          { 
+            open: false,
+            date: "10/24 (D2)", 
+            city: "Auckland 奧克蘭", 
+            hotelName: "Pullman Auckland Airport（奧克蘭機場鉑爾曼酒店）", 
+            mapUrl: "https://maps.google.com/?q=Pullman+Auckland+Airport",
+            orders: [
+              { orderNo: "1616329175381614", link: "https://drive.google.com/file/d/1MSkaY4tTxA9Z8HyVnbXZWRhiB1p-aWfB/view?usp=drive_link", bookName: "HSIEH TONGLIN", roomType: "高級特大床房", price: "NT$ 9,571", note: "附早晚餐", guests: "HSIEH TONGLIN, KAO MEIYUEH" },
+              { orderNo: "1616329175381614", link: "https://drive.google.com/file/d/1MSkaY4tTxA9Z8HyVnbXZWRhiB1p-aWfB/view?usp=drive_link", bookName: "KUO FONGYI", roomType: "高級特大床房", price: "NT$ 9,571", note: "附早晚餐", guests: "KUO FONGYI, CHOU YICHI" },
+              { orderNo: "1616329175393790", link: "https://drive.google.com/file/d/1l_AUB8zNg4gqIE0SvzMf2pE3708BvrNr/view?usp=drive_link", bookName: "KAO LIHUA", roomType: "高級房 - 帶2張大床", price: "NT$ 15,361", note: "附早晚餐", guests: "KAO LIHUA, KAOWEI YUHSIA" },
+              { orderNo: "1616329175393790", link: "https://drive.google.com/file/d/1l_AUB8zNg4gqIE0SvzMf2pE3708BvrNr/view?usp=drive_link", bookName: "KAO TZUYUN", roomType: "高級房 - 帶2張大床", price: "NT$ 15,361", note: "附早晚餐", guests: "KAO TZUYUN, KAO LIWEN" },
+              { orderNo: "1616329175393790", link: "https://drive.google.com/file/d/1l_AUB8zNg4gqIE0SvzMf2pE3708BvrNr/view?usp=drive_link", bookName: "HSIEH MENGTING", roomType: "高級房 - 帶2張大床", price: "NT$ 15,361", note: "附早晚餐", guests: "HSIEH MENGTING, HSIEH ICHIN" },
+              { orderNo: "1616329175402496", link: "https://drive.google.com/file/d/1RBX5MojUss4FQmafg5RQQOBJ0M5_dqIQ/view?usp=drive_link", bookName: "KAO CHIACHUN", roomType: "高級特大床房", price: "NT$ 4,836", note: "附早晚餐", guests: "KAO CHIACHUN, HSU CHIACHUN" },
+              { orderNo: "1616330927696646", link: "https://drive.google.com/file/d/1an5lAZs9vDFFDzmxpr885esNWdaVuNyT/view?usp=drive_link", bookName: "KAO TSAICHEN", roomType: "高級房 - 帶2張大床", price: "NT$ 4,825", note: "附早餐", guests: "KAO TSAICHEN, SUN HSIEHWEN" }
+            ]
+          },
+          { 
+            open: false,
+            date: "10/25 (D3)", 
+            city: "Hokitika 霍基蒂卡", 
+            hotelName: "Beachfront Hotel Hokitika（霍基蒂卡海濱酒店）", 
+            mapUrl: "https://maps.google.com/?q=Beachfront+Hotel+Hokitika",
+            orders: [
+              { orderNo: "1616330818613973", link: "https://drive.google.com/file/d/1U8lreLB7quTRebOXWQRrZkpEqcK9fOeN/view?usp=drive_link", bookName: "KAO LIHUA", roomType: "海景豪華特大床房", price: "NT$ 13,185", note: "", guests: "KAO LIHUA, KAOWEI YUHSIA" },
+              { orderNo: "1616330818613973", link: "https://drive.google.com/file/d/1U8lreLB7quTRebOXWQRrZkpEqcK9fOeN/view?usp=drive_link", bookName: "KUO FONGYI", roomType: "海景豪華特大床房", price: "NT$ 13,185", note: "", guests: "KUO FONGYI, CHOU YICHI" },
+              { orderNo: "1616330818613973", link: "https://drive.google.com/file/d/1U8lreLB7quTRebOXWQRrZkpEqcK9fOeN/view?usp=drive_link", bookName: "KAO CHIACHUN", roomType: "海景豪華特大床房", price: "NT$ 13,185", note: "", guests: "KAO CHIACHUN, HSU CHIACHUN" },
+              { orderNo: "1616330818630512", link: "https://drive.google.com/file/d/1iAf9VUBFWcX8cXetJvaDMdSRtNMb3iKH/view?usp=drive_link", bookName: "KAO MEIYUEH", roomType: "海景兩臥兩衛家庭房", price: "NT$ 8,930", note: "", guests: "HSIEH TONGLIN, KAO MEIYUEH, HSIEH MENGTING, HSIEH ICHIN" },
+              { orderNo: "1616330818638211", link: "https://drive.google.com/file/d/1MWQoxqz6TdhSyqg-IuV8J6Ienyq6JnVG/view?usp=drive_link", bookName: "KAO TSAICHEN", roomType: "海景豪華雙床房", price: "NT$ 9,010", note: "", guests: "KAO TSAICHEN, SUN HSIEHWEN" },
+              { orderNo: "1616330818638211", link: "https://drive.google.com/file/d/1MWQoxqz6TdhSyqg-IuV8J6Ienyq6JnVG/view?usp=drive_link", bookName: "KAO TZUYUN", roomType: "海景豪華雙床房", price: "NT$ 9,010", note: "", guests: "KAO TZUYUN, KAO LIWEN" }
+            ]
+          },
+          { 
+            open: false,
+            date: "10/26 (D4)", 
+            city: "Franz Josef 法蘭士約瑟夫", 
+            hotelName: "Aspen Court Franz Josef Motel（阿斯彭閣法蘭茲約瑟夫汽車旅館）", 
+            mapUrl: "https://maps.google.com/?q=Aspen+Court+Franz+Josef+Motel",
+            orders: [
+              { orderNo: "1616331423132569", link: "https://drive.google.com/file/d/1T4fz1hHvtcsDvqOuvaiwJkfCJCLEP36_/view?usp=drive_link", bookName: "KAO CHIACHUN", roomType: "One Bedroom Apartment", price: "NT$ 22,860", note: "1 King & 1 Single", guests: "KAO CHIACHUN, HSU CHIACHUN" },
+              { orderNo: "1616331423132569", link: "https://drive.google.com/file/d/1T4fz1hHvtcsDvqOuvaiwJkfCJCLEP36_/view?usp=drive_link", bookName: "KUO FONGYI", roomType: "One Bedroom Apartment", price: "NT$ 22,860", note: "2 King beds", guests: "KUO FONGYI, CHOU YICHI" },
+              { orderNo: "1616331423132569", link: "https://drive.google.com/file/d/1T4fz1hHvtcsDvqOuvaiwJkfCJCLEP36_/view?usp=drive_link", bookName: "HSIEH TONGLIN", roomType: "One Bedroom Apartment", price: "NT$ 22,860", note: "2 King beds", guests: "HSIEH TONGLIN, KAO MEIYUEH" },
+              { orderNo: "1616331423132569", link: "https://drive.google.com/file/d/1T4fz1hHvtcsDvqOuvaiwJkfCJCLEP36_/view?usp=drive_link", bookName: "HSIEH MENGTING", roomType: "One Bedroom Apartment", price: "NT$ 22,860", note: "2 King beds", guests: "HSIEH MENGTING, HSIEH ICHIN" },
+              { orderNo: "1742240156", link: "https://drive.google.com/file/d/1EfCG83kvFVxJE1ExW2WguqulDq7gSVv_/view?usp=drive_link", bookName: "KAO LIHUA", roomType: "One Bedroom Apartment", price: "NT$ 11,592", note: "2 King beds", guests: "KAO LIHUA, KAOWEI YUHSIA" },
+              { orderNo: "1742240156", link: "https://drive.google.com/file/d/1EfCG83kvFVxJE1ExW2WguqulDq7gSVv_/view?usp=drive_link", bookName: "KAO TZUYUN", roomType: "One Bedroom Apartment", price: "NT$ 11,592", note: "2 King beds", guests: "KAO TZUYUN, KAO LIWEN" },
+              { orderNo: "1742240763", link: "https://drive.google.com/file/d/1SQTIU8jRpo0upcKe4TAPeMdNbDCC_n7X/view?usp=drive_link", bookName: "KAO TSAICHEN", roomType: "One Bedroom Apartment", price: "NT$ 5,796", note: "2 King beds", guests: "KAO TSAICHEN, SUN HSIEHWEN" }
+            ]
+          },
+          { 
+            open: false,
+            date: "10/27 (D5)", 
+            city: "Wanaka 瓦納卡", 
+            hotelName: "ASURE Brookvale Motel（ASURE布魯克韋爾汽車旅館）", 
+            mapUrl: "https://maps.google.com/?q=ASURE+Brookvale+Motel",
+            orders: [
+              { orderNo: "1616330243084923", link: "https://drive.google.com/file/d/1AYtOwzGX3QvB4Wb4F9Sr1hOAQiymmEVa/view?usp=drive_link", bookName: "KAO CHIACHUN", roomType: "豪華一室房", price: "NT$ 14,109", note: "", guests: "KAO CHIACHUN, HSU CHIACHUN" },
+              { orderNo: "1616330243084923", link: "https://drive.google.com/file/d/1AYtOwzGX3QvB4Wb4F9Sr1hOAQiymmEVa/view?usp=drive_link", bookName: "KUO FONGYI", roomType: "豪華一室房", price: "NT$ 14,109", note: "", guests: "KUO FONGYI, CHOU YICHI" },
+              { orderNo: "1616330243084923", link: "https://drive.google.com/file/d/1AYtOwzGX3QvB4Wb4F9Sr1hOAQiymmEVa/view?usp=drive_link", bookName: "HSIEH TONGLIN", roomType: "豪華一室房", price: "NT$ 14,109", note: "", guests: "HSIEH TONGLIN, KAO MEIYUEH" },
+              { orderNo: "1616330243097839", link: "https://drive.google.com/file/d/18Bt7kVKMmuhUID_WWFXAZBanZ4aYWH7Z/view?usp=drive_link", bookName: "KAO LIHUA", roomType: "一臥室公寓", price: "NT$ 12,392", note: "1 Queen & 2 Single", guests: "KAO LIHUA, HSIEH MENGTING, HSIEH ICHIN" },
+              { orderNo: "1616330243097839", link: "https://drive.google.com/file/d/18Bt7kVKMmuhUID_WWFXAZBanZ4aYWH7Z/view?usp=drive_link", bookName: "KAO TZUYUN", roomType: "一臥室公寓", price: "NT$ 12,392", note: "1 Queen & 2 Single", guests: "KAO TZUYUN, KAO LIWEN, KAOWEI YUHSIA" },
+              { orderNo: "1616330243484947", link: "https://drive.google.com/file/d/1jwtoXQ_uEmYmSmOo0EgSQ4yMfnApQT9T/view?usp=drive_link", bookName: "KAO TSAICHEN", roomType: "山景高級雙人或雙床間", price: "NT$ 5,177", note: "2 beds", guests: "KAO TSAICHEN, SUN HSIEHWEN" }
+            ]
+          },
+          { 
+            open: false,
+            date: "10/28 - 10/30 (D6-D8)", 
+            city: "Queenstown 皇后鎮", 
+            hotelName: "Beacon Sky (Queenstown)", 
+            mapUrl: "https://maps.app.goo.gl/b2ewtK7i5F3vB4Ye6",
+            orders: [
+              { orderNo: "WEBZKKGYC0G", link: "https://m.duve.co/g/uQNScWzAA?isCompany=1&affType=100&id=home", bookName: "KAO TSAICHEN", roomType: "Suite 1002 (3 bedrooms) / Suite 1003 (1 bedroom) / Suite 1004 (2 bedrooms)", price: "NT$ 141,917", note: "", guests: "KAO TSAICHEN, SUN HSIEHWEN, HSIEH TONGLIN, KAO MEIYUEH, HSIEH MENGTING, HSIEH ICHIN, KAO LIHUA, KAOWEI YUHSIA, KAO TZUYUN, KAO LIWEN" },
+              { orderNo: "RHH013787", link: "", bookName: "KAO CHIACHUN", roomType: "Suite 1006", price: "NT$ 9,687（20%)", note: "", guests: "KAO CHIACHUN, HSU CHIACHUN, KUO FONGYI, CHOU YICHI" }
+            ]
+          },
+          { 
+            open: false,
+            date: "10/31 (D9)", 
+            city: "奧拉基/庫克山國家公園 (Aoraki / Mount Cook National Park)", 
+            hotelName: "The Hermitage Hotel (隱士飯店)", 
+            mapUrl: "https://maps.google.com/?q=The+Hermitage+Hotel+Mount+Cook",
+            orders: [
+              { orderNo: "R1AAC3", link: "https://drive.google.com/file/d/1P9FO0SZqDckONPJgtD0laLAZo-43HadG/view?usp=drive_link", bookName: "CHIACHUN KAO", roomType: "Premium Super King", price: "NT$ 17,048", note: "附早晚餐", guests: "KAO CHIACHUN, HSU CHIACHUN" },
+              { orderNo: "R1AAC2", link: "https://drive.google.com/file/d/1dqkhNmK00RAVg4K7-CvPQfwonOGtA8lE/view?usp=drive_link", bookName: "TONGLIN HSIEH", roomType: "Premium Super King", price: "NT$ 17,048", note: "附早晚餐", guests: "HSIEH TONGLIN, KAO MEIYUEH" },
+              { orderNo: "R1AAC4", link: "https://drive.google.com/file/d/1dqkhNmK00RAVg4K7-CvPQfwonOGtA8lE/view?usp=drive_link", bookName: "FONGYI KUO", roomType: "Premium Super King", price: "NT$ 17,048", note: "附早晚餐", guests: "KUO FONGYI, CHOU YICHI" },
+              { orderNo: "R1AF62", link: "https://drive.google.com/file/d/1_1XiqOo_b2SnpGyJtSF6F5ziDvmvCdIK/view?usp=drive_link", bookName: "TZUYUN KAO", roomType: "Premium Super King", price: "NT$ 17,198", note: "附早晚餐", guests: "KAO TZUYUN, KAO LIWEN" },
+              { orderNo: "R1AF61", link: "https://drive.google.com/file/d/1UX1eHVDjQM0-hcg8ADrJKvvu-oTe31ZQ/view?usp=drive_link", bookName: "LIHUA KAO", roomType: "Premium Super King", price: "NT$ 17,198", note: "附早晚餐", guests: "KAO LIHUA, KAOWEI YUHSIA" },
+              { orderNo: "R1AF60", link: "https://drive.google.com/file/d/1lzQnlQ8JPafwmKB_4Nv_Tw0vVRYEAX2E/view?usp=drive_link", bookName: "MENGTING HSIEH", roomType: "Premium Super King", price: "NT$ 17,198", note: "附早晚餐", guests: "HSIEH MENGTING, HSIEH ICHIN" },
+              { orderNo: "R1B883", link: "https://drive.google.com/file/d/1LSA8YznoHpjvEZpnzovI_l8VseDmmbYJ/view?usp=drive_link", bookName: "TSAICHEN KAO", roomType: "Mt Cook Suite", price: "NT$ 17,504", note: "附早晚餐", guests: "KAO TSAICHEN, SUN HSIEHWEN" }
+            ]
+          },
+          { 
+            open: false,
+            date: "11/01 (D10)", 
+            city: "Lake Tekapo 蒂卡波湖", 
+            hotelName: "Peppers Bluewater Resort Lake Tekapo（蒂卡波湖胡椒藍水度假村）", 
+            mapUrl: "https://maps.google.com/?q=Peppers+Bluewater+Resort+Lake+Tekapo",
+            orders: [
+              { orderNo: "1616329466697431", link: "https://drive.google.com/file/d/1F9bu1tK4b2Y1tgN3RVwxCW8tmie_kjbs/view?usp=drive_link", bookName: "KAO TZUYUN", roomType: "湖景2臥套房", price: "NT$ 26,400", note: "附早餐,2 Double ", guests: "KAO TZUYUN, KUO FONGYI, CHOU YICHI" },
+              { orderNo: "1616329466697431", link: "https://drive.google.com/file/d/1F9bu1tK4b2Y1tgN3RVwxCW8tmie_kjbs/view?usp=drive_link", bookName: "KAO LIHUA", roomType: "湖景2臥套房", price: "NT$ 26,400", note: "附早餐,1 Double & 2 Single", guests: "KAO LIHUA, HSIEH MENGTING, HSIEH ICHIN" },
+              { orderNo: "1616329641315801", link: "https://drive.google.com/file/d/152E6Ayf-GBQV0bN7UQrccJ3NlSKB84C-/view?usp=drive_link", bookName: "KAO TSAICHEN", roomType: "湖景2臥套房", price: "NT$ 26,417", note: "附早餐,1 Double & 2 Single", guests: "KAO TSAICHEN, SUN HSIEHWEN, KAO LIWEN" },
+              { orderNo: "1616329641315801", link: "https://drive.google.com/file/d/152E6Ayf-GBQV0bN7UQrccJ3NlSKB84C-/view?usp=drive_link", bookName: "HSIEH TONGLIN", roomType: "湖景2臥套房", price: "NT$ 26,417", note: "附早餐,2 Double", guests: "HSIEH TONGLIN, KAO MEIYUEH, KAOWEI YUHSIA" },
+              { orderNo: "1616331403037604", link: "https://drive.google.com/file/d/1TW2sJvu0_1Vo5bT48lterLk2Rg8L-3Ml/view?usp=drive_link", bookName: "KAO CHIACHUN", roomType: "一臥室湖景別墅", price: "NT$ 11,079", note: "附早餐", guests: "KAO CHIACHUN, HSU CHIACHUN" }
+            ]
+          },
+          { 
+            open: false,
+            date: "11/02 (D11)", 
+            city: "Christchurch 基督城", 
+            hotelName: "Distinction Christchurch Hotel（基督城卓越飯店）", 
+            mapUrl: "https://maps.google.com/?q=Distinction+Christchurch+Hotel",
+            orders: [
+              { orderNo: "JME093597", link: "https://drive.google.com/file/d/18HG5-_OlnigBlkJzawMB3DLxY7eq_QCU/view?usp=drive_link", bookName: "KAO LIHUA", roomType: "高級客房", price: "NT$ 15,968", note: "2張大床", guests: "KAO LIHUA, KAOWEI YUHSIA" },
+              { orderNo: "JME093597", link: "https://drive.google.com/file/d/18HG5-_OlnigBlkJzawMB3DLxY7eq_QCU/view?usp=drive_link", bookName: "KAO TZUYUN", roomType: "高級客房", price: "NT$ 15,968", note: "2張大床", guests: "KAO TZUYUN, KAO LIWEN" },
+              { orderNo: "UVP779082", link: "https://drive.google.com/file/d/1Lg2csPUjYV5KPfN9_ff1kn2Iya0sQZv-/view?usp=drive_link", bookName: "KAO CHIACHUN", roomType: "高級客房", price: "NT$ 15,368", note: "床型將於入住時安排", guests: "KAO CHIACHUN, HSU CHIACHUN" },
+              { orderNo: "UVP779082", link: "https://drive.google.com/file/d/1Lg2csPUjYV5KPfN9_ff1kn2Iya0sQZv-/view?usp=drive_link", bookName: "KUO FONGYI", roomType: "高級客房", price: "NT$ 15,368", note: "床型將於入住時安排", guests: "KUO FONGYI, CHOU YICHI" },
+              { orderNo: "STA691775", link: "https://drive.google.com/file/d/1pejHu0Ec12ShB5HLr7aGYjGqUgY3P6HD/view?usp=drive_link", bookName: "HSIEH TONGLIN", roomType: "家庭套房", price: "NT$ 9,708", note: "1張特大床 ＆ 2張大床", guests: "HSIEH TONGLIN, KAO MEIYUEH, HSIEH MENGTING, HSIEH ICHIN" },
+              { orderNo: "CBB525646", link: "https://drive.google.com/file/d/1MrM2UlSnJkGwaHiVkQBu8uA35c2R07og/view?usp=drive_link", bookName: "KAO TSAICHEN", roomType: "高級客房", price: "NT$ 8,216", note: "2張大床", guests: "KAO TSAICHEN, SUN HSIEHWEN" }
+            ]
+          }
+        ],
+
+        itinerary: [
+          {
+            dayCode: "D1",
+            date: "10/23(五)",
+            title: "台北出發 ✈️ 飛行與轉機",
+            startLocation: "Taipei (TPE)",
+            stay: "飛機上",
+            meals: { b: "自理", bUrl: "", l: "自理", lUrl: "", d: "飛機上", dUrl: "" },
+            spots: [
+              {
+                isGroup: true,
+                groups: [
+                  {
+                    groupTitle: "Group 1",
+                    items: [
+                      { name: "NZ78 台北 TPE 第二航廈 18:35 - 奧克蘭 AKL 10:15+1", tag: "航班", note: "飛行時間 10 小時 40 分鐘", url: "" }
+                    ]
+                  },
+                  {
+                    groupTitle: "Group 2",
+                    items: [
+                      { name: "CI53 台北 TPE 第二航廈 23:55 - 布里斯本(澳洲) BNE 10:35+1", tag: "航班", note: "飛行時間 8 小時 40 分鐘", url: "" }
+                    ]
+                  }
+                ]
+              },
+            ]
+          },
+          {
+            dayCode: "D2",
+            date: "10/24(六)",
+            title: "布里斯本過境 → 奧克蘭",
+            startLocation: "Auckland",
+            stay: "Pullman Auckland Airport",
+            stayUrl: "https://maps.google.com/?q=Pullman+Auckland+Airport",
+            meals: { b: "飛機上", bUrl: "", l: "飛機上", lUrl: "", d: "旅館", dUrl: "https://maps.google.com/?q=Pullman+Auckland+Airport" },
+            spots: [
+              {
+                isGroup: true,
+                groups: [
+                  {
+                    groupTitle: "Group 1",
+                    items: [
+                      { name: "NZ78 台北 TPE 第二航廈 18:35 - 奧克蘭 AKL 10:15+1", tag: "航班", note: "飛行時間 10 小時 40 分鐘", url: "" }
+                    ]
+                  },
+                  {
+                    groupTitle: "Group 2",
+                    items: [
+                      { name: "同飛機 布里斯本(澳洲) BNE 停降 2小時20分", tag: "航班", note: "布里斯本過境短暫停靠", url: "" },
+                      { name: "CI53 布里斯本 BNE 12:55 - 奧克蘭 AKL 19:00", tag: "航班", note: "飛行時間 3 小時 5 分鐘", url: "" }
+                    ]
+                  }
+                ]
+              },                  
+              { name: "Pullman Auckland Airport", tag: "住宿", note: "入住機場飯店休息", url: "https://maps.google.com/?q=Pullman+Auckland+Airport" }
+            ]
+          },
+          {
+            dayCode: "D3",
+            date: "10/25(日)",
+            title: "飛抵基督城 → Castle Hill Rocks (巨石群) → 霍基蒂卡 Hokitika",
+            startLocation: "Christchurch",
+            stay: "Beachfront Hotel Hokitika",
+            stayUrl: "https://maps.app.goo.gl/4SkpsihP3YovuN7S6",
+            meals: { 
+              b: "旅館", bUrl: "", 
+              l: "Alpine Parrot Cafe and Bar", lUrl: "https://maps.google.com/?q=Alpine+Parrot+Cafe+and+Bar+Hokitika", 
+              d: "Fat Pipi Pizza", dUrl: "https://maps.app.goo.gl/fiHdSBCaTgcDa5a4A" 
+            },
+            spots: [
+              { name: "NZ0527 奧克蘭 AKL 08:50 - 基督城 CHC 10:15", tag: "航班", note: "飛行時間 1 小時 25 分鐘", url: "" },
+              { name: "基督城機場辦理租車", tag: "自駕", note: "取車", url: "https://maps.app.goo.gl/HuFJEbsfD7qAxWGBA" },
+              { name: "Woolworths 超市補給", tag: "補給", note: "補水、零食、買沙蠅水...等", url: "https://maps.app.goo.gl/k55cgpVqfTQ72j97A" },
+              { name: "Sheffield Pies - Sheffield store", tag: "美食", driveTime: "開車 45 分鐘", note: "外帶鹹派", url: "https://maps.google.com/?q=Sheffield+Pies+Sheffield" },
+              { name: "Pippa’s Lookout", tag: "景點", driveTime: "開車 30 分鐘", note: "景觀展望台 (有廁所)", url: "https://maps.app.goo.gl/muQ7sMkzvgZkFJrGA" },
+              { name: "Castle Hill Rocks (巨石群)", tag: "景點", driveTime: "開車 10 分鐘", note: "納尼亞傳奇取景地 (有廁所)", url: "https://maps.app.goo.gl/bdQsRBUuuFGxuYVe9" },
+              { name: "Arthur's Pass Scenic Lookout", tag: "景點", driveTime: "開車 40 分鐘", note: "亞瑟隘口觀景台", url: "https://maps.google.com/?q=Arthurs+Pass+Scenic+Lookout" },
+              { name: "Alpine Parrot Cafe and Bar", tag: "美食", note: "午餐", url: "https://maps.google.com/?q=Alpine+Parrot+Cafe+and+Bar+Hokitika" },
+              { name: "Devils Punchbowl Waterfall （不走的可附近找地方休息）", tag: "健行", note: "看瀑布，來回約 40~60 分鐘 (不少樓梯)", url: "https://maps.google.com/?q=Devils+Punchbowl+Waterfall" },
+              { name: "Hokitika (NPD 加油站)", tag: "加油", driveTime: "開車 1 小時 30 分鐘", note: "提前加滿油,冰河區域油價貴", url: "https://maps.google.com/?q=NPD+Hokitika" },
+              { name: "Fat Pipi Pizza", tag: "美食", note: "晚餐", url: "https://maps.app.goo.gl/fiHdSBCaTgcDa5a4A" },
+              { name: "Glow Worm Dell 藍光螢火蟲", tag: "景點", note: "免費藍光螢火蟲步道", url: "https://maps.google.com/?q=Glow+Worm+Dell+Hokitika" },
+              { name: "Beachfront Hotel Hokitika", tag: "住宿", note: "當日住宿飯店", url: "https://maps.app.goo.gl/4SkpsihP3YovuN7S6" }
+            ]
+          },
+          {
+            dayCode: "D4",
+            date: "10/26(一)",
+            weekday: "(紐西蘭勞動節放假)",
+            title: "霍基蒂卡 Hokitika → Fox Glacier 福克斯冰河",
+            startLocation: "Hokitika",
+            stay: "Aspen Court Franz Josef",
+            stayUrl: "https://maps.google.com/?q=Aspen+Court+Franz+Josef+Motel",
+            meals: { 
+              b: "Clocktower Cafe Bar 29 Weld St", bUrl: "https://maps.google.com/?q=Clocktower+Cafe+Bar+Hokitika", 
+              l: "Matheson Cafe(或直升機報到處對面餐廳咖啡店，自行決定)", lUrl: "https://maps.app.goo.gl/1zdgBFzZiTgE6oDw7", 
+              d: "Betsey Jane Eatery & Bar", dUrl: "https://maps.app.goo.gl/ss51CWhnjkLWKsy9A" 
+            },
+            spots: [
+              { name: "Clocktower Cafe Bar (29 Weld St)", tag: "美食", note: "早餐 ＃不想早起者可外帶車上吃", url: "https://maps.google.com/?q=Clocktower+Cafe+Bar+Hokitika" },
+              { name: "最晚 08:30 出發", tag: "自駕", driveTime: "開車約 2 小時 30 分鐘", url: "" },
+              {
+                isGroup: true,
+                groups: [
+                  {
+                    groupTitle: "Group 1",
+                    items: [
+                      { name: "Fox Glacier 福克斯冰河健行", tag: "預約活動", alert: "預約 11:50 梯次 (4hr)", note: "直升機冰川健行體驗", url: "https://maps.app.goo.gl/kwig5gziwcP5VPgt5" }
+                    ]
+                  },
+                  {
+                    groupTitle: "Group 2",
+                    items: [
+                      { name: "三冰河直升機飛行 (含著陸)", tag: "預約活動", alert: "預約 12:00 梯次 (40mins)", note: "觀覽冰河景色含冰河降落", url: "https://maps.app.goo.gl/tX7oWGfvGyRtZed36" }
+                    ]
+                  }
+                ]
+              },
+              { name: "Lake Matheson 馬松森湖", tag: "景點", note: "Group 1 等待時間可到湖邊喝咖啡走走散步", url: "https://maps.app.goo.gl/1zdgBFzZiTgE6oDw7" },
+              { name: "Betsey Jane Eatery & Bar", tag: "美食", note: "晚餐", url: "https://maps.app.goo.gl/ss51CWhnjkLWKsy9A" },
+              { name: "Aspen Court Franz Josef Motel", tag: "住宿", note: "當日住宿飯店", url: "https://maps.google.com/?q=Aspen+Court+Franz+Josef+Motel" }
+            ]
+          },
+          {
+            dayCode: "D5",
+            date: "10/27(二)",
+            title: "Franz Josef 法蘭士約瑟夫冰河 → 景觀公路 → 瓦納卡 Wanaka",
+            startLocation: "Franz Josef",
+            stay: "ASURE Brookvale Motel",
+            stayUrl: "https://maps.google.com/?q=ASURE+Brookvale+Motel",
+            meals: { 
+              b: "Full Of Beans (06:30開)", bUrl: "https://maps.google.com/?q=Full+Of+Beans+Franz+Josef", 
+              l: "Matheson Cafe", lUrl: "https://maps.app.goo.gl/1zdgBFzZiTgE6oDw7", 
+              d: "Muttonbird (預訂 19:30)", dUrl: "https://maps.google.com/?q=Muttonbird+Wanaka" 
+            },
+            spots: [
+              { name: "Full Of Beans (06:30開)", tag: "美食", note: "早餐 ＃因為活動很早，吃不吃自行決定", url: "https://maps.google.com/?q=Full+Of+Beans+Franz+Josef" },
+              {
+                isGroup: true,
+                groups: [
+                  {
+                    groupTitle: "Group 1",
+                    items: [
+                      { name: "Franz Josef Glacier 冰河健行", tag: "預約活動", alert: "預約 07:30 梯次 (4hr)", note: "法蘭士約瑟夫冰河健行", url: "https://maps.app.goo.gl/F8juq59YZztNDSky9" }
+                    ]
+                  },
+                  {
+                    groupTitle: "Group 2",
+                    items: [
+                      { name: "三冰河直升機飛行 (含著陸)", tag: "預約活動", alert: "預約 08:15 梯次 (45mins)", note: "觀覽冰河景色含冰河降落", url: "https://maps.app.goo.gl/gXBkiHEUVYR6Qn5n9" }
+                    ]
+                  }
+                ]
+              },
+              { name: "Matheson Cafe", tag: "美食", driveTime: "開車 40 分鐘", note: "午餐", url: "https://maps.app.goo.gl/1zdgBFzZiTgE6oDw7" },
+              { name: "Knights Point Lookout 武士角觀景台", tag: "景點", driveTime: "開車 1 小時 15 分鐘", note: "停車休息拍照 (有廁所)", url: "https://maps.app.goo.gl/yYcN1Wud9qpBTwRf8" },
+              { name: "Thunder Creek Falls 雷霆溪瀑布", tag: "景點", driveTime: "開車 70 分鐘", note: "停車休息拍照", url: "https://maps.app.goo.gl/72BRq3ucfdAELpKp9" },
+              { name: "Makarora Public Toilets", tag: "休憩", note: "公廁休憩點", url: "https://maps.app.goo.gl/a8ScFMsxHxwJk8fHA" },
+              { name: "Lake Hawea Lookout 哈威亞湖觀景台", tag: "景點", driveTime: "開車 65 分鐘", note: "停車休息拍照", url: "https://maps.app.goo.gl/NCbFjbbBYRQ878Rg6" },
+              { name: "Muttonbird (預訂 19:30)", tag: "美食", alert: "已預訂 19:30 晚餐", note: "晚餐", url: "https://maps.google.com/?q=Muttonbird+Wanaka" },
+              { name: "ASURE Brookvale Motel", tag: "住宿", note: "當日住宿飯店", url: "https://maps.google.com/?q=ASURE+Brookvale+Motel" }
+            ]
+          },
+          {
+            dayCode: "D6",
+            date: "10/28(三)",
+            title: "瓦納卡 Wanaka → 箭鎮 → 皇后鎮 Queenstown",
+            startLocation: "Wanaka",
+            stay: "Beacon Sky (Queenstown)",
+            stayUrl: "https://maps.app.goo.gl/ywcD33auGSh2kFZd7",
+            meals: { 
+              b: "Scroggin Coffee and Eatery", bUrl: "https://maps.google.com/?q=Scroggin+Coffee+and+Eatery+Wanaka", 
+              l: "The Fork And Tap", lUrl: "https://maps.google.com/?q=The+Fork+And+Tap+Arrowtown", 
+              d: "Essence Restaurant by ROKI Collection（米其林＊＊）", dUrl: "https://maps.app.goo.gl/BaAgtHDhsL5SVdMQA" 
+            },
+            spots: [
+              {
+                isGroup: true,
+                groups: [
+                  {
+                    groupTitle: "Group 1",
+                    items: [
+                      { name: "Scroggin Coffee and Eatery", tag: "美食", note: "早餐", url: "https://maps.google.com/?q=Scroggin+Coffee+and+Eatery+Wanaka" },
+                      { name: "Wānaka Willow Tree (孤獨樹)", tag: "景點", note: "早餐後可開車去湖邊散步拍照", url: "https://maps.app.goo.gl/qkm7RCTsFvg3XfNe9" },
+                      { name: "Crown Range Road Scenic Lookout", tag: "景點", note: "停車拍照", url: "https://maps.app.goo.gl/ZdewmvKUpu2ZT3729" },
+                      { 
+                        isSubChoice: true, 
+                        choices: [
+                          { label: "選項 1", name: "The Fork And Tap", url: "https://maps.google.com/?q=The+Fork+And+Tap+Arrowtown" },
+                          { label: "選項 2", name: "Little Aosta", url: "https://maps.google.com/?q=Little+Aosta+Arrowtown" }
+                        ]
+                      },
+                      { name: "箭鎮 Buckingham Street", tag: "景點", driveTime: "開車 65 分鐘", note: "單行道街區，進街區前左側有停車場，Wolf Coffee / Patagonia 巧克力", url: "https://maps.google.com/?q=Buckingham+Street+Arrowtown" }
+                    ]
+                  },
+                  {
+                    groupTitle: "Group 2",
+                    items: [
+                      { name: "Isthmus Peak Track", tag: "健行", driveTime: "開車 30 分鐘", note: "來回 16km 原路折返，總爬升 1,155m (約 5-6hr)", url: "https://maps.app.goo.gl/MtDoyL8KxMo2BRwA6" },
+                      { name: "Skydive Wanaka 高空跳傘", tag: "預約活動", alert: "預約 12:30", driveTime: "開車 10 分鐘", note: "15000呎", url: "https://maps.app.goo.gl/Xvrorm7tfYT4472Y6" }
+                    ]
+                  }
+                ]
+              },                      
+              { name: "Essence Restaurant by ROKI Collection", tag: "美食", note: "晚餐, 米其林＊＊ <br> 07:30pm, TSAICHEN, KAO (6人） <br> 08:00pm, MEIYUEH, KAO（4人） <br> 08:30pm, CHIACHUN, KAO（4人）" , url: "https://maps.app.goo.gl/BaAgtHDhsL5SVdMQA" },                    
+              { name: "Beacon Sky (Queenstown)", tag: "住宿", note: "當日住宿飯店 (民宿), <a href='https://m.duve.co/g/MV4Kev3qhV?id=post&gId=7qCxirqY-&affType=100&nflp=1' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>停車場車位號與鑰匙密碼 <i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a> , Wi-Fi: Luxe Stay 1002345 / QTownView03", url: "https://maps.app.goo.gl/ywcD33auGSh2kFZd7" }
+            ]
+          },
+          {
+            dayCode: "D7",
+            date: "10/29(四)",
+            title: "皇后鎮 Queenstown",
+            startLocation: "Queenstown",
+            stay: "Beacon Sky (Queenstown)",
+            stayUrl: "https://maps.app.goo.gl/ywcD33auGSh2kFZd7",
+            meals: { 
+                b: "", 
+                l: "", 
+                br: "The Boat Shed Cafe", brUrl: "https://maps.app.goo.gl/nBaffzgMjo8eCtaV9", 
+                d: "Winnies Gourmet Pizza Bar", dUrl: "https://maps.app.goo.gl/U8WrhuFsFja5pPpPA" },
+            spots: [ 
+              { name: "Queenstown Hill Walking Track（自由參加)", tag: "健行", note: "來回 5km 原路折返，爬升 450m (約 2~2.5hr)", url: "https://maps.app.goo.gl/42tX11r3VYyDAYHG9" },
+              { name: "09:10 出發 ", tag: "自駕", url: "" },  
+              { name: "The Boat Shed Cafe", tag: "美食", driveTime: "開車約 10 分鐘", note: "早午餐 漢堡有名 <br> TSAICHEN, KAO (6人) <br>CHIACHUN, KAO（8人）", alert: "預約 09:30" , url: "https://maps.app.goo.gl/nBaffzgMjo8eCtaV9" },
+              { name: "鹿園高地 Deer Park Heights Queenstown", tag: "景點", note: "如在車上餵食，食物不要丟太靠近車子，有牌子寫不能下車的區段請不要下車，飼料現金NZD$2", url: "https://maps.app.goo.gl/GifKbp3z7YSr3aev9" },
+              { name: "車開回民宿停", tag: "自駕", url: "" }, 
+              { name: "Skyline Gondola & Luge 溜溜車", tag: "預約活動", note: "纜車與斜坡滑車", url: "https://maps.google.com/?q=Skyline+Queenstown" },
+              { name: "Kiwi Birdlife Park 奇異鳥公園", tag: "景點", note: "保育類奇異鳥生態體驗", url: "https://maps.google.com/?q=Kiwi+Birdlife+Park" },
+              { name: "Fergburger 著名漢堡", tag: "美食", note: "CNN 評比全世界最好吃漢堡 (營業 07:00~02:30)", url: "https://maps.google.com/?q=Fergburger" },
+              { name: "自由活動 or 碼頭步道散步", tag: "景點", note: "Patagonia Chocolates 冰淇淋 / 逛街", url: "https://maps.google.com/?q=Patagonia+Chocolates+Queenstown" },
+              { name: "Winnies Gourmet Pizza Bar", tag: "美食", note: "晚餐", alert: "預約 19:00" , url: "https://maps.app.goo.gl/U8WrhuFsFja5pPpPA"},
+              { name: "Beacon Sky (Queenstown)", tag: "住宿", note: "當日住宿飯店 (民宿), <a href='https://m.duve.co/g/MV4Kev3qhV?id=post&gId=7qCxirqY-&affType=100&nflp=1' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>停車場車位號與鑰匙密碼 <i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a> , Wi-Fi: Luxe Stay 1002345 / QTownView03", url: "https://maps.app.goo.gl/ywcD33auGSh2kFZd7" }
+            ]
+          },
+          {
+            dayCode: "D8",
+            date: "10/30(五)",
+            title: "皇后鎮 Queenstown → 米佛峽灣 Milford Sound → 皇后鎮 Queenstown",
+            startLocation: "Queenstown",
+            stay: "Beacon Sky (Queenstown)",
+            stayUrl: "https://maps.app.goo.gl/ywcD33auGSh2kFZd7",
+            meals: { 
+              b: "Sandfly Cafe (Te Anau)", bUrl: "https://maps.google.com/?q=Sandfly+Cafe+Te+Anau", 
+              d: "The Fat Duck", dUrl: "https://maps.google.com/?q=The+Fat+Duck+Te+Anau", 
+            },
+            spots: [
+              { name: "06:45 出發 (拉車時間長)", tag: "自駕", alert: "非常早出門，前一天沒事早點睡，下午才用餐，怕肚子餓的請車上自行備食物！", url: "" },
+              { name: "Marmolada Cafe", tag: "補給", note: "06:00開", url: "https://maps.app.goo.gl/Z9XvPFso8VdrF1tNA" },
+              { name: "Sandfly Cafe (Te Anau)", tag: "美食", driveTime: "開車約 2 小時 20 分鐘", note: "早餐", url: "https://maps.google.com/?q=Sandfly+Cafe+Te+Anau" },
+              { name: "Te Anau (Allied 加油站)", tag: "加油", note: "加油", url: "https://maps.app.goo.gl/6fJ8DpbLwSP6UjQW9" },
+              { name: "Mirror Lakes 鏡湖", tag: "景點", note: "停車拍照", url: "https://maps.app.goo.gl/VEKgMCBXKGcxi9XB9" },
+              { name: "米佛峽灣 Milford Sound 停車場", tag: "自駕", driveTime: "開車約 2 小時", note: "停車一小時 NZD $10 + 交易費 $0.5", url: "https://maps.app.goo.gl/PG8WSaUMvesgVsKp8" },
+              { name: "Milford Sound Boutique Small Boat Cruise", tag: "預約活動", alert: "預約 12:45 巡航 (約 2hr)", note: "峽灣遊船", url: "https://maps.app.goo.gl/6E9GBX4gPP9ToWqf7" },
+              { name: "Hundred Falls 冰河 U 型谷", tag: "景點", note: "停車拍照", url: "https://maps.app.goo.gl/kgumDq2xXevtg8Au8" },
+              { name: "Luxmore Souvenirs 南方禮品中心", tag: "購物", note: "禮品", driveTime: "開車約 2 小時",url: "https://maps.app.goo.gl/WNoAw7fetnw4BvHz7" },
+              { name: "The Fat Duck", tag: "美食", note: "下午餐", url: "https://maps.google.com/?q=The+Fat+Duck+Te+Anau" },
+              { name: "Fergburger（如果肚子還餓的）", tag: "美食", driveTime: "開車約 2 小時", note: "或是外帶披薩 <a href='https://maps.app.goo.gl/Vu6MtKGGCjqiB1eZ7' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>The Cow <i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a>", url: "https://maps.app.goo.gl/q4gjBxit73wiKRnY8" },
+              { name: "Beacon Sky (Queenstown)", tag: "住宿", note: "當日住宿飯店 (民宿), <a href='https://m.duve.co/g/MV4Kev3qhV?id=post&gId=7qCxirqY-&affType=100&nflp=1' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>停車場車位號與鑰匙密碼 <i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a> , Wi-Fi: Luxe Stay 1002345 / QTownView03", url: "https://maps.app.goo.gl/ywcD33auGSh2kFZd7" }
+            ]
+          },
+          {
+            dayCode: "D9",
+            date: "10/31(六)",
+            title: "皇后鎮 Queenstown → 奧拉基/庫克山國家公園 Aoraki / Mount Cook National Park",
+            startLocation: "Queenstown",
+            stay: "The Hermitage Hotel",
+            stayUrl: "https://maps.google.com/?q=The+Hermitage+Hotel+Mount+Cook",
+            meals: { 
+              b: "The Wrinkly Rams", bUrl: "https://maps.google.com/?q=The+Wrinkly+Rams", 
+              l: "The Old Mountaineers Cafe", lUrl: "https://maps.google.com/?q=The+Old+Mountaineers+Cafe+Mount+Cook", 
+              d: "Alpine Restaurant (預訂 19:00)", dUrl: "https://maps.app.goo.gl/LaPQNxsxzwbC59re7", 
+            },
+            spots: [
+              { name: "07:00 出發 (拉車時間長)", tag: "自駕", alert: "非常早出門，前一天沒事早點睡。", url: "" },
+              { name: "The Wrinkly Rams", tag: "美食", driveTime: "開車約 2 小時 30 分鐘", note: "早餐", url: "https://maps.google.com/?q=The+Wrinkly+Rams" },
+              { name: "High Country Salmon 高地鄉村鮭魚", tag: "美食", driveTime: "開車約 20 分鐘", note: "生魚片 (10:00~)", url: "https://maps.google.com/?q=High+Country+Salmon" },
+              { name: "Twizel (McKeown 加油站)", tag: "加油",note: "加油", url: "https://maps.app.goo.gl/uyApcDR4shhi3xQ59" },
+              { name: "Lake Pukaki 普卡基湖", tag: "景點", driveTime: "開車約 20 分鐘" , note: "停車拍照上廁所", url: "https://maps.app.goo.gl/HqUm1ApfzMi9Kcno8" },
+              { name: "Hooker Valley Track 健行", tag: "健行", driveTime: "開車約 40 分鐘" , note: "10.5 km 平緩步道，來回約 3-4 小時", url: "https://maps.google.com/?q=Hooker+Valley+Track" },
+              { name: "庫克山國家公園遊客中心", tag: "景點", note: "Aoraki/Mount Cook Visitor Centre", url: "https://maps.google.com/?q=Aoraki+Mount+Cook+National+Park+Visitor+Centre" },
+              { name: "The Old Mountaineers Cafe", tag: "美食", note: "午餐", url: "https://maps.google.com/?q=The+Old+Mountaineers+Cafe+Mount+Cook" },
+              { name: "Alpine Restaurant", tag: "美食", alert: "已預訂 19:00", note: "飯店晚餐", url: "https://maps.app.goo.gl/T4azXTPw6VUZXeGs9" },
+              { name: "The Hermitage Hotel", tag: "住宿", note: "當日住宿飯店 (庫克山隱士飯店)", url: "https://maps.google.com/?q=The+Hermitage+Hotel+Mount+Cook" }
+            ]
+          },
+          {
+            dayCode: "D10",
+            date: "11/01(日)",
+            title: "奧拉基/庫克山國家公園 Aoraki / Mount Cook National Park → 蒂卡波湖 Lake Tekapo",
+            startLocation: "Aoraki Mount Cook National Park",
+            stay: "Peppers Bluewater Resort Lake Tekapo",
+            stayUrl: "https://maps.google.com/?q=Peppers+Bluewater+Resort+Lake+Tekapo",
+            meals: { 
+              b: "Alpine Restaurant", bUrl: "https://maps.app.goo.gl/LaPQNxsxzwbC59re7", 
+              l: "", lUrl: "", 
+              d: "TLV Restaurant & Bar", dUrl: "https://maps.google.com/?q=TLV+Restaurant+%26+Bar+Lake+Tekapo" 
+            },
+            spots: [
+              { name: "Alpine Restaurant", tag: "美食", note: "飯店早餐 06:30~", url: "https://maps.app.goo.gl/T4azXTPw6VUZXeGs9" },
+              { name: "Glacier Explorer（TBD)", tag: "預約活動", alert: "預約 08:45~11:30", note: "需步行1.5km（25分鐘內)＋搭船1小時，原路來回", url: "https://maps.app.goo.gl/xohqNdCMVdBaUmjh7" },
+              { name: "Tasman Lake Track 塔斯曼湖步道", tag: "健行", driveTime: "開車 15 分鐘", note: "來回約 1 小時", url: "https://maps.app.goo.gl/4rjnxFJahCipMXDJ7" },
+              { name: "Mt Cook Alpine Salmon Shop", tag: "美食", driveTime: "開車約 55 分鐘", note: "生魚片", url: "https://maps.app.goo.gl/zkaxDuC1DdPi1r4m8" },
+              { name: "Mt John Observatory 約翰山天文台", tag: "景點", driveTime: "開車 50 分鐘", note: "賞魯冰花，停車 NZD $8 (Card Only)", url: "https://maps.app.goo.gl/cDWJnjb5qDQZvvf87" },
+              { name: "The Better Batter NZ", tag: "美食", note: "炸魚薯條", url: "https://maps.app.goo.gl/9xz7u9UibtgnLUbZA" },
+              { name: "The Church of the Good Shepherd", tag: "景點", note: "善良牧羊人教堂 (教堂內禁止拍照)", url: "https://maps.app.goo.gl/a9pprRUiLAQkTEfz9" },
+              { name: "The Sheepdog Memorial", tag: "景點", note: "牧羊犬雕像", url: "https://maps.google.com/?q=The+Sheepdog+Memorial" },
+              { name: "TLV Restaurant & Bar", tag: "美食", note: "晚餐", url: "https://maps.google.com/?q=TLV+Restaurant+%26+Bar+Lake+Tekapo" },
+              { name: "Crater Stargazing 觀星體驗", tag: "預約活動", alert: "預約 23:30", note: "Dark Sky Project 火山口夜間觀星", url: "https://maps.google.com/?q=Dark+Sky+Project" },
+              { name: "Peppers Bluewater Resort Lake Tekapo", tag: "住宿", note: "當日住宿飯店", url: "https://maps.google.com/?q=Peppers+Bluewater+Resort+Lake+Tekapo" }
+            ]
+          },
+          {
+            dayCode: "D11",
+            date: "11/02(一)",
+            title: "蒂卡波湖 Lake Tekapo → 基督城 Christchurch",
+            startLocation: "Tekapo",
+            stay: "Distinction Christchurch Hotel",
+            stayUrl: "https://maps.google.com/?q=Distinction+Christchurch+Hotel",
+            meals: { 
+              b: "旅館", bUrl: "", 
+              l: "自由解決", lUrl: "", 
+              d: "Twenty Seven Steps", dUrl: "https://maps.app.goo.gl/mHT5TXNtKsowj9yf8" 
+            },
+            spots: [
+              { name: "Fairlie Bakehouse 鹹派", tag: "美食", driveTime: "開車約 40 分鐘", note: "牛肉鹹派、培根鮭魚鹹派", url: "https://maps.google.com/?q=Fairlie+Bakehouse" },
+              { name: "Geraldine 小鎮", tag: "購物", driveTime: "開車約 45 分鐘", note: "Barker's Foodstore & Eatery / Summit and Flow NZ / Geraldine Cheese Company / Super Liquor Geraldine / Joosh / Southbound Specialty Coffee", url: "https://maps.app.goo.gl/1f7qCgvVzpxJG9GW6" },
+              { name: "基督城市區自由活動", tag: "景點", driveTime: "總車程約 1 小時 45 分鐘", note: "<a href='https://maps.app.goo.gl/Z16azBY9PWaC4VTN8' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>紙教堂 <i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a> / <a href='https://maps.app.goo.gl/nohYDvovTS3BFjWk9' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>基督城大教堂 (修復中) <i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a>/ <a href='https://maps.app.goo.gl/VzTnFjQT82owfvTi9' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>追億橋 <i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a>  / <a href='https://maps.app.goo.gl/DLrwz8fKtsuNvcti9' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>河畔市場 <i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a> / 百貨區自由逛", url: "https://maps.app.goo.gl/CpkTvWLJdSLrGUxh9" },
+              { name: "Twenty Seven Steps", tag: "美食", note: "晚餐", url: "https://maps.app.goo.gl/mHT5TXNtKsowj9yf8" },
+              { name: "Distinction Christchurch Hotel", tag: "住宿", note: "當日住宿飯店", url: "https://maps.google.com/?q=Distinction+Christchurch+Hotel" }
+            ]
+          },
+          {
+            dayCode: "D12",
+            date: "11/03(二)",
+            title: "基督城還車 ✈️ 奧克蘭轉機回台北",
+            startLocation: "Christchurch",
+            stay: "溫暖的家 🏠",
+            meals: { b: "飛機上", bUrl: "", l: "飛機上", lUrl: "", d: "飛機上", dUrl: "" },
+            spots: [
+              { name: "Gas Station", tag: "加油", driveTime: "開車 20 分鐘", note: "最晚 05:00 市中心出發，還車前加滿油", url: "https://maps.app.goo.gl/TWCQ2veTtyrAarAM9" },
+              { name: "基督城 CHC 機場還車", tag: "自駕", url: "" },
+              { name: "NZ0584 基督城 CHC 06:45 - 奧克蘭 AKL 08:10", tag: "航班", note: "飛行時間 1 小時 25 分鐘 , 行李直掛", url: "" },
+              { name: "奧克蘭 AKL 機場轉機 (2小時35分)", tag: "航班", note: "轉機至國際航廈", url: "" },
+              { name: "NZ77 奧克蘭 AKL 10:45 - 台北 TPE 第二航廈 17:00", tag: "航班", note: "直飛台北 飛行時間 11 小時 15 分鐘", url: "" }
+            ]
+          }
+        ],
+
+        notices: [
+          { id: "01", text: "紐西蘭旅館多半不提供牙刷、牙膏、梳子、刮鬍刀、室內拖鞋，請自行攜帶。" },
+          { id: "02", text: "要帶墨鏡、雨傘、防曬乳，紐西蘭紫外線極強。" },
+          { id: "03", text: "西海岸沿岸靠水區域都有很多\"沙蠅\"，如不噴沙蠅水或含DEET等高強度防蚊液，請穿長袖長褲，被咬可能紅腫一週以上。" },
+          { id: "04", text: "搭車時間長，如會暈車者請自行準備暈車藥。" },
+          { id: "05", text: "不准帶水果，飛機上任何食物（包含餅乾）請都不要帶下飛機。" },
+          { id: "06", text: "盡可能不要帶泡麵&餅乾，肚子餓買當地食物。任何可以放進嘴巴的帶進紐西蘭就要申報，有疑慮沒申報被查到先罰 400 紐幣！" },
+          { id: "07", text: "在紐西蘭使用信用卡刷卡時店家帳單可能會額外出現一筆加收 1.5~2.5% 刷卡手續費。" },
+          { id: "08", text: "下車 \"一定\" 要把手機跟包包帶下車，不要放在座位上，包含外套，避免車窗被敲破小偷搜刮！" },
+          { id: "09", text: "鞋子請洗乾淨再帶出門，鞋底絕對不要有任何泥土。" },
+          { id: "10", text: "登山鞋、慢跑鞋、球鞋、靴子、拐杖等曾經沾過泥土的，入境時就要走申報通道檢查。" },
+          { id: "11", text: "一般個人藥品不需申報，超過三個月份才需申報，請攜帶夠用就好，不需要帶別人的份。" },
+          { id: "12", text: "慢性病藥品、常備藥品、維他命等都要保留外盒外包裝或藥袋供檢查。單夾鏈袋無說明藥品或來路不明之中藥請勿攜帶。" },
+          { id: "13", text: "私人用化妝品不用申報，但如含有蜂蜜、蜂膠成分則必須申報。" },
+          { id: "14", text: "禁止攜帶蜂蜜、蜂膠、蜂王乳（即使澳洲轉機也不行）。" },
+          { id: "15", text: "木筷、茶樹精油類、薰衣草類製品、帶有貝殼的飾品，通通都要申報。" },
+          { id: "16", text: "要申報的物品請盡可能集中放一包/一區（行李箱）或隨身背包內方便海關檢查。" },
+          { id: "17", text: "NZeTA (電子旅行授權)：手機 App 申請約 17 紐元（<a href='https://apps.apple.com/app/nzeta/id1470900142' target='_blank' class='font-bold text-rose-600 underline hover:text-rose-800 inline-flex items-center gap-0.5'><i class='fa-brands fa-apple'></i> iOS</a> / <a href='https://play.google.com/store/apps/details?id=nz.govt.mbie.eta' target='_blank' class='font-bold text-rose-600 underline hover:text-rose-800 inline-flex items-center gap-0.5'><i class='fa-brands fa-google-play'></i> Android</a>）；網頁線上申請為 23 紐元。[<a href='https://shinshing.tw/nz-nzeta-guide/' target='_blank' class='font-bold text-rose-600 underline hover:text-rose-800 inline-flex items-center gap-0.5'>說明</a>]" },
+          { id: "18", text: "NZeTA (NZD$17) + IVL 國際旅客保育及旅遊捐 (NZD$100)，請最慢出發前一個禮拜完成申請。[<a href='https://schoolaplus.com/articles-detail.asp?seq=2063' target='_blank' class='font-bold text-rose-600 underline hover:text-rose-800 inline-flex items-center gap-0.5'>填寫參考</a>]" },
+          { id: "19", text: "NZTD (旅客入境申報單)：在飛機抵達紐西蘭前 24 小時內填寫（<a href='https://apps.apple.com/app/nztd/id1668684467' target='_blank' class='font-bold text-rose-600 underline hover:text-rose-800 inline-flex items-center gap-0.5'><i class='fa-brands fa-apple'></i> iOS</a> / <a href='https://play.google.com/store/apps/details?id=nz.govt.mbie.td' target='_blank' class='font-bold text-rose-600 underline hover:text-rose-800 inline-flex items-center gap-0.5'><i class='fa-brands fa-google-play'></i> Android</a>），填完收到確認供通關查驗。[<a href='https://shinshing.tw/nz-entry-guide/' target='_blank' class='font-bold text-rose-600 underline hover:text-rose-800 inline-flex items-center gap-0.5'>說明</a>]/[<a href='https://holiujourney.com/nztd/' target='_blank' class='font-bold text-rose-600 underline hover:text-rose-800 inline-flex items-center gap-0.5'>填寫參考</a>]" },
+          { id: "20", text: "托運行李只有 23kg 限制，沒要用的東西請盡量不要帶。" },
+          { id: "21", text: "租車駕駛人一定要攜帶：本人實體信用卡、台灣駕照正本、國際駕照正本（台灣與國際駕照兩者皆需備齊）。" },
+          { id: "22", text: "租車者出國前務必向信用卡發卡銀行開通並設定四碼「預借現金密碼 (Pin Code)」。" },
+          { id: "23", text: "紐西蘭插座為八字形，請記得攜帶轉接頭（轉接頭無變壓功能）。" },
+          { id: "24", text: "紐西蘭電壓為 230V，台灣設備多半為 110V，請確定可支援萬國電壓 (100-240V) 再帶，避免電器燒毀。" },
+          { id: "25", text: "對吹風機有特別要求者請攜帶符合萬國電壓的吹風機（如 Dyson HD19、Panasonic EH-NA55 等）。" },
+          { id: "26", text: "隔日需要的物品請前一晚先拿到隨身背包，盡可能不要在景點停車場打開行李箱，容易被小偷盯上。" },
+          { id: "27", text: "Carplay語音導航可能出現左右轉相反的情況，請注意轉彎方向以依照當前地圖對照後的為主。" },
+          { id: "28", text: "靠左行駛、左轉小彎、右轉大彎，副駕駛＆車上同行者請醒著時幫忙注意行車方向，避免逆向。" },
+          { id: "29", text: "Google Maps 請提早下載好全區離線地圖，避免郊區臨時收不到網路訊號。" },
+          { id: "30", text: "行車途中對向車輛閃燈，可能代表前方路段有警察實施測速攔查。" },
+          { id: "31", text: "靠近單向隧道口路邊可能設有紅綠燈，看到紅燈務必停車等候。" },
+          { id: "32", text: "想上廁所請提早說，首頁有 'Public toilet'可供查詢。" }
+        ]
+      }
+    }
+  </script>
+</body>
+</html>
