@@ -593,7 +593,6 @@
       </div>
 
       <div class="overflow-y-auto custom-scrollbar pr-1 space-y-4 flex-1 text-xs">
-        <!-- 1. 消費類別 -->
         <div>
           <label class="font-bold text-stone-700 block mb-1.5">消費類別</label>
           <div class="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
@@ -611,7 +610,6 @@
           </div>
         </div>
 
-        <!-- 2. 日期與幣別 -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="font-bold text-stone-700 block mb-1">消費日期</label>
@@ -626,7 +624,6 @@
           </div>
         </div>
 
-        <!-- 3. 名稱與快速帶入 -->
         <div class="space-y-1.5">
           <label class="font-bold text-stone-700 block">項目 / 餐廳名稱</label>
           <input type="text" x-model="expenseForm.customTitle" placeholder="請直接輸入項目或餐廳名稱..." class="w-full bg-stone-50 border border-stone-200 rounded-xl p-2.5 font-bold text-stone-900 focus:outline-none">
@@ -641,7 +638,6 @@
           </div>
         </div>
 
-        <!-- 4. 代刷人與費率 -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-stone-50 p-3 rounded-2xl border border-stone-200">
           <div>
             <label class="font-bold text-stone-700 block mb-1">由誰刷卡/代付</label>
@@ -659,7 +655,6 @@
           </div>
         </div>
 
-        <!-- 5. 細項輸入與分攤勾選 -->
         <div class="space-y-3 pt-2">
           <div class="flex items-center justify-between border-b border-stone-200 pb-1.5">
             <span class="font-black text-stone-800 text-xs">費用細項與分攤成員</span>
@@ -681,7 +676,6 @@
                 </button>
               </div>
 
-              <!-- 分攤成員勾選區 -->
               <div class="pt-1.5 border-t border-dashed border-stone-200 space-y-1.5">
                 <div class="flex items-center justify-between">
                   <span class="text-[10px] font-bold text-stone-500">選擇共同分攤成員：</span>
@@ -700,7 +694,6 @@
                     </template>
                   </div>
 
-                  <!-- 4 位成員淺藍邊框小方塊 -->
                   <div class="border-2 border-sky-400 rounded-xl p-2 bg-sky-50/50">
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                       <template x-for="m in specialGroup" :key="m">
@@ -726,7 +719,6 @@
           </template>
         </div>
 
-        <!-- 6. 最底下：備註說明與收據附件檔案 -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-amber-50/50 p-3 rounded-2xl border border-amber-200/70">
           <div>
             <label class="font-bold text-stone-700 block mb-1">備註說明 (選填)</label>
@@ -911,7 +903,6 @@
                 </label>
               </template>
             </div>
-            <!-- 4人小框 -->
             <div class="border border-sky-300 rounded-xl p-1.5 bg-sky-50/40 my-1">
               <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                 <template x-for="m in specialGroup" :key="m">
@@ -1148,15 +1139,15 @@
           'TLV Restaurant & Bar (晚餐)', 'Fairlie Bakehouse (鹹派)', 'Twenty Seven Steps (基督城晚餐)'
         ],
 
+        // 住宿快速選單 (已更新為最新 7 家清單)
         hotelPresetPlaces: [
-          '基督城 Airport Gateway Motor Lodge',
-          '霍基蒂卡 Beachfront Hotel Hokitika',
-          '法蘭茲約瑟夫 Rainforest Retreat',
-          '瓦納卡 Edgewater Hotel Wanaka',
-          '皇后鎮 Heritage Queenstown',
-          '蒂阿瑙 Distinction Te Anau Hotel & Villas',
-          '庫克山隱士飯店 The Hermitage Hotel',
-          '蒂卡波湖 Peppers Bluewater Resort'
+          'Pullman Auckland Airport',
+          'Beachfront Hotel Hokitika',
+          'Aspen Court Franz Josef',
+          'ASURE Brookvale Motel',
+          'Beacon Sky',
+          'The Hermitage Hotel',
+          'Distinction Christchurch Hotel'
         ],
 
         activityPresetPlaces: [
