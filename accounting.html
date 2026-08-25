@@ -1374,19 +1374,30 @@
           this.isSyncing = true;
           this.syncStatusText = '同步中...';
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 6000);
+          const timeoutId = setTimeout(() => controller.abort(), 10000);
 
           try {
-            const res = await fetch(GOOGLE_SCRIPT_API_URL, { signal: controller.signal });
+            // 加入時間戳記 ?t=，徹底破除手機 Safari/Chrome 的 HTTP 快取
+            const noCacheUrl = `${GOOGLE_SCRIPT_API_URL}?t=${Date.now()}`;
+            const res = await fetch(noCacheUrl, { 
+              signal: controller.signal,
+              cache: 'no-store',
+              headers: { 'Cache-Control': 'no-cache' }
+            });
             clearTimeout(timeoutId);
             const json = await res.json();
+
             if (json && json.status === 'success') {
+              // 確保以雲端為唯一準則
               this.expenses = Array.isArray(json.expenses) ? json.expenses : [];
               this.prepaids = Array.isArray(json.prepaids) ? json.prepaids : [];
               this.transfers = Array.isArray(json.transfers) ? json.transfers : [];
               
+              // 強制將最新資料寫入 LocalStorage
               this.persistLocal();
               this.syncStatusText = '雲端已同步';
+            } else {
+              this.syncStatusText = '資料異常';
             }
           } catch (e) {
             this.syncStatusText = '離線快取模式';
@@ -1396,6 +1407,7 @@
         },
         
         async syncToCloud() {
+          // 防護機制：避免本機意外清空時誤覆蓋雲端
           if (this.expenses.length === 0 && this.prepaids.length === 0 && this.transfers.length === 0) {
             console.warn('本地無完整資料，已取消上傳以保護雲端資料！');
             return;
@@ -1417,14 +1429,18 @@
                 transfers: this.transfers
               })
             });
-            this.syncStatusText = '雲端已同步';
+
+            // 等候 1.5 秒讓 Google 試算表完成寫入，再重新抓取最新狀態確認
+            setTimeout(() => {
+              this.syncStatusText = '雲端已同步';
+            }, 1500);
+
           } catch (e) {
             this.syncStatusText = '已存本地 (待同步)';
-          } finally {
             this.isSyncing = false;
           }
         },
-
+        
         getExpenseCategoryStyle(catName) {
           const cat = this.expenseCategories.find(c => c.name === catName);
           return cat ? cat.bg : 'bg-slate-100 text-slate-800';
