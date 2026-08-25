@@ -1213,7 +1213,40 @@
         },
 
         get hotelList() {
-          return this.prepaids.filter(p => p.category === '住宿房費');
+          return (this.prepaids || []).filter(p => p && String(p.category || '').trim() === '住宿房費');
+        },
+
+        get groupedHotels() {
+          const hotels = {};
+          this.hotelList.forEach(item => {
+            if (!item) return;
+            const title = (item.title && String(item.title).trim()) ? String(item.title).trim() : '未命名飯店';
+            const itemDate = item.date || '2026-10-24';
+
+            if (!hotels[title]) {
+              hotels[title] = { 
+                title: title, 
+                earliestDate: itemDate, 
+                orders: [], 
+                totalNZD: 0, 
+                totalTWD: 0 
+              };
+            }
+
+            hotels[title].orders.push(item);
+            if (itemDate < hotels[title].earliestDate) {
+              hotels[title].earliestDate = itemDate;
+            }
+
+            hotels[title].totalNZD += Number(this.getItemFinalNZD(item) || 0);
+            hotels[title].totalTWD += Number(this.getItemFinalTWD(item) || 0);
+          });
+
+          Object.values(hotels).forEach(h => {
+            h.orders.sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
+          });
+
+          return Object.values(hotels).sort((a, b) => String(a.earliestDate || '').localeCompare(String(b.earliestDate || '')));
         },
 
         get activityList() {
