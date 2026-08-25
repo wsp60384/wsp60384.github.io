@@ -1366,9 +1366,12 @@
             clearTimeout(timeoutId);
             const json = await res.json();
             if (json && json.status === 'success') {
-              if (Array.isArray(json.expenses)) this.expenses = json.expenses;
-              if (Array.isArray(json.prepaids)) this.prepaids = json.prepaids;
-              if (Array.isArray(json.transfers)) this.transfers = json.transfers;
+              // 直接用雲端乾淨且已過濾掉刪除線的資料覆蓋
+              this.expenses = Array.isArray(json.expenses) ? json.expenses : [];
+              this.prepaids = Array.isArray(json.prepaids) ? json.prepaids : [];
+              this.transfers = Array.isArray(json.transfers) ? json.transfers : [];
+              
+              // 強制將乾淨的資料寫回本地快取，抹除舊的快取殘留
               this.persistLocal();
               this.syncStatusText = '雲端已同步';
             }
@@ -1378,7 +1381,7 @@
             this.isSyncing = false;
           }
         },
-
+        
         async syncToCloud() {
           this.persistLocal();
           this.isSyncing = true;
@@ -1913,7 +1916,9 @@
           return diff >= 0 ? `≈ +NZ$ ${diff.toFixed(2)}` : `≈ -NZ$ ${Math.abs(diff).toFixed(2)}`;
         },
 
-        calcGrandTotalNZD`()}
+        calcGrandTotalNZD() {
+          return this.expenses.reduce((s, e) => s + this.getItemFinalNZD(e), 0);
+        },
 
         calcExpensesGrandTotalTWD() {
           return Math.round(this.expenses.reduce((s, e) => s + this.getItemFinalTWD(e), 0));
