@@ -168,6 +168,14 @@
         >
           <i class="fa-solid fa-ticket"></i> 🎫 活動詳細資訊
         </button>
+        
+        <!-- 旅費記帳快捷按鈕 -->
+        <button 
+        @click="goToAccounting()"
+        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-600/90 hover:bg-orange-700 text-white text-xs font-bold shadow-sm transition-all cursor-pointer"
+        >
+          <i class="fa-solid fa-receipt"></i> 💰 旅費記帳
+        </button>
 
         <a 
           href="https://www.google.com/maps/search/public+toilet+South+Island+New+Zealand/" 
@@ -1604,6 +1612,16 @@
             default: return 'bg-slate-200 text-slate-800 font-bold';
           }
         },
+        
+        goToAccounting() {
+        const pwd = prompt('請輸入旅費記帳密碼：');
+        if (pwd === '0000') {
+            sessionStorage.setItem('nz_accounting_auth', 'passed');
+            window.location.href = './accounting.html';
+        } else if (pwd !== null) {
+            alert('密碼錯誤！');
+        }
+        },   
 
         getGroupedOrders(orders) {
           if (!orders) return [];
