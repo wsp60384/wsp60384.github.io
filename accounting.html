@@ -231,7 +231,7 @@
       </div>
     </div>
 
-    <!-- TAB 2: 行前預付 - 住宿房費 (同飯店收合展開 + 預設收合 + 入住日期 + 備註顯示) -->
+    <!-- TAB 2: 行前預付 - 住宿房費 -->
     <div x-show="currentTab === 'hotel'" class="space-y-4">
       <div class="bg-cozy-card p-4 rounded-2xl border border-cozy-border shadow-xs flex flex-wrap items-center justify-between gap-3">
         <div class="text-xs text-cozy-sub font-bold flex items-center gap-1.5">
@@ -1913,9 +1913,7 @@
           return diff >= 0 ? `≈ +NZ$ ${diff.toFixed(2)}` : `≈ -NZ$ ${Math.abs(diff).toFixed(2)}`;
         },
 
-        calcGrandTotalNZD() {
-          return this.expenses.reduce((s, e) => s + this.getItemFinalNZD(e), 0);
-        },
+        calcGrandTotalNZD`()}
 
         calcExpensesGrandTotalTWD() {
           return Math.round(this.expenses.reduce((s, e) => s + this.getItemFinalTWD(e), 0));
