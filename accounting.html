@@ -231,7 +231,7 @@
       </div>
     </div>
 
-    <!-- TAB 2: 行前預付 - 住宿房費 -->
+    <!-- TAB 2: 行前預付 - 住宿房費 (同飯店收合展開 + 預設收合 + 入住日期 + 備註顯示) -->
     <div x-show="currentTab === 'hotel'" class="space-y-4">
       <div class="bg-cozy-card p-4 rounded-2xl border border-cozy-border shadow-xs flex flex-wrap items-center justify-between gap-3">
         <div class="text-xs text-cozy-sub font-bold flex items-center gap-1.5">
@@ -284,6 +284,10 @@
                     <div class="text-[11px] text-stone-500 break-words whitespace-normal leading-relaxed">
                       分攤成員 (<span class="font-bold text-stone-700" x-text="item.sharedWith ? item.sharedWith.length : 0"></span>人)：
                       <span class="text-stone-700 font-bold" x-text="item.sharedWith ? item.sharedWith.join(', ') : '無'"></span>
+                    </div>
+                    <!-- 住宿備註 (若有) -->
+                    <div x-show="item.note" class="text-[11px] text-indigo-800 font-bold bg-indigo-50/80 px-2 py-0.5 rounded border border-indigo-100 inline-block mt-0.5">
+                      <i class="fa-solid fa-circle-info mr-1 text-indigo-600"></i><span x-text="item.note"></span>
                     </div>
                   </div>
 
@@ -574,7 +578,7 @@
 
   </main>
 
-  <!-- 彈窗 1：新增 / 編輯 現場消費 (備註與附加檔案已移至最底下) -->
+  <!-- 彈窗 1：新增 / 編輯 現場消費 -->
   <div 
     x-show="showExpenseModal" 
     x-transition
@@ -846,6 +850,12 @@
             </div>
           </div>
         </div>
+
+        <!-- 備註說明欄位 (新增於最下方) -->
+        <div>
+          <label class="font-bold text-stone-700 block mb-1">備註說明 (選填)</label>
+          <input type="text" x-model="prepaidForm.note" placeholder="例如: 附早晚餐 / 2張特大床" class="w-full bg-stone-50 border border-stone-200 rounded-xl p-2.5 font-bold focus:outline-none">
+        </div>
       </div>
 
       <div class="pt-3 border-t border-cozy-border mt-3 flex items-center justify-end gap-2">
@@ -903,6 +913,7 @@
                 </label>
               </template>
             </div>
+            <!-- 4人小框 -->
             <div class="border border-sky-300 rounded-xl p-1.5 bg-sky-50/40 my-1">
               <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                 <template x-for="m in specialGroup" :key="m">
@@ -1139,7 +1150,7 @@
           'TLV Restaurant & Bar (晚餐)', 'Fairlie Bakehouse (鹹派)', 'Twenty Seven Steps (基督城晚餐)'
         ],
 
-        // 住宿快速選單 (已更新為最新 7 家清單)
+        // 住宿快速選單
         hotelPresetPlaces: [
           'Pullman Auckland Airport',
           'Beachfront Hotel Hokitika',
@@ -1187,6 +1198,7 @@
           customTitle: '',
           payer: 'KAO CHIACHUN',
           amount: '',
+          note: '',
           sharedWith: []
         },
 
@@ -1556,6 +1568,7 @@
               customTitle: item.title,
               payer: item.payer || this.prepaidAllowedPayers[0],
               amount: item.finalTotal,
+              note: item.note || '',
               sharedWith: item.sharedWith || []
             };
           } else {
@@ -1571,6 +1584,7 @@
               customTitle: '',
               payer: this.prepaidAllowedPayers[0],
               amount: '',
+              note: '',
               sharedWith: []
             };
           }
@@ -1610,6 +1624,7 @@
             exchangeRate: rate,
             payer: this.prepaidForm.payer,
             finalTotal: amount,
+            note: this.prepaidForm.note ? this.prepaidForm.note.trim() : '',
             sharedWith: [...this.prepaidForm.sharedWith],
             dishes: [{
               name: title,
