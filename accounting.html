@@ -683,7 +683,7 @@
               <div class="pt-1.5 border-t border-dashed border-stone-200 space-y-1.5">
                 <div class="flex items-center justify-between">
                   <span class="text-[10px] font-bold text-stone-500">選擇共同分攤成員：</span>
-                  <button @click="toggleSelectAllExpenseDish(dIdx)" class="text-[10px] font-black text-indigo-600 hover:underline">
+                  <button @click="toggleSelectAllExpenseDish(dishIndex)" class="text-[10px] font-black text-indigo-600 hover:underline">
                     <span x-text="dish.sharedWith.length === members.length ? '全不選' : '全選 (14人)'"></span>
                   </button>
                 </div>
@@ -1250,7 +1250,7 @@
         },
 
         get activityList() {
-          return this.prepaids.filter(p => p.category === '活動票券');
+          return (this.prepaids || []).filter(p => p && String(p.category || '').trim() === '活動票券');
         },
 
         get sortedTransfers() {
@@ -1269,24 +1269,6 @@
             groups[d].totalTWD += this.getItemFinalTWD(item);
           });
           return Object.values(groups).sort((a, b) => a.date.localeCompare(b.date));
-        },
-
-        get groupedHotels() {
-          const hotels = {};
-          this.hotelList.forEach(item => {
-            const title = item.title ? item.title.trim() : '未命名飯店';
-            if (!hotels[title]) {
-              hotels[title] = { title: title, earliestDate: item.date, orders: [], totalNZD: 0, totalTWD: 0 };
-            }
-            hotels[title].orders.push(item);
-            if (item.date < hotels[title].earliestDate) hotels[title].earliestDate = item.date;
-            hotels[title].totalNZD += this.getItemFinalNZD(item);
-            hotels[title].totalTWD += this.getItemFinalTWD(item);
-          });
-          Object.values(hotels).forEach(h => {
-            h.orders.sort((a, b) => a.date.localeCompare(b.date));
-          });
-          return Object.values(hotels).sort((a, b) => a.earliestDate.localeCompare(b.earliestDate));
         },
 
         get sortedActivityList() {
@@ -1399,12 +1381,10 @@
             clearTimeout(timeoutId);
             const json = await res.json();
             if (json && json.status === 'success') {
-              // 直接用雲端乾淨且已過濾掉刪除線的資料覆蓋
               this.expenses = Array.isArray(json.expenses) ? json.expenses : [];
               this.prepaids = Array.isArray(json.prepaids) ? json.prepaids : [];
               this.transfers = Array.isArray(json.transfers) ? json.transfers : [];
               
-              // 強制將乾淨的資料寫回本地快取，抹除舊的快取殘留
               this.persistLocal();
               this.syncStatusText = '雲端已同步';
             }
@@ -1416,7 +1396,6 @@
         },
         
         async syncToCloud() {
-          // 防護機制：如果本地陣列異常清空，禁止全量覆蓋 Google Sheet，避免誤刪
           if (this.expenses.length === 0 && this.prepaids.length === 0 && this.transfers.length === 0) {
             console.warn('本地無完整資料，已取消上傳以保護雲端資料！');
             return;
