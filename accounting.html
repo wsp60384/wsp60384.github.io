@@ -1416,6 +1416,12 @@
         },
         
         async syncToCloud() {
+          // 防護機制：如果本地陣列異常清空，禁止全量覆蓋 Google Sheet，避免誤刪
+          if (this.expenses.length === 0 && this.prepaids.length === 0 && this.transfers.length === 0) {
+            console.warn('本地無完整資料，已取消上傳以保護雲端資料！');
+            return;
+          }
+
           this.persistLocal();
           this.isSyncing = true;
           this.syncStatusText = '上傳中...';
