@@ -683,7 +683,7 @@
               <div class="pt-1.5 border-t border-dashed border-stone-200 space-y-1.5">
                 <div class="flex items-center justify-between">
                   <span class="text-[10px] font-bold text-stone-500">選擇共同分攤成員：</span>
-                  <button @click="toggleSelectAllExpenseDish(dishIndex)" class="text-[10px] font-black text-indigo-600 hover:underline">
+                  <button @click="toggleSelectAllExpenseDish(dIdx)" class="text-[10px] font-black text-indigo-600 hover:underline">
                     <span x-text="dish.sharedWith.length === members.length ? '全不選' : '全選 (14人)'"></span>
                   </button>
                 </div>
@@ -851,7 +851,7 @@
           </div>
         </div>
 
-        <!-- 備註說明欄位 (新增於最下方) -->
+        <!-- 備註說明欄位 -->
         <div>
           <label class="font-bold text-stone-700 block mb-1">備註說明 (選填)</label>
           <input type="text" x-model="prepaidForm.note" placeholder="例如: 附早晚餐 / 2張特大床" class="w-full bg-stone-50 border border-stone-200 rounded-xl p-2.5 font-bold focus:outline-none">
@@ -1377,29 +1377,27 @@
           const timeoutId = setTimeout(() => controller.abort(), 10000);
 
           try {
-            // 加入時間戳記 ?t=，徹底破除手機 Safari/Chrome 的 HTTP 快取
             const noCacheUrl = `${GOOGLE_SCRIPT_API_URL}?t=${Date.now()}`;
             const res = await fetch(noCacheUrl, { 
-              signal: controller.signal,
-              cache: 'no-store',
-              headers: { 'Cache-Control': 'no-cache' }
+              method: 'GET',
+              redirect: 'follow',
+              signal: controller.signal
             });
             clearTimeout(timeoutId);
             const json = await res.json();
 
             if (json && json.status === 'success') {
-              // 確保以雲端為唯一準則
               this.expenses = Array.isArray(json.expenses) ? json.expenses : [];
               this.prepaids = Array.isArray(json.prepaids) ? json.prepaids : [];
               this.transfers = Array.isArray(json.transfers) ? json.transfers : [];
               
-              // 強制將最新資料寫入 LocalStorage
               this.persistLocal();
               this.syncStatusText = '雲端已同步';
             } else {
               this.syncStatusText = '資料異常';
             }
           } catch (e) {
+            console.error('同步失敗原因:', e);
             this.syncStatusText = '離線快取模式';
           } finally {
             this.isSyncing = false;
@@ -1407,7 +1405,6 @@
         },
         
         async syncToCloud() {
-          // 防護機制：避免本機意外清空時誤覆蓋雲端
           if (this.expenses.length === 0 && this.prepaids.length === 0 && this.transfers.length === 0) {
             console.warn('本地無完整資料，已取消上傳以保護雲端資料！');
             return;
@@ -1430,7 +1427,6 @@
               })
             });
 
-            // 等候 1.5 秒讓 Google 試算表完成寫入，再重新抓取最新狀態確認
             setTimeout(() => {
               this.syncStatusText = '雲端已同步';
             }, 1500);
@@ -1542,8 +1538,8 @@
           this.expenseForm.dishes.splice(index, 1);
         },
 
-        toggleSelectAllExpenseDish(dishIndex) {
-          const dish = this.expenseForm.dishes[dishIndex];
+        toggleSelectAllExpenseDish(dIdx) {
+          const dish = this.expenseForm.dishes[dIdx];
           dish.sharedWith = dish.sharedWith.length === this.members.length ? [] : [...this.members];
         },
 
