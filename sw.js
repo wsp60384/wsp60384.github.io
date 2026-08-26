@@ -5,7 +5,8 @@ const STATIC_ASSETS = [
   './manifest.json',
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-  'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js'
+  'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js',
+  'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap'
 ];
 
 self.addEventListener('install', (event) => {
