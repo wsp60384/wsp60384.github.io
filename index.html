@@ -187,7 +187,15 @@
         >
           <i class="fa-solid fa-receipt"></i> 💰 旅費記帳
         </button>
-
+        
+        <!-- Google Drive 快捷按鈕 -->
+        <button 
+          @click="openDrive()"
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600/90 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition-all cursor-pointer"
+        >
+          <i class="fa-brands fa-google-drive"></i> 📁 雲端硬碟 (Drive)
+        </button>
+        
         <a 
           href="https://www.google.com/maps/search/public+toilet+South+Island+New+Zealand/" 
           target="_blank" 
@@ -1625,15 +1633,17 @@
         },
         
         goToAccounting() {
-        const pwd = prompt('請輸入旅費記帳密碼：');
+          window.open('./accounting.html', '_blank', 'noopener,noreferrer');
+        },
+        
+        openDrive() {
+          const pwd = prompt('請輸入雲端硬碟存取密碼：');
           if (pwd === '0000') {
-            sessionStorage.setItem('nz_accounting_auth', 'passed');
-            // 另開新視窗/新分頁開啟旅費記帳頁面
-            window.open('./accounting.html', '_blank', 'noopener,noreferrer');
+            window.open('https://drive.google.com/drive/folders/19VSim6lnlKGTS5TdDSQLzW0dji7HeeAn?usp=drive_link', '_blank', 'noopener,noreferrer');
           } else if (pwd !== null) {
             alert('密碼錯誤！');
           }
-        },   
+        }, 
 
         getGroupedOrders(orders) {
           if (!orders) return [];
