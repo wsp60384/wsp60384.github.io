@@ -2427,8 +2427,12 @@
     const href = targetLink.getAttribute('href');
     if (!href) return;
 
-    // 判斷是否為地圖相關連結
-    if (href.includes('maps.google.com') || href.includes('maps.app.goo.gl') || href.includes('google.com/maps')) {
+    // 嚴格判斷是否為 Google Maps 相關連結
+    const isGoogleMaps = href.includes('maps.google.com') || 
+                         href.includes('maps.app.goo.gl') || 
+                         href.includes('google.com/maps');
+
+    if (isGoogleMaps) {
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
       const isAndroid = /Android/.test(navigator.userAgent);
 
@@ -2449,7 +2453,7 @@
         // 若未抓到 query，提取乾淨純文字
         if (!query || query.trim() === '') {
           const rawText = targetLink.textContent || targetLink.innerText || '';
-          query = encodeURIComponent(rawText.replace(/[\n\r\t]/g, ' ').replace(/🚻|🚗|🏠|🎫|⚠️|地圖|[\u{1F300}-\u{1F9FF}]/gu, '').trim());
+          query = encodeURIComponent(rawText.replace(/[\n\r\t]/g, ' ').replace(/🚻|🚗|🏠|🎫|⚠️|🛣️|💰|地圖|[\u{1F300}-\u{1F9FF}]/gu, '').trim());
         }
 
         if (!query) {
