@@ -1626,12 +1626,13 @@
         
         goToAccounting() {
         const pwd = prompt('請輸入旅費記帳密碼：');
-        if (pwd === '0000') {
+          if (pwd === '0000') {
             sessionStorage.setItem('nz_accounting_auth', 'passed');
-            window.location.href = './accounting.html';
-        } else if (pwd !== null) {
+            // 另開新視窗/新分頁開啟旅費記帳頁面
+            window.open('./accounting.html', '_blank', 'noopener,noreferrer');
+          } else if (pwd !== null) {
             alert('密碼錯誤！');
-        }
+          }
         },   
 
         getGroupedOrders(orders) {
