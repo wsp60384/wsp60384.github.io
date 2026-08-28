@@ -3,6 +3,8 @@ const CACHE_NAME = 'nz-roadtrip-app';
 // 靜態核心函式庫與資源
 const STATIC_ASSETS = [
   './manifest.json',
+  './icons/nz-192.png',
+  './icons/nz-512.png',
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
   'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js',
