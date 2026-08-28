@@ -19,6 +19,9 @@
     }
     window.addEventListener('load', () => {
       window.scrollTo(0, 0);
+      if (document.activeElement) {
+        document.activeElement.blur();
+      }
     });
   </script>
   
