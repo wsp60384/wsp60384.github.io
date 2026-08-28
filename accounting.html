@@ -22,6 +22,12 @@
       if (document.activeElement) {
         document.activeElement.blur();
       }
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        if (document.activeElement) {
+          document.activeElement.blur();
+        }
+      }, 100);
     });
   </script>
   
