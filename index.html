@@ -7,7 +7,7 @@
 
   <!-- PWA 設定與圖示宣告 -->
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/826/826070.png">
+  <link rel="apple-touch-icon" href="./icons/nz-192.png">
   <meta name="theme-color" content="#c86428">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -244,10 +244,12 @@
         </div>
       </div>
 
-      <!-- 2. 即時氣溫 -->
+      <!-- 2. 即時氣象 -->
       <div class="bg-cozy-card p-4 rounded-2xl border border-cozy-border dash-card flex flex-col justify-between min-w-0">
         <div class="text-xs font-bold text-cozy-sub flex items-center justify-between mb-1 gap-1">
-          <span class="flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"><i class="fa-solid fa-cloud-sun text-sky-600"></i> 即時出發地氣溫</span>
+          <span class="flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
+            <i class="fa-solid fa-cloud-sun text-sky-600"></i> 即時出發地氣溫
+          </span>
           
           <select 
             x-model="selectedCityKey" 
@@ -259,15 +261,35 @@
             </template>
           </select>
         </div>
-        <div class="flex items-baseline justify-between my-1">
-          <div class="text-3xl font-black text-cozy-text tracking-tight">
-            <span x-text="currentWeather.temp">--</span>°C
-          </div>
-          <div class="text-xs text-cozy-sub font-bold flex items-center gap-1 bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200/60">
-            <i class="fa-solid fa-umbrella text-sky-500"></i>降雨率 <span x-text="currentWeather.rain">--</span>%
-          </div>
+
+        <div class="flex items-center justify-between gap-1 my-1.5">
+      <!-- 氣溫 -->
+      <div class="text-3xl font-black text-cozy-text tracking-tight flex-shrink-0">
+        <span x-text="currentWeather.temp">--</span>°C
+      </div>
+
+      <!-- 兩個等高 (h-7)、統一字級與單行不折字的資訊方塊 -->
+      <div class="flex items-center gap-1.5 justify-end">
+        <!-- 1. 天氣狀況方塊 -->
+        <div class="h-7 px-2 rounded-lg bg-amber-50 border border-amber-200/80 text-amber-900 font-bold text-[11px] flex items-center gap-1 whitespace-nowrap shadow-2xs">
+          <i :class="currentWeather.icon" class="text-xs"></i>
+          <span x-text="currentWeather.desc">--</span>
         </div>
-        <div class="text-[10px] text-slate-400 text-right font-medium">10 分鐘自動更新</div>
+
+        <!-- 2. 今日降雨率方塊 -->
+        <div class="h-7 px-2 rounded-lg bg-sky-50 border border-sky-200/80 text-sky-950 font-bold text-[11px] flex items-center gap-1 whitespace-nowrap shadow-2xs">
+          <i class="fa-solid fa-umbrella text-sky-500 text-xs"></i>
+          <span>今日降雨 <span class="font-extrabold" x-text="currentWeather.rainProb">--</span>%</span>
+        </div>
+      </div>
+    </div>
+
+        <!-- 即時降雨量 + 即時風速 + 自動更新提示 -->
+        <div class="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-dashed border-cozy-border font-semibold">
+          <span class="flex items-center gap-1"><i class="fa-solid fa-droplet text-sky-400"></i>雨量: <b class="text-stone-700" x-text="currentWeather.precipitation">0</b> mm</span>
+          <span class="flex items-center gap-1"><i class="fa-solid fa-wind text-teal-500"></i>風速: <b class="text-stone-700" x-text="currentWeather.windSpeed">0</b> km/h</span>
+          <span class="text-slate-400 font-normal">10分更新</span>
+        </div>
       </div>
 
       <!-- 3. 匯率試算 -->
@@ -1148,7 +1170,7 @@
 
           <div class="bg-amber-50/90 border border-amber-200/90 rounded-xl p-3 text-[11px] text-amber-950 font-medium leading-relaxed">
             <i class="fa-solid fa-circle-info text-amber-600 mr-1"></i>
-            紐西蘭停車多數是先付款（預繳制）。停好車後，必須先預估停留時間並在繳費機台或APP完成付費，不要停完才付，否則會被視為未繳費而收到高額罰單。
+            紐西蘭停車部分停車場採預繳制，請依現場標誌、停車機或App指示付款。預繳制請先預估停留時間並在繳費機台或App完成付費，不要停完才付，否則會被視為未繳費而收到高額罰單。
           </div>
 
           <div class="overflow-x-auto custom-scrollbar">
@@ -1648,7 +1670,29 @@
           'Milford Sound': { name: '米佛峽灣 (Milford Sound)', lat: -44.6716, lng: 167.9256 }
         },
         selectedCityKey: 'Christchurch',
-        currentWeather: { temp: '--', rain: '--' },
+        currentWeather: { 
+          temp: '--', 
+          desc: '載入中', 
+          icon: 'fa-solid fa-cloud-sun text-amber-500', 
+          precipitation: '0.0', 
+          windSpeed: '--', 
+          rainProb: '--' 
+        },
+
+        getWmoWeatherInfo(code) {
+          switch(code) {
+            case 0: return { desc: '晴朗', icon: 'fa-solid fa-sun text-amber-500' };
+            case 1: case 2: return { desc: '多雲時晴', icon: 'fa-solid fa-cloud-sun text-amber-500' };
+            case 3: return { desc: '陰天', icon: 'fa-solid fa-cloud text-slate-400' };
+            case 45: case 48: return { desc: '有霧', icon: 'fa-solid fa-smog text-slate-400' };
+            case 51: case 53: case 55: return { desc: '毛毛細雨', icon: 'fa-solid fa-cloud-rain text-sky-400' };
+            case 61: case 63: case 65: return { desc: '陣雨/降雨', icon: 'fa-solid fa-cloud-showers-heavy text-sky-600' };
+            case 71: case 73: case 75: return { desc: '降雪', icon: 'fa-solid fa-snowflake text-sky-300' };
+            case 80: case 81: case 82: return { desc: '強陣雨', icon: 'fa-solid fa-cloud-showers-water text-indigo-500' };
+            case 95: case 96: case 99: return { desc: '雷陣雨', icon: 'fa-solid fa-cloud-bolt text-purple-600' };
+            default: return { desc: '多雲', icon: 'fa-solid fa-cloud-sun text-amber-500' };
+          }
+        },
 
         sunRise: '--:--',
         sunSet: '--:--',
@@ -1774,16 +1818,33 @@
         async fetchWeather() {
           const city = this.cityCoords[this.selectedCityKey] || this.cityCoords['Christchurch'];
           try {
-            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lng}&current=temperature_2m,precipitation_probability&timezone=auto`);
+            const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lng}&current=temperature_2m,precipitation,weather_code,wind_speed_10m&daily=precipitation_probability_max&timezone=auto&forecast_days=1`;
+            const res = await fetch(apiUrl);
             if (!res.ok) throw new Error();
             const data = await res.json();
+
             if (data && data.current) {
               this.currentWeather.temp = Math.round(data.current.temperature_2m);
-              this.currentWeather.rain = data.current.precipitation_probability !== undefined ? data.current.precipitation_probability : 0;
+              this.currentWeather.precipitation = (data.current.precipitation !== undefined) ? data.current.precipitation.toFixed(1) : '0.0';
+              this.currentWeather.windSpeed = Math.round(data.current.wind_speed_10m || 0);
+
+              const weatherInfo = this.getWmoWeatherInfo(data.current.weather_code);
+              this.currentWeather.desc = weatherInfo.desc;
+              this.currentWeather.icon = weatherInfo.icon;
+            }
+
+            if (data && data.daily && data.daily.precipitation_probability_max && data.daily.precipitation_probability_max[0] !== undefined) {
+              this.currentWeather.rainProb = data.daily.precipitation_probability_max[0];
+            } else {
+              this.currentWeather.rainProb = 0;
             }
           } catch (e) {
             this.currentWeather.temp = '--';
-            this.currentWeather.rain = '--';
+            this.currentWeather.desc = '無信號';
+            this.currentWeather.icon = 'fa-solid fa-circle-question text-slate-300';
+            this.currentWeather.precipitation = '--';
+            this.currentWeather.windSpeed = '--';
+            this.currentWeather.rainProb = '--';
           }
         },
 
@@ -2230,13 +2291,13 @@
                   {
                     groupTitle: "Group 1",
                     items: [
-                      { name: "Fox Glacier 福克斯冰河健行", tag: "預約活動", alert: "預約 11:50 梯次 (4hr)", note: "直升機冰川健行體驗", url: "https://maps.google.com/?q=Fox+Glacier+Guiding+Glacier+Tours+%26+Adventures" }
+                      { name: "Fox Glacier 福克斯冰河健行", tag: "預約活動", alert: "預約 11:50 梯次 (4hr)", note: "直升機冰川健行體驗，受雲量/天候影響，不保證出發", url: "https://maps.google.com/?q=Fox+Glacier+Guiding+Glacier+Tours+%26+Adventures" }
                     ]
                   },
                   {
                     groupTitle: "Group 2",
                     items: [
-                      { name: "三冰河直升機飛行 (含著陸)", tag: "預約活動", alert: "預約 12:00 梯次 (40mins)", note: "觀覽冰河景色含冰河降落", url: "https://maps.google.com/?q=The+Helicopter+Line+Fox+Glacier" }
+                      { name: "三冰河直升機飛行 (含著陸)", tag: "預約活動", alert: "預約 12:00 梯次 (40mins)", note: "觀覽冰河景色含冰河降落，受雲量/天候影響，不保證出發", url: "https://maps.google.com/?q=The+Helicopter+Line+Fox+Glacier" }
                     ]
                   }
                 ]
@@ -2266,22 +2327,21 @@
                   {
                     groupTitle: "Group 1",
                     items: [
-                      { name: "Franz Josef Glacier 冰河健行", tag: "預約活動", alert: "預約 07:30 梯次 (4hr)", note: "法蘭士約瑟夫冰河健行", url: "https://maps.google.com/?q=Franz Josef Glacier Guides" }
+                      { name: "Franz Josef Glacier 冰河健行", tag: "預約活動", alert: "預約 07:30 梯次 (4hr)", note: "法蘭士約瑟夫冰河健行，受雲量/天候影響，不保證出發", url: "https://maps.google.com/?q=Franz Josef Glacier Guides" }
                     ]
                   },
                   {
                     groupTitle: "Group 2",
                     items: [
-                      { name: "三冰河直升機飛行 (含著陸)", tag: "預約活動", alert: "預約 08:15 梯次 (45mins)", note: "觀覽冰河景色含冰河降落", url: "https://maps.google.com/?q=Glacier+Country+Helicopters" }
+                      { name: "三冰河直升機飛行 (含著陸)", tag: "預約活動", alert: "預約 08:15 梯次 (45mins)", note: "觀覽冰河景色含冰河降落，受雲量/天候影響，不保證出發", url: "https://maps.google.com/?q=Glacier+Country+Helicopters" }
                     ]
                   }
                 ]
               },
               { name: "Matheson Cafe", tag: "美食", driveTime: "開車 40 分鐘", note: "午餐", url: "https://maps.google.com/?q=Lake+Matheson+parking" },
               { name: "Knights Point Lookout 武士角觀景台", tag: "景點", driveTime: "開車 1 小時 15 分鐘", note: "停車休息拍照 (有廁所)", url: "https://maps.google.com/?q=Knights+Point+Lookout" },
-              { name: "Thunder Creek Falls 雷霆溪瀑布", tag: "景點", driveTime: "開車 70 分鐘", note: "停車休息拍照", url: "https://maps.google.com/?q=Thunder+Creek+Falls" },
-              { name: "Makarora Public Toilets", tag: "休憩", note: "公廁休憩點", url: "https://maps.app.goo.gl/a8ScFMsxHxwJk8fHA" },
-              { name: "Lake Hawea Lookout 哈威亞湖觀景台", tag: "景點", driveTime: "開車 65 分鐘", note: "停車休息拍照", url: "https://maps.app.goo.gl/NCbFjbbBYRQ878Rg6" },
+              { name: "Makarora Public Toilets", tag: "休憩", note: "公廁休憩點", driveTime: "開車 1 小時 40 分鐘", url: "https://maps.app.goo.gl/a8ScFMsxHxwJk8fHA" },
+              { name: "Lake Hawea Lookout 哈威亞湖觀景台", tag: "景點", driveTime: "開車 40 分鐘", note: "停車休息拍照", url: "https://maps.app.goo.gl/NCbFjbbBYRQ878Rg6" },
               { name: "Muttonbird (預訂 19:30)", tag: "美食", alert: "已預訂 19:30 晚餐", note: "晚餐", url: "https://maps.google.com/?q=Muttonbird+Wanaka" },
               { name: "ASURE Brookvale Motel", tag: "住宿", note: "當日住宿飯店", url: "https://maps.google.com/?q=ASURE+Brookvale+Motel" }
             ]
@@ -2369,8 +2429,8 @@
               d: "The Fat Duck", dUrl: "https://maps.google.com/?q=The+Fat+Duck+Te+Anau", 
             },
             spots: [
-              { name: "06:45 出發 (拉車時間長)", tag: "自駕", alert: "非常早出門，前一天沒事早點睡，下午才用餐，怕肚子餓的請車上自行備食物！", url: "" },
-              { name: "Marmolada Cafe", tag: "補給", note: "06:00開", url: "https://maps.google.com/?q=Marmolada+Cafe+Queenstown" },
+              { name: "06:30 出發 (拉車時間長)", tag: "自駕", alert: "非常早出門，前一天沒事早點睡，下午才用餐，怕肚子餓的請車上自行備食物！", url: "" },
+              { name: "Marmolada Cafe", tag: "補給", note: "06:00開, 需要咖啡的可以出發前先去買", url: "https://maps.google.com/?q=Marmolada+Cafe+Queenstown" },
               { name: "Sandfly Cafe (Te Anau)", tag: "美食", driveTime: "開車約 2 小時 20 分鐘", note: "早餐", url: "https://maps.google.com/?q=Sandfly+Cafe+Te+Anau" },
               { name: "Te Anau (Allied 加油站)", tag: "加油", note: "加油", url: "https://maps.google.com/?q=Allied+Te+Anau" },
               { name: "Mirror Lakes 鏡湖", tag: "景點", note: "停車拍照", url: "https://maps.google.com/?q=Mirror+Lakes" },
@@ -2401,7 +2461,7 @@
               { name: "High Country Salmon 高地鄉村鮭魚", tag: "美食", driveTime: "開車約 20 分鐘", note: "生魚片 (10:00~)", url: "https://maps.google.com/?q=High+Country+Salmon" },
               { name: "Twizel (McKeown 加油站)", tag: "加油",note: "加油", url: "https://maps.google.com/?q=McKeown+Twizel+CardFuel" },
               { name: "Lake Pukaki 普卡基湖", tag: "景點", driveTime: "開車約 20 分鐘" , note: "停車拍照上廁所", url: "https://maps.google.com/?q=Tapataia+Mahaka +Peter's+Lookout" },
-              { name: "Hooker Valley Track 健行", tag: "健行", driveTime: "開車約 40 分鐘" , note: "10.5 km 平緩步道，來回約 3-4 小時", url: "https://maps.google.com/?q=Hooker+Valley+Track" },
+              { name: "Hooker Valley Track 健行", tag: "健行", driveTime: "開車約 45 分鐘" , note: "10.5 km 平緩步道，來回約 3-4 小時, 停車費$25/日(Card Only）", url: "https://maps.google.com/?q=Hooker+Valley+Track" },
               { name: "庫克山國家公園遊客中心", tag: "景點", note: "Aoraki/Mount Cook Visitor Centre", url: "https://maps.google.com/?q=Aoraki+Mount+Cook+National+Park+Visitor+Centre" },
               { name: "The Old Mountaineers Cafe", tag: "美食", note: "午餐", url: "https://maps.google.com/?q=The+Old+Mountaineers+Cafe+Mount+Cook" },
               { name: "Alpine Restaurant", tag: "美食", alert: "已預訂 19:00", note: "飯店晚餐", url: "https://maps.google.com/?q=Alpine+Restaurant" },
@@ -2423,14 +2483,14 @@
             spots: [
               { name: "Alpine Restaurant", tag: "美食", note: "飯店早餐 06:30~", url: "https://maps.google.com/?q=Alpine+Restaurant" },
               { name: "Glacier Explorer", tag: "預約活動", alert: "預約 08:45~11:30", note: "需步行1.5km（25分鐘內)＋搭船1小時，原路來回", url: "https://maps.google.com/?q=Glacier Explorer" },
-              { name: "Tasman Lake Track 塔斯曼湖步道", tag: "健行", driveTime: "開車 15 分鐘", note: "來回約 1 小時", url: "https://maps.google.com/?q=Tasman +Glacier+Car+Park+New+Zealand" },
+              { name: "Tasman Lake Track 塔斯曼湖步道（備用行程）", tag: "健行", driveTime: "開車 15 分鐘", note: "來回約 1 小時", url: "https://maps.google.com/?q=Tasman +Glacier+Car+Park+New+Zealand" },
               { name: "Mt Cook Alpine Salmon Shop", tag: "美食", driveTime: "開車約 55 分鐘", note: "生魚片", url: "https://maps.google.com/?q=Mt+Cook+Alpine +Salmon+Shop" },
-              { name: "Mt John Observatory 約翰山天文台", tag: "景點", driveTime: "開車 50 分鐘", note: "賞魯冰花，停車 NZD $8 (Card Only)", url: "https://maps.google.com/?q=Mt+John+Observatory" },
+              { name: "Mt John Observatory 約翰山天文台", tag: "景點", driveTime: "開車 50 分鐘", note: "賞魯冰花，停車費$8 (Card Only)", url: "https://maps.google.com/?q=Mt+John+Observatory" },
               { name: "The Better Batter NZ", tag: "美食", note: "炸魚薯條", url: "https://maps.google.com/?q=The+Better+Batter+NZ" },
               { name: "The Church of the Good Shepherd", tag: "景點", note: "善良牧羊人教堂 (教堂內禁止拍照)", url: "https://maps.google.com/?q=The+Church+of+the+ Good+Shepherd+New+Zealand" },
               { name: "The Sheepdog Memorial", tag: "景點", note: "牧羊犬雕像", url: "https://maps.google.com/?q=The+Sheepdog+Memorial" },
               { name: "TLV Restaurant & Bar", tag: "美食", alert: "尚未預約" , note: "晚餐", url: "https://maps.google.com/?q=TLV+Restaurant+%26+Bar+Lake+Tekapo" },
-              { name: "Crater Stargazing 觀星體驗", tag: "預約活動", alert: "預約 23:30", note: "Dark Sky Project 火山口夜間觀星", url: "https://maps.google.com/?q=Dark+Sky+Project" },
+              { name: "Crater Stargazing 觀星體驗", tag: "預約活動", alert: "預約 23:30", note: "Dark Sky Project 火山口夜間觀星，受雲量/天候影響，不保證可見", url: "https://maps.google.com/?q=Dark+Sky+Project" },
               { name: "Peppers Bluewater Resort Lake Tekapo", tag: "住宿", note: "當日住宿飯店", url: "https://maps.google.com/?q=Peppers+Bluewater+Resort+Lake+Tekapo" }
             ]
           },
@@ -2476,7 +2536,7 @@
           { id: "02", text: "要帶墨鏡、雨傘、防曬乳，紐西蘭紫外線極強。" },
           { id: "03", text: "西海岸沿岸靠水區域都有很多\"沙蠅\"，如不噴沙蠅水或含DEET等高強度防蚊液，請穿長袖長褲，被咬可能紅腫一週以上。" },
           { id: "04", text: "搭車時間長，全程預估約2100km，如會暈車者請自行準備暈車藥。" },
-          { id: "05", text: "不允許帶水果，飛機上任何食物（包含餅乾），請都不要帶下飛機。" },
+          { id: "05", text: "不允許帶水果，飛機上任何食物（包含餅乾），請不要帶下飛機。" },
           { id: "06", text: "盡可能不要帶泡麵&餅乾，肚子餓請買當地食物。任何可以放進嘴巴的帶進紐西蘭就要申報，有疑慮沒申報被查到先罰 400 紐幣！" },
           { id: "07", text: "當地使用信用卡消費如有幣別選擇，記得選紐幣$NZD，店家帳單可能會額外出現一筆加收 1.5~2.5% 刷卡手續費（與海外刷卡手續費不同）。" },
           { id: "08", text: "下車 \"一定\" 要把手機跟包包帶下車，不要放在座位上，包含外套，避免車窗被敲破小偷搜刮！" },
