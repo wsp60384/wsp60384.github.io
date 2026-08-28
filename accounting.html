@@ -1,46 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <script>
-    if (sessionStorage.getItem('nz_accounting_auth') !== 'passed') {
-      const pwd = prompt('請輸入旅費記帳存取密碼：');
-      if (pwd === '0000') {
-        sessionStorage.setItem('nz_accounting_auth', 'passed');
-      } else {
-        alert('密碼錯誤，即將返回首頁！');
-        window.location.href = './index.html';
-      }
-    }
-
-    // 強制重設捲動並建立焦點防護
-    if ('scrollRestoration' in history) {
-      history.scrollRestoration = 'manual';
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      window.scrollTo(0, 0);
-    });
-
-    window.addEventListener('load', () => {
-      window.scrollTo(0, 0);
-      // 多次強制釋放焦點，防止手機瀏覽器自動對焦捲動
-      if (document.activeElement) {
-        document.activeElement.blur();
-      }
-      setTimeout(() => {
-        window.scrollTo(0, 0);
-        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-        if (document.activeElement) {
-          document.activeElement.blur();
-        }
-      }, 50);
-      setTimeout(() => {
-        window.scrollTo(0, 0);
-        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-      }, 150);
-    });
-  </script>
-  
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>旅費記帳</title>
@@ -89,6 +49,26 @@
   </style>
 </head>
 <body class="min-h-screen pb-20 bg-cozy-bg text-cozy-text" x-data="expenseApp()">
+
+  <!-- 🔐 內嵌密碼解鎖遮罩層 (徹底取代容易造成手機滾動跑版的 prompt) -->
+  <div x-show="!isAuthenticated" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" style="display: none;">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-cozy-border text-center space-y-4">
+      <div class="w-12 h-12 rounded-2xl bg-amber-100 text-cozy-accent flex items-center justify-center mx-auto text-xl font-bold shadow-xs">
+        <i class="fa-solid fa-lock"></i>
+      </div>
+      <div>
+        <h3 class="text-base font-black text-stone-900">請輸入旅費記帳存取密碼</h3>
+        <p class="text-[11px] text-stone-500 font-bold mt-1">預設密碼為 0000</p>
+      </div>
+      <form @submit.prevent="checkPassword()">
+        <input type="password" x-model="inputPassword" placeholder="請輸入密碼..." class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-bold text-center tracking-widest focus:outline-none focus:border-cozy-accent mb-3">
+        <div class="flex gap-2">
+          <a href="./index.html" class="flex-1 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs flex items-center justify-center">返回首頁</a>
+          <button type="submit" class="flex-1 py-2 rounded-xl bg-cozy-accent hover:bg-orange-700 text-white font-black text-xs shadow-sm">確認進入</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- 頂部 Header -->
   <header class="bg-white/90 border-b border-cozy-border sticky top-0 z-30 backdrop-blur-md">
@@ -1128,6 +1108,22 @@
 
     function expenseApp() {
       return {
+        isAuthenticated: sessionStorage.getItem('nz_accounting_auth') === 'passed',
+        inputPassword: '',
+        
+        checkPassword() {
+          if (this.inputPassword === '0000') {
+            sessionStorage.setItem('nz_accounting_auth', 'passed');
+            this.isAuthenticated = true;
+            this.$nextTick(() => {
+              window.scrollTo(0, 0);
+            });
+          } else {
+            alert('密碼錯誤！');
+            this.inputPassword = '';
+          }
+        },
+
         currentTab: 'list',
         showExpenseModal: false,
         showPrepaidModal: false,
