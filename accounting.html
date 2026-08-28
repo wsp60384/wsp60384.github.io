@@ -2,32 +2,42 @@
 <html lang="zh-TW">
 <head>
   <script>
-   if (sessionStorage.getItem('nz_accounting_auth') !== 'passed') {
-     const pwd = prompt('請輸入旅費記帳存取密碼：');
-     if (pwd === '0000') {
-       sessionStorage.setItem('nz_accounting_auth', 'passed');
-     } else {
-       alert('密碼錯誤，即將返回首頁！');
-       window.location.href = './index.html';
-     }
-   }
-  </script>
+    if (sessionStorage.getItem('nz_accounting_auth') !== 'passed') {
+      const pwd = prompt('請輸入旅費記帳存取密碼：');
+      if (pwd === '0000') {
+        sessionStorage.setItem('nz_accounting_auth', 'passed');
+      } else {
+        alert('密碼錯誤，即將返回首頁！');
+        window.location.href = './index.html';
+      }
+    }
 
-  <script>
+    // 強制重設捲動並建立焦點防護
     if ('scrollRestoration' in history) {
       history.scrollRestoration = 'manual';
     }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      window.scrollTo(0, 0);
+    });
+
     window.addEventListener('load', () => {
       window.scrollTo(0, 0);
+      // 多次強制釋放焦點，防止手機瀏覽器自動對焦捲動
       if (document.activeElement) {
         document.activeElement.blur();
       }
       setTimeout(() => {
         window.scrollTo(0, 0);
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
         if (document.activeElement) {
           document.activeElement.blur();
         }
-      }, 100);
+      }, 50);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      }, 150);
     });
   </script>
   
