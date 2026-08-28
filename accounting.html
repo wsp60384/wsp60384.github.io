@@ -51,6 +51,12 @@
     }
     .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #d8cebe; border-radius: 9999px; }
+    .modal-scroll {
+      -webkit-overflow-scrolling: touch;
+      transform: translateZ(0);
+      will-change: scroll-position;
+      backface-visibility: hidden;
+    }
   </style>
 </head>
 <body class="min-h-screen pb-20 bg-cozy-bg text-cozy-text" x-data="expenseApp()">
@@ -107,7 +113,7 @@
       <div class="bg-cozy-card p-4 rounded-2xl border border-cozy-border shadow-xs flex flex-wrap items-center justify-between gap-3">
         <div class="text-xs text-cozy-sub font-bold flex items-center gap-1.5">
           <i class="fa-solid fa-calendar-day text-emerald-600"></i>
-          <span>匯率依消費日 VISA 國際匯率動態結算</span>
+          <span>匯率依消費日匯率動態結算</span>
         </div>
         <button @click="openExpenseModal()" class="w-full sm:w-auto px-4 py-2 bg-cozy-accent hover:bg-orange-700 text-white rounded-xl text-xs font-extrabold shadow-sm flex items-center justify-center gap-1.5 transition-all">
           <i class="fa-solid fa-plus"></i> 新增現場消費
@@ -596,7 +602,7 @@
         </button>
       </div>
 
-      <div class="overflow-y-auto custom-scrollbar pr-1 space-y-4 flex-1 text-xs">
+      <div class="overflow-y-auto custom-scrollbar modal-scroll pr-1 space-y-4 flex-1 text-xs">
         <div>
           <label class="font-bold text-stone-700 block mb-1.5">消費類別</label>
           <div class="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
@@ -1415,10 +1421,14 @@
           this.syncStatusText = '上傳中...';
 
           try {
-            await fetch(GOOGLE_SCRIPT_API_URL, {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15秒超時保護
+
+            const res = await fetch(GOOGLE_SCRIPT_API_URL, {
               method: 'POST',
-              mode: 'no-cors',
-              headers: { 'Content-Type': 'application/json' },
+              redirect: 'follow',
+              signal: controller.signal,
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
               body: JSON.stringify({
                 action: 'syncAll',
                 expenses: this.expenses,
@@ -1426,17 +1436,25 @@
                 transfers: this.transfers
               })
             });
+            clearTimeout(timeoutId);
 
-            setTimeout(() => {
+            const json = await res.json();
+
+            if (json && json.status === 'success') {
               this.syncStatusText = '雲端已同步';
-            }, 1500);
+            } else {
+              console.error('後端回傳非成功狀態:', json);
+              this.syncStatusText = '⚠️ 尚未同步';
+            }
 
           } catch (e) {
-            this.syncStatusText = '已存本地 (待同步)';
+            console.error('上傳失敗:', e);
+            this.syncStatusText = '⚠️ 尚未同步';
+          } finally {
             this.isSyncing = false;
           }
         },
-        
+                
         getExpenseCategoryStyle(catName) {
           const cat = this.expenseCategories.find(c => c.name === catName);
           return cat ? cat.bg : 'bg-slate-100 text-slate-800';
@@ -1552,9 +1570,14 @@
           }
 
           const rate = await this.fetchDailyRate(this.expenseForm.date);
-          const feePercent = (Number(this.expenseForm.serviceFeeRate) || 0) + (Number(this.expenseForm.cardFeeRate) || 0);
+          
+          // 分層連乘計算：先計服務費，再計刷卡手續費
+          const sRate = Number(this.expenseForm.serviceFeeRate) || 0;
+          const cRate = Number(this.expenseForm.cardFeeRate) || 0;
+          const feeMultiplier = (1 + sRate / 100) * (1 + cRate / 100);
+          
           const rawSubtotal = dishes.reduce((sum, d) => sum + (Number(d.price) || 0), 0);
-          const finalTotal = rawSubtotal * (1 + feePercent / 100);
+          const finalTotal = rawSubtotal * feeMultiplier;
 
           const itemData = {
             id: this.isEditingExpense ? this.editingId : ('exp_' + Date.now()),
@@ -1566,9 +1589,9 @@
             payer: this.expenseForm.payer,
             note: this.expenseForm.note ? this.expenseForm.note.trim() : '',
             receiptImg: this.expenseForm.receiptImg || '',
-            serviceFeeRate: Number(this.expenseForm.serviceFeeRate) || 0,
-            cardFeeRate: Number(this.expenseForm.cardFeeRate) || 0,
-            feeMultiplier: (1 + feePercent / 100),
+            serviceFeeRate: sRate,
+            cardFeeRate: cRate,
+            feeMultiplier: feeMultiplier,
             dishes: dishes.map(d => ({
               name: d.name.trim() || '項目細項',
               price: Number(d.price),
