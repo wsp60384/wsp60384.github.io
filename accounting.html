@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>旅費記帳</title>
   
   <!-- Tailwind CSS -->
@@ -50,17 +50,18 @@
 </head>
 <body class="min-h-screen pb-20 bg-cozy-bg text-cozy-text" x-data="expenseApp()">
 
-  <!-- 🔐 內嵌密碼解鎖遮罩層 (徹底取代容易造成手機滾動跑版的 prompt) -->
+  <!-- 🔐 內嵌密碼解鎖遮罩層 (無預設密碼、完美適配手機尺寸) -->
   <div x-show="!isAuthenticated" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" style="display: none;">
-    <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-cozy-border text-center space-y-4">
+    <div class="bg-white rounded-3xl p-5 sm:p-6 max-w-xs sm:max-w-sm w-full shadow-2xl border border-cozy-border text-center space-y-4">
       <div class="w-12 h-12 rounded-2xl bg-amber-100 text-cozy-accent flex items-center justify-center mx-auto text-xl font-bold shadow-xs">
         <i class="fa-solid fa-lock"></i>
       </div>
       <div>
         <h3 class="text-base font-black text-stone-900">請輸入旅費記帳存取密碼</h3>
-        <p class="text-[11px] text-stone-500 font-bold mt-1">預設密碼為 0000</p>
+        <p class="text-[11px] text-stone-500 font-bold mt-1">請向群組成員詢問存取密碼</p>
       </div>
       <form @submit.prevent="checkPassword()">
+        <!-- 移除預設密碼顯示，保持空白 -->
         <input type="password" x-model="inputPassword" placeholder="請輸入密碼..." class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-bold text-center tracking-widest focus:outline-none focus:border-cozy-accent mb-3">
         <div class="flex gap-2">
           <a href="./index.html" class="flex-1 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs flex items-center justify-center">返回首頁</a>
