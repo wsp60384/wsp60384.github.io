@@ -117,7 +117,7 @@
     }
   </style>
 </head>
-<body class="min-h-screen pb-16 relative" x-data="itineraryApp()">
+<body class="min-h-screen flex flex-col relative" x-data="itineraryApp()">
 
   <!-- 固定背景與遮罩 -->
   <div class="bg-image-container"></div>
@@ -364,7 +364,7 @@
 
   <!-- 固定 Tab 頁籤切換 -->
   <nav class="sticky top-0 z-40 bg-[#fcfbf7]/95 border-y border-cozy-border py-2.5 mb-6 shadow-sm">
-    <div class="max-w-4xl mx-auto px-4">
+    <main class="max-w-4xl mx-auto px-4 w-full flex-1">
       <div class="flex items-center gap-2 overflow-x-auto custom-scrollbar overscroll-x-contain scroll-smooth pb-0.5 -mx-1 px-1">
         <template x-for="(day, index) in itinerary" :key="'tab-'+index">
           <button 
@@ -748,6 +748,15 @@
 </div>
 
   </main>
+  
+  <!-- 最底下置中頁尾 -->
+  <footer class="mt-auto py-8 text-center text-xs text-cozy-sub select-none w-full">
+    <div class="inline-flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-full bg-stone-100/80 border border-cozy-border shadow-2xs">
+      <span>🇳🇿 紐西蘭南島自駕之旅 2026</span>
+      <span class="text-stone-300">|</span>
+      <span>Kia Ora! ✨</span>
+    </div>
+  </footer>
 
   <!-- 🚗 租車與自駕注意事項視窗 (Car Modal) -->
   <div 
@@ -1817,19 +1826,19 @@
         },
 
         selectDay(index) {
-          this.activeDay = index;
-          if (index !== 'notice' && this.itinerary[index]) {
-            const dayLocation = this.itinerary[index].startLocation;
-            for (let key in this.cityCoords) {
-              if (dayLocation.includes(key) || key.includes(dayLocation)) {
-                this.selectedCityKey = key;
-                break;
-              }
+        this.activeDay = index;
+        if (index !== 'notice' && this.itinerary[index]) {
+        const dayLocation = this.itinerary[index].startLocation.toLowerCase().trim();
+        for (let key in this.cityCoords) {
+        if (dayLocation.includes(key.toLowerCase()) || key.toLowerCase().includes(dayLocation)) {
+        this.selectedCityKey = key;
+        break;
             }
-            this.fetchWeather();
-            this.updateSunTimes();
-          }
-        },
+        }
+    this.fetchWeather();
+    this.updateSunTimes();
+  }
+},
 
         onCitySelectChange() {
           this.fetchWeather();
@@ -2238,7 +2247,7 @@
             dayCode: "D1",
             date: "10/23(五)",
             title: "台北出發 ✈️ 飛行與轉機",
-            startLocation: "Taipei (TPE)",
+            startLocation: "Taipei",
             stay: "飛機上",
             meals: { b: "自理", bUrl: "", l: "自理", lUrl: "", d: "飛機上", dUrl: "" },
             spots: [
