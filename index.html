@@ -218,43 +218,102 @@
         </a>
       </div>
     </div>
-
-    <!-- 頂端 3 欄 Dashboard 資訊卡片 -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 max-w-4xl mx-auto">
+    
+    <!-- Dashboard 資訊卡片區 (左側上下雙時區+匯率、右側即時天氣) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 max-w-3xl mx-auto items-stretch">
       
-      <!-- 1. 動態時間 & 時區 -->
-      <div class="bg-cozy-card p-4 rounded-2xl border border-cozy-border dash-card flex flex-col justify-between min-w-0">
-        <div class="text-xs font-bold text-cozy-sub flex items-center justify-between mb-2">
-          <span class="flex items-center gap-1.5"><i class="fa-solid fa-clock text-amber-600"></i> 即時雙時區</span>
-          <span class="text-[10px] bg-amber-100/80 text-amber-900 px-2 py-0.5 rounded-full font-bold" x-text="nzOffsetLabel"></span>
+      <!-- ⬅️ 左欄：上下兩格垂直容器 -->
+      <div class="flex flex-col gap-2.5 justify-between">
+        
+        <!-- 左上：動態時間 & 時區 & 日出日落 (精緻雙時區卡片) -->
+        <div class="bg-cozy-card px-3 py-2 rounded-xl border border-cozy-border dash-card flex-1 flex flex-col justify-between min-w-0 shadow-2xs">
+          <!-- 頂部標題與時差徽章 -->
+          <div class="text-[11px] font-bold text-cozy-sub flex items-center justify-between">
+            <span class="flex items-center gap-1">
+              <i class="fa-solid fa-earth-oceania text-amber-600 text-xs"></i> 即時雙時區
+            </span>
+            <span class="text-[9px] bg-amber-100/90 text-amber-950 px-1.5 py-0.2 rounded-full font-black border border-amber-200" x-text="nzOffsetLabel"></span>
+          </div>
+
+          <!-- 雙時區並列對照卡片 -->
+          <div class="grid grid-cols-2 gap-1.5 my-1">
+            <!-- 紐西蘭時間 -->
+            <div class="bg-gradient-to-br from-amber-50 to-orange-50/60 p-1.5 rounded-lg border border-amber-200/80 flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-black text-stone-800 flex items-center gap-1">
+                  <span>🇳🇿</span> 紐西蘭
+                </span>
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              </div>
+              <div class="mt-0.5 text-right">
+                <span class="font-mono font-black text-cozy-accent text-xs sm:text-sm tracking-tight" x-text="nzTime">--:--:--</span>
+              </div>
+            </div>
+
+            <!-- 台北時間 -->
+            <div class="bg-stone-50/90 p-1.5 rounded-lg border border-stone-200 flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-stone-600 flex items-center gap-1">
+                  <span>🇹🇼</span> 台北
+                </span>
+                <span class="text-[8px] text-stone-400 font-semibold">Home</span>
+              </div>
+              <div class="mt-0.5 text-right">
+                <span class="font-mono font-extrabold text-stone-700 text-xs sm:text-sm tracking-tight" x-text="taipeiTime">--:--:--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 底部日出日落 (靠中間排列，適度間隔) -->
+          <div class="flex items-center justify-center gap-5 pt-1 border-t border-dashed border-cozy-border text-[10px] text-cozy-sub font-bold">
+            <span class="flex items-center gap-1"><i class="fa-solid fa-sun text-amber-500 text-[10px]"></i> 日出 <span class="font-mono" x-text="sunRise">--:--</span></span>
+            <span class="text-stone-300">|</span>
+            <span class="flex items-center gap-1"><i class="fa-solid fa-moon text-indigo-400 text-[10px]"></i> 日落 <span class="font-mono" x-text="sunSet">--:--</span></span>
+          </div>
         </div>
-        <div class="space-y-1.5 text-xs">
-          <div class="flex justify-between items-center">
-            <span class="text-slate-600 font-semibold">🇹🇼 台北時間:</span>
-            <span class="font-extrabold text-cozy-text tracking-wide" x-text="taipeiTime">--:--:--</span>
+
+        <!-- 左下：紐幣匯率換算 -->
+        <div class="bg-cozy-card px-3 py-2 rounded-xl border border-cozy-border dash-card flex-1 flex flex-col justify-between text-xs min-w-0 shadow-2xs">
+          <div class="flex items-center justify-between mb-0.5">
+            <span class="font-bold text-cozy-sub flex items-center gap-1 text-[11px]">
+              <i class="fa-solid fa-calculator text-emerald-600 text-xs"></i> 紐幣試算
+            </span>
+            <span class="text-[9px] text-emerald-800 font-bold bg-emerald-100/80 px-1 py-0.2 rounded">1 NZD ≈ <span x-text="visaRate">19.25</span> TWD</span>
           </div>
-          <div class="flex justify-between items-center">
-            <span class="text-slate-600 font-semibold">🇳🇿 紐西蘭時間:</span>
-            <span class="font-extrabold text-cozy-accent tracking-wide" x-text="nzTime">--:--:--</span>
+
+          <div class="flex items-center gap-1.5 my-1">
+            <div class="relative flex-1">
+              <input type="number" x-model="nzdAmt" class="w-full bg-white border border-cozy-border rounded-md px-2 py-0.5 text-[11px] text-cozy-text font-bold focus:outline-none focus:border-cozy-accent shadow-inner">
+              <span class="absolute right-1 top-1 text-[8px] text-stone-400 font-bold">NZD</span>
+            </div>
+            <i class="fa-solid fa-arrow-right text-slate-400 text-[9px]"></i>
+            <div class="flex-1 bg-amber-50 border border-amber-200 rounded-md px-2 py-0.5 font-black text-cozy-accent text-right text-[11px] truncate">
+              NT$ <span x-text="(nzdAmt * visaRate).toFixed(0)"></span>
+            </div>
           </div>
-          <div class="flex justify-between items-center pt-2 border-t border-dashed border-cozy-border text-[11px] text-cozy-sub font-bold">
-            <span class="flex items-center gap-1"><i class="fa-solid fa-sun text-amber-500"></i> 日出 <span x-text="sunRise">--:--</span></span>
-            <span class="flex items-center gap-1"><i class="fa-solid fa-moon text-indigo-400"></i> 日落 <span x-text="sunSet">--:--</span></span>
+
+          <div class="flex items-center justify-between text-[9px] pt-1 border-t border-dashed border-cozy-border">
+            <span class="text-slate-400 font-semibold">快速:</span>
+            <div class="flex gap-1">
+              <button @click="nzdAmt = 10" class="px-1.5 py-0.2 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">10</button>
+              <button @click="nzdAmt = 25" class="px-1.5 py-0.2 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">25</button>
+              <button @click="nzdAmt = 50" class="px-1.5 py-0.2 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">50</button>
+              <button @click="nzdAmt = 100" class="px-1.5 py-0.2 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">100</button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- 2. 即時氣象 -->
-      <div class="bg-cozy-card p-4 rounded-2xl border border-cozy-border dash-card flex flex-col justify-between min-w-0">
-        <div class="text-xs font-bold text-cozy-sub flex items-center justify-between mb-1 gap-1">
-          <span class="flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
-            <i class="fa-solid fa-cloud-sun text-sky-600"></i> 即時出發地氣溫
+      <!-- ➡️ 右欄：即時氣象 (高密度 24 小時逐時滑動) -->
+      <div class="bg-cozy-card px-3 py-2 rounded-xl border border-cozy-border dash-card flex flex-col justify-between min-w-0 shadow-2xs">
+        <div class="text-[11px] font-bold text-cozy-sub flex items-center justify-between mb-0.5 gap-1">
+          <span class="flex items-center gap-1 whitespace-nowrap flex-shrink-0">
+            <i class="fa-solid fa-cloud-sun text-sky-600 text-xs"></i> 即時出發地氣溫
           </span>
-          
           <select 
             x-model="selectedCityKey" 
             @change="onCitySelectChange()"
-            class="text-[11px] font-bold bg-emerald-100/90 text-emerald-900 px-2 py-0.5 rounded-lg border border-emerald-300/80 focus:outline-none cursor-pointer truncate max-w-[130px] sm:max-w-[150px]"
+            class="text-[10px] font-bold bg-emerald-100/90 text-emerald-900 px-1.5 py-0.5 rounded-md border border-emerald-300/80 focus:outline-none cursor-pointer truncate max-w-[120px]"
           >
             <template x-for="(city, key) in cityCoords" :key="key">
               <option :value="key" x-text="city.name"></option>
@@ -262,72 +321,50 @@
           </select>
         </div>
 
-        <div class="flex items-center justify-between gap-1 my-1.5">
-      <!-- 氣溫 -->
-      <div class="text-3xl font-black text-cozy-text tracking-tight flex-shrink-0">
-        <span x-text="currentWeather.temp">--</span>°C
-      </div>
-
-      <!-- 兩個等高 (h-7)、統一字級與單行不折字的資訊方塊 -->
-      <div class="flex items-center gap-1.5 justify-end">
-        <!-- 1. 天氣狀況方塊 -->
-        <div class="h-7 px-2 rounded-lg bg-amber-50 border border-amber-200/80 text-amber-900 font-bold text-[11px] flex items-center gap-1 whitespace-nowrap shadow-2xs">
-          <i :class="currentWeather.icon" class="text-xs"></i>
-          <span x-text="currentWeather.desc">--</span>
+        <div class="flex items-center justify-between gap-1 my-0.5">
+          <div class="text-2xl font-black text-cozy-text tracking-tight flex-shrink-0">
+            <span x-text="currentWeather.temp">--</span>°C
+          </div>
+          <div class="flex items-center gap-1 justify-end">
+            <div class="h-6 px-1.5 rounded-md bg-amber-50 border border-amber-200/80 text-amber-900 font-bold text-[10px] flex items-center gap-1 whitespace-nowrap">
+              <i :class="currentWeather.icon" class="text-[10px]"></i>
+              <span x-text="currentWeather.desc">--</span>
+            </div>
+            <div class="h-6 px-1.5 rounded-md bg-sky-50 border border-sky-200/80 text-sky-950 font-bold text-[10px] flex items-center gap-1 whitespace-nowrap">
+              <i class="fa-solid fa-umbrella text-sky-500 text-[10px]"></i>
+              <span>降雨 <span class="font-extrabold" x-text="currentWeather.rainProb">--</span>%</span>
+            </div>
+          </div>
         </div>
 
-        <!-- 2. 今日降雨率方塊 -->
-        <div class="h-7 px-2 rounded-lg bg-sky-50 border border-sky-200/80 text-sky-950 font-bold text-[11px] flex items-center gap-1 whitespace-nowrap shadow-2xs">
-          <i class="fa-solid fa-umbrella text-sky-500 text-xs"></i>
-          <span>今日降雨 <span class="font-extrabold" x-text="currentWeather.rainProb">--</span>%</span>
-        </div>
-      </div>
-    </div>
-
-        <!-- 即時降雨量 + 即時風速 + 自動更新提示 -->
-        <div class="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-dashed border-cozy-border font-semibold">
+        <div class="flex items-center justify-between text-[9px] text-slate-500 pt-0.5 border-t border-dashed border-cozy-border font-semibold">
           <span class="flex items-center gap-1"><i class="fa-solid fa-droplet text-sky-400"></i>雨量: <b class="text-stone-700" x-text="currentWeather.precipitation">0</b> mm</span>
           <span class="flex items-center gap-1"><i class="fa-solid fa-wind text-teal-500"></i>風速: <b class="text-stone-700" x-text="currentWeather.windSpeed">0</b> km/h</span>
           <span class="text-slate-400 font-normal">10分更新</span>
         </div>
-      </div>
 
-      <!-- 3. 匯率試算 -->
-      <div class="bg-cozy-card p-4 rounded-2xl border border-cozy-border dash-card flex flex-col justify-between text-xs min-w-0">
-        <div class="flex items-center justify-between mb-1">
-          <span class="font-bold text-cozy-sub flex items-center gap-1.5">
-            <i class="fa-solid fa-calculator text-emerald-600"></i> 紐幣 (NZD) 試算
-          </span>
-          <span class="text-[10px] text-emerald-800 font-bold bg-emerald-100/80 px-1.5 py-0.5 rounded">1 NZD ≈ <span x-text="visaRate">19.25</span> TWD</span>
-        </div>
-        <div class="flex items-center gap-2 my-1">
-          <div class="relative flex-1">
-            <input type="number" x-model="nzdAmt" class="w-full bg-white/95 border border-cozy-border rounded-lg px-2.5 py-1 text-xs text-cozy-text font-bold focus:outline-none focus:border-cozy-accent shadow-inner">
-            <span class="absolute right-2 top-1 text-[9px] text-cozy-sub font-bold">NZD</span>
-          </div>
-          <i class="fa-solid fa-arrow-right text-slate-400 text-[10px]"></i>
-          <div class="flex-1 bg-amber-50/95 border border-amber-200/90 rounded-lg px-2.5 py-1 font-extrabold text-cozy-accent text-right shadow-sm">
-            NT$ <span x-text="(nzdAmt * visaRate).toFixed(0)" class="text-xs"></span>
-          </div>
-        </div>
-        <div class="flex items-center justify-between text-[10px] pt-1">
-          <span class="text-slate-400">快捷:</span>
-          <div class="flex gap-1">
-            <button @click="nzdAmt = 5" class="px-1.5 py-0.5 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">5</button>
-            <button @click="nzdAmt = 10" class="px-1.5 py-0.5 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">10</button>
-            <button @click="nzdAmt = 15" class="px-1.5 py-0.5 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">15</button>
-            <button @click="nzdAmt = 25" class="px-1.5 py-0.5 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">25</button>
-            <button @click="nzdAmt = 50" class="px-1.5 py-0.5 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">50</button>
+        <!-- 24小時逐時天氣滑動區 -->
+        <div class="mt-1 pt-1 border-t border-dashed border-cozy-border">
+          <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar overscroll-x-contain scroll-smooth pb-0.5 -mx-1 px-1">
+            <template x-for="(h, idx) in hourlyWeather" :key="'h-'+idx">
+              <div class="flex flex-col items-center flex-shrink-0 min-w-[32px] text-center py-0.2 px-0.5 rounded hover:bg-amber-50/60">
+                <span class="text-[8px] font-bold" :class="idx === 0 ? 'text-cozy-accent font-black' : 'text-stone-400'" x-text="h.time"></span>
+                <i :class="h.icon" class="text-[10px] my-0.5"></i>
+                <span class="text-[10px] font-black text-stone-800"><span x-text="h.temp"></span>°</span>
+                <span x-show="h.rain > 0" class="text-[7px] font-bold text-sky-600 leading-none mt-0.2"><span x-text="h.rain"></span>%</span>
+                <span x-show="!h.rain || h.rain === 0" class="text-[7px] text-transparent leading-none mt-0.2 select-none">-</span>
+              </div>
+            </template>
           </div>
         </div>
       </div>
     </div>
-  </header>
+</header>
 
   <!-- 固定 Tab 頁籤切換 -->
   <nav class="sticky top-0 z-40 bg-[#fcfbf7]/95 border-y border-cozy-border py-2.5 mb-6 shadow-sm">
     <div class="max-w-4xl mx-auto px-4">
-      <div class="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-0.5">
+      <div class="flex items-center gap-2 overflow-x-auto custom-scrollbar overscroll-x-contain scroll-smooth pb-0.5 -mx-1 px-1">
         <template x-for="(day, index) in itinerary" :key="'tab-'+index">
           <button 
             @click="selectDay(index)"
@@ -362,7 +399,7 @@
                 <i class="fa-solid fa-location-dot text-amber-600"></i> 當日出發地氣溫
               </div>
               <div class="text-sm font-black text-cozy-text mt-0.5 whitespace-nowrap">
-                <span x-text="currentDayData.startLocation"></span> : <span class="text-cozy-accent" x-text="currentWeather.temp"></span>°C
+              <span x-text="currentDayData.startLocation"></span> : <span class="text-cozy-accent" x-text="currentWeather.temp"></span>°C
               </div>
             </div>
           </div>
@@ -1658,16 +1695,17 @@
         nzOffsetLabel: '+5h (夏令)',
         
         cityCoords: {
-          'Christchurch': { name: '基督城 (Christchurch)', lat: -43.5321, lng: 172.6362 },
-          'Taipei': { name: '台北 (Taipei)', lat: 25.0330, lng: 121.5654 },
-          'Auckland': { name: '奧克蘭 (Auckland)', lat: -36.8485, lng: 174.7633 },
-          'Hokitika': { name: '霍基蒂卡 (Hokitika)', lat: -42.7167, lng: 170.9667 },
-          'Franz Josef': { name: '法蘭士約瑟夫 (Franz Josef)', lat: -43.3872, lng: 170.1840 },
-          'Wanaka': { name: '瓦納卡 (Wanaka)', lat: -44.7000, lng: 169.1500 },
-          'Queenstown': { name: '皇后鎮 (Queenstown)', lat: -45.0311, lng: 168.6625 },
-          'Aoraki Mount Cook National Park': { name: '庫克山國家公園 (Aoraki Mount Cook)', lat: -43.7330, lng: 170.0935 },
-          'Tekapo': { name: '蒂卡波湖 (Lake Tekapo)', lat: -44.0044, lng: 170.4771 },
-          'Milford Sound': { name: '米佛峽灣 (Milford Sound)', lat: -44.6716, lng: 167.9256 }
+        'Christchurch': { name: '基督城 (Christchurch)', lat: -43.5321, lng: 172.6362 },
+        'Taipei': { name: '台北 (Taipei)', lat: 25.0330, lng: 121.5654 },
+        'Auckland': { name: '奧克蘭 (Auckland)', lat: -36.8485, lng: 174.7633 },
+        'Hokitika': { name: '霍基蒂卡 (Hokitika)', lat: -42.7167, lng: 170.9667 },
+        'Franz Josef': { name: '法蘭士約瑟夫 (Franz Josef)', lat: -43.3872, lng: 170.1840 },
+        'Wanaka': { name: '瓦納卡 (Wanaka)', lat: -44.7000, lng: 169.1500 },
+        'Queenstown': { name: '皇后鎮 (Queenstown)', lat: -45.0311, lng: 168.6625 },
+        'Aoraki Mount Cook National Park': { name: '庫克山 (Mount Cook)', lat: -43.7330, lng: 170.0935 },
+        'Mount Cook': { name: '庫克山 (Mount Cook)', lat: -43.7330, lng: 170.0935 },
+        'Tekapo': { name: '蒂卡波湖 (Lake Tekapo)', lat: -44.0044, lng: 170.4771 },
+        'Milford Sound': { name: '米佛峽灣 (Milford Sound)', lat: -44.6716, lng: 167.9256 }
         },
         selectedCityKey: 'Christchurch',
         currentWeather: { 
@@ -1678,6 +1716,7 @@
           windSpeed: '--', 
           rainProb: '--' 
         },
+        hourlyWeather: [], // 儲存未來 24 小時天氣資料
 
         getWmoWeatherInfo(code) {
           switch(code) {
@@ -1818,11 +1857,12 @@
         async fetchWeather() {
           const city = this.cityCoords[this.selectedCityKey] || this.cityCoords['Christchurch'];
           try {
-            const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lng}&current=temperature_2m,precipitation,weather_code,wind_speed_10m&daily=precipitation_probability_max&timezone=auto&forecast_days=1`;
+            const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lng}&current=temperature_2m,precipitation,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability&daily=precipitation_probability_max,sunrise,sunset&timezone=auto&forecast_days=2`;
             const res = await fetch(apiUrl);
             if (!res.ok) throw new Error();
             const data = await res.json();
 
+            // 1. 即時天氣資訊
             if (data && data.current) {
               this.currentWeather.temp = Math.round(data.current.temperature_2m);
               this.currentWeather.precipitation = (data.current.precipitation !== undefined) ? data.current.precipitation.toFixed(1) : '0.0';
@@ -1833,11 +1873,44 @@
               this.currentWeather.icon = weatherInfo.icon;
             }
 
-            if (data && data.daily && data.daily.precipitation_probability_max && data.daily.precipitation_probability_max[0] !== undefined) {
-              this.currentWeather.rainProb = data.daily.precipitation_probability_max[0];
-            } else {
-              this.currentWeather.rainProb = 0;
+            // 2. 今日最大降雨機率 & 日出日落（直接依選擇的城市即時切換）
+            if (data && data.daily) {
+              this.currentWeather.rainProb = (data.daily.precipitation_probability_max && data.daily.precipitation_probability_max[0] !== undefined) 
+                ? data.daily.precipitation_probability_max[0] : 0;
+              
+              if (data.daily.sunrise && data.daily.sunrise[0]) {
+                this.sunRise = data.daily.sunrise[0].split('T')[1].slice(0, 5);
+              }
+              if (data.daily.sunset && data.daily.sunset[0]) {
+                this.sunSet = data.daily.sunset[0].split('T')[1].slice(0, 5);
+              }
             }
+
+            // 3. 未來 24 小時逐時天氣解析
+            if (data && data.hourly && data.hourly.time && data.current && data.current.time) {
+              const currentHourStr = data.current.time.slice(0, 13);
+              let startIndex = data.hourly.time.findIndex(t => t.startsWith(currentHourStr));
+              if (startIndex === -1) startIndex = 0;
+
+              const next24 = [];
+              for (let i = startIndex; i < startIndex + 24 && i < data.hourly.time.length; i++) {
+                const timeStr = data.hourly.time[i];
+                const hourNum = timeStr.split('T')[1].slice(0, 5);
+                const tempVal = Math.round(data.hourly.temperature_2m[i]);
+                const codeVal = data.hourly.weather_code[i];
+                const rainVal = (data.hourly.precipitation_probability && data.hourly.precipitation_probability[i] !== undefined) ? data.hourly.precipitation_probability[i] : 0;
+                const info = this.getWmoWeatherInfo(codeVal);
+
+                next24.push({
+                  time: i === startIndex ? '現在' : hourNum,
+                  temp: tempVal,
+                  icon: info.icon,
+                  rain: rainVal
+                });
+              }
+              this.hourlyWeather = next24;
+            }
+
           } catch (e) {
             this.currentWeather.temp = '--';
             this.currentWeather.desc = '無信號';
@@ -1845,9 +1918,10 @@
             this.currentWeather.precipitation = '--';
             this.currentWeather.windSpeed = '--';
             this.currentWeather.rainProb = '--';
+            this.hourlyWeather = [];
           }
         },
-
+        
         async fetchFxRate() {
           try {
             const res = await fetch('https://open.er-api.com/v6/latest/NZD');
@@ -1862,33 +1936,8 @@
         },
 
         async updateSunTimes() {
-          if (this.activeDay === 'notice' || !this.currentDayData) return;
-          
-          try {
-            const currentDay = this.currentDayData;
-            const dateParts = currentDay.date.split('/');
-            const year = 2026;
-            const dateStr = `${year}-${dateParts[0].padStart(2, '0')}-${dateParts[1].padStart(2, '0')}`;
-            const city = this.cityCoords[this.selectedCityKey] || this.cityCoords['Christchurch'];
-
-            const res = await fetch(`https://api.sunrise-sunset.org/json?lat=${city.lat}&lng=${city.lng}&date=${dateStr}&formatted=0`);
-            if (!res.ok) throw new Error();
-            const data = await res.json();
-
-            if (data && data.results) {
-              const sr = new Date(data.results.sunrise);
-              const ss = new Date(data.results.sunset);
-
-              const srNz = sr.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Pacific/Auckland' });
-              const ssNz = ss.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Pacific/Auckland' });
-
-              this.sunRise = srNz;
-              this.sunSet = ssNz;
-            }
-          } catch (e) {
-            this.sunRise = '06:22';
-            this.sunSet = '20:05';
-          }
+          // 直接由 fetchWeather 統一取得精準的日出日落
+          await this.fetchWeather();
         },
 
         // 活動整理資料 (可展開詳細訂單與參加人)
@@ -2402,7 +2451,7 @@
                 b: "", 
                 l: "", 
                 br: "The Boat Shed Cafe", brUrl: "https://maps.google.com/?q=The+Boat+Shed+Cafe+Queenstown", 
-                d: "Winnies Gourmet Pizza Bar", dUrl: "https://maps.google.com/?q=Winnies+Gourmet+Pizza +Bar+Queenstown" },
+                d: "Winnies Gourmet Pizza Bar", dUrl: "https://maps.google.com/?q=Winnies+Gourmet+Pizza+Bar+Queenstown" },
             spots: [ 
               { name: "Queenstown Hill Walking Track（自由參加)", tag: "健行", note: "來回 5km 原路折返，爬升 450m (約 2~2.5hr)", url: "https://maps.google.com/?q=Queenstown+Hill+Walking+Track" },
               { name: "09:10 出發 ", tag: "自駕", url: "" },  
@@ -2413,7 +2462,7 @@
               { name: "Kiwi Birdlife Park 奇異鳥公園", tag: "景點", note: "保育類奇異鳥生態體驗", url: "https://maps.google.com/?q=Kiwi+Birdlife+Park" },
               { name: "Fergburger 著名漢堡", tag: "美食", note: "CNN 評比全世界最好吃漢堡 (營業 07:00~02:30)", url: "https://maps.google.com/?q=Fergburger" },
               { name: "自由活動 or 碼頭步道散步", tag: "景點", note: "Patagonia Chocolates 冰淇淋 / 逛街", url: "https://maps.google.com/?q=Patagonia+Chocolates+Queenstown" },
-              { name: "Winnies Gourmet Pizza Bar", tag: "美食", note: "晚餐", alert: "預約 19:00" , url: "https://maps.google.com/?q=Winnies+Gourmet+Pizza +Bar+Queenstown"},
+              { name: "Winnies Gourmet Pizza Bar", tag: "美食", note: "晚餐", alert: "預約 19:00" , url: "https://maps.google.com/?q=Winnies+Gourmet+Pizza+Bar+Queenstown"},
               { name: "Beacon Sky (Queenstown)", tag: "住宿", note: "當日住宿飯店 (民宿), <a href='https://m.duve.co/g/MV4Kev3qhV?id=post&gId=7qCxirqY-&affType=100&nflp=1' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>停車場車位號與鑰匙密碼 <i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a> , Wi-Fi: Luxe Stay 1002345 / QTownView03", url: "https://maps.app.goo.gl/ywcD33auGSh2kFZd7" }
             ]
           },
@@ -2460,7 +2509,7 @@
               { name: "The Wrinkly Rams", tag: "美食", driveTime: "開車約 2 小時 30 分鐘", note: "早餐", url: "https://maps.google.com/?q=The+Wrinkly+Rams" },
               { name: "High Country Salmon 高地鄉村鮭魚", tag: "美食", driveTime: "開車約 20 分鐘", note: "生魚片 (10:00~)", url: "https://maps.google.com/?q=High+Country+Salmon" },
               { name: "Twizel (McKeown 加油站)", tag: "加油",note: "加油", url: "https://maps.google.com/?q=McKeown+Twizel+CardFuel" },
-              { name: "Lake Pukaki 普卡基湖", tag: "景點", driveTime: "開車約 20 分鐘" , note: "停車拍照上廁所", url: "https://maps.google.com/?q=Tapataia+Mahaka +Peter's+Lookout" },
+              { name: "Lake Pukaki 普卡基湖", tag: "景點", driveTime: "開車約 20 分鐘" , note: "停車拍照上廁所", url: "https://maps.google.com/?q=Tapataia+Mahaka+Peter's+Lookout" },
               { name: "Hooker Valley Track 健行", tag: "健行", driveTime: "開車約 45 分鐘" , note: "10.5 km 平緩步道，來回約 3-4 小時, 停車費$25/日(Card Only）", url: "https://maps.google.com/?q=Hooker+Valley+Track" },
               { name: "庫克山國家公園遊客中心", tag: "景點", note: "Aoraki/Mount Cook Visitor Centre", url: "https://maps.google.com/?q=Aoraki+Mount+Cook+National+Park+Visitor+Centre" },
               { name: "The Old Mountaineers Cafe", tag: "美食", note: "午餐", url: "https://maps.google.com/?q=The+Old+Mountaineers+Cafe+Mount+Cook" },
@@ -2482,9 +2531,9 @@
             },
             spots: [
               { name: "Alpine Restaurant", tag: "美食", note: "飯店早餐 06:30~", url: "https://maps.google.com/?q=Alpine+Restaurant" },
-              { name: "Glacier Explorer", tag: "預約活動", alert: "預約 08:45~11:30", note: "需步行1.5km（25分鐘內)＋搭船1小時，原路來回", url: "https://maps.google.com/?q=Glacier Explorer" },
-              { name: "Tasman Lake Track 塔斯曼湖步道（備用行程）", tag: "健行", driveTime: "開車 15 分鐘", note: "來回約 1 小時", url: "https://maps.google.com/?q=Tasman +Glacier+Car+Park+New+Zealand" },
-              { name: "Mt Cook Alpine Salmon Shop", tag: "美食", driveTime: "開車約 55 分鐘", note: "生魚片", url: "https://maps.google.com/?q=Mt+Cook+Alpine +Salmon+Shop" },
+              { name: "Glacier Explorer", tag: "預約活動", alert: "預約 08:45~11:30", note: "需步行1.5km（25分鐘內)＋搭船1小時，原路來回", url: "https://maps.google.com/?q=Glacier+Explorer" },
+              { name: "Tasman Lake Track 塔斯曼湖步道（備用行程）", tag: "健行", driveTime: "開車 15 分鐘", note: "來回約 1 小時", url: "https://maps.google.com/?q=Tasman+Glacier+Car+Park+New+Zealand" },
+              { name: "Mt Cook Alpine Salmon Shop", tag: "美食", driveTime: "開車約 55 分鐘", note: "生魚片", url: "https://maps.google.com/?q=Mt+Cook+Alpine+Salmon+Shop" },
               { name: "Mt John Observatory 約翰山天文台", tag: "景點", driveTime: "開車 50 分鐘", note: "賞魯冰花，停車費$8 (Card Only)", url: "https://maps.google.com/?q=Mt+John+Observatory" },
               { name: "The Better Batter NZ", tag: "美食", note: "炸魚薯條", url: "https://maps.google.com/?q=The+Better+Batter+NZ" },
               { name: "The Church of the Good Shepherd", tag: "景點", note: "善良牧羊人教堂 (教堂內禁止拍照)", url: "https://maps.google.com/?q=The+Church+of+the+ Good+Shepherd+New+Zealand" },
