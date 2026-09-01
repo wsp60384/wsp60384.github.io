@@ -219,13 +219,44 @@
       </div>
     </div>
     
-    <!-- Dashboard 資訊卡片區 (左側上下雙時區+匯率、右側即時天氣) -->
+    <!-- Dashboard 資訊卡片區：匯率在上、時區與日出日落在下，右側即時天氣) -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 max-w-3xl mx-auto items-stretch">
       
-      <!-- ⬅️ 左欄：上下兩格垂直容器 -->
+      <!-- 上下兩格垂直容器 -->
       <div class="flex flex-col gap-2.5 justify-between">
         
-        <!-- 左上：動態時間 & 時區 & 日出日落 (精緻雙時區卡片) -->
+        <!-- 左上：紐幣匯率換算 -->
+        <div class="bg-cozy-card px-3 py-2 rounded-xl border border-cozy-border dash-card flex-1 flex flex-col justify-between text-xs min-w-0 shadow-2xs">
+          <div class="flex items-center justify-between mb-0.5">
+            <span class="font-bold text-cozy-sub flex items-center gap-1 text-[11px]">
+              <i class="fa-solid fa-calculator text-emerald-600 text-xs"></i> 紐幣試算
+            </span>
+            <span class="text-[9px] text-emerald-800 font-bold bg-emerald-100/80 px-1 py-0.2 rounded">1 NZD ≈ <span x-text="visaRate">19.25</span> TWD</span>
+          </div>
+
+          <div class="flex items-center gap-1.5 my-1">
+            <div class="relative flex-1">
+              <input type="number" x-model="nzdAmt" class="w-full bg-white border border-cozy-border rounded-md px-2 py-0.5 text-[11px] text-cozy-text font-bold focus:outline-none focus:border-cozy-accent shadow-inner">
+              <span class="absolute right-1 top-1 text-[8px] text-stone-400 font-bold">NZD</span>
+            </div>
+            <i class="fa-solid fa-arrow-right text-slate-400 text-[9px]"></i>
+            <div class="flex-1 bg-amber-50 border border-amber-200 rounded-md px-2 py-0.5 font-black text-cozy-accent text-right text-[11px] truncate">
+              NT$ <span x-text="(nzdAmt * visaRate).toFixed(0)"></span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between text-[9px] pt-1 border-t border-dashed border-cozy-border">
+            <span class="text-slate-400 font-semibold">快速:</span>
+            <div class="flex gap-1">
+              <button @click="nzdAmt = 10" class="px-1.5 py-0.2 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">10</button>
+              <button @click="nzdAmt = 25" class="px-1.5 py-0.2 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">25</button>
+              <button @click="nzdAmt = 50" class="px-1.5 py-0.2 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">50</button>
+              <button @click="nzdAmt = 100" class="px-1.5 py-0.2 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">100</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 左下：動態時間 & 時區 & 日出日落 (精緻雙時區卡片) -->
         <div class="bg-cozy-card px-3 py-2 rounded-xl border border-cozy-border dash-card flex-1 flex flex-col justify-between min-w-0 shadow-2xs">
           <!-- 頂部標題與時差徽章 -->
           <div class="text-[11px] font-bold text-cozy-sub flex items-center justify-between">
@@ -272,36 +303,6 @@
           </div>
         </div>
 
-        <!-- 左下：紐幣匯率換算 -->
-        <div class="bg-cozy-card px-3 py-2 rounded-xl border border-cozy-border dash-card flex-1 flex flex-col justify-between text-xs min-w-0 shadow-2xs">
-          <div class="flex items-center justify-between mb-0.5">
-            <span class="font-bold text-cozy-sub flex items-center gap-1 text-[11px]">
-              <i class="fa-solid fa-calculator text-emerald-600 text-xs"></i> 紐幣試算
-            </span>
-            <span class="text-[9px] text-emerald-800 font-bold bg-emerald-100/80 px-1 py-0.2 rounded">1 NZD ≈ <span x-text="visaRate">19.25</span> TWD</span>
-          </div>
-
-          <div class="flex items-center gap-1.5 my-1">
-            <div class="relative flex-1">
-              <input type="number" x-model="nzdAmt" class="w-full bg-white border border-cozy-border rounded-md px-2 py-0.5 text-[11px] text-cozy-text font-bold focus:outline-none focus:border-cozy-accent shadow-inner">
-              <span class="absolute right-1 top-1 text-[8px] text-stone-400 font-bold">NZD</span>
-            </div>
-            <i class="fa-solid fa-arrow-right text-slate-400 text-[9px]"></i>
-            <div class="flex-1 bg-amber-50 border border-amber-200 rounded-md px-2 py-0.5 font-black text-cozy-accent text-right text-[11px] truncate">
-              NT$ <span x-text="(nzdAmt * visaRate).toFixed(0)"></span>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between text-[9px] pt-1 border-t border-dashed border-cozy-border">
-            <span class="text-slate-400 font-semibold">快速:</span>
-            <div class="flex gap-1">
-              <button @click="nzdAmt = 10" class="px-1.5 py-0.2 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">10</button>
-              <button @click="nzdAmt = 25" class="px-1.5 py-0.2 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">25</button>
-              <button @click="nzdAmt = 50" class="px-1.5 py-0.2 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">50</button>
-              <button @click="nzdAmt = 100" class="px-1.5 py-0.2 rounded bg-amber-100/80 hover:bg-amber-200 text-amber-900 font-bold">100</button>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- ➡️ 右欄：即時氣象 (高密度 24 小時逐時滑動) -->
