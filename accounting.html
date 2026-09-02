@@ -379,6 +379,11 @@
               <span class="font-mono font-bold text-purple-900 text-xs" x-text="'每人 NT$ ' + Math.round(getItemFinalTWD(item) / (item.sharedWith ? item.sharedWith.length : 1)).toLocaleString()"></span>
             </div>
 
+            <div x-show="item.note" class="text-[11px] text-purple-900 font-bold bg-purple-50/80 px-2.5 py-1 rounded-lg border border-purple-150 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-info text-purple-600 text-[10px]"></i>
+              <span>備註：<span x-text="item.note"></span></span>
+            </div>
+
             <div class="flex justify-end gap-3 pt-1 border-t border-stone-100">
               <button @click="openPrepaidModal('活動票券', item)" class="text-xs text-indigo-600 hover:text-indigo-800 font-bold px-2 py-1 flex items-center gap-1">
                 <i class="fa-regular fa-pen-to-square"></i> 編輯
