@@ -1345,14 +1345,36 @@
         </div>
 
         <!-- 緊急求救與超速罰單警示 -->
-        <div class="bg-rose-50/90 border border-rose-200 p-3 rounded-xl text-[11px] text-rose-950 space-y-1">
-          <div class="font-bold text-rose-900 flex items-center gap-1.5">
+        <div class="bg-rose-50/90 border border-rose-200 p-3.5 rounded-2xl text-[11px] text-rose-950 space-y-2.5 shadow-2xs">
+          <div class="font-black text-rose-900 flex items-center gap-1.5 border-b border-rose-200/80 pb-1.5 text-xs">
             <i class="fa-solid fa-triangle-exclamation text-rose-600"></i> 緊急求救電話與超速開罰警示
           </div>
-          <p class="font-medium leading-relaxed text-[10px]">
-            ● <b>緊急求救電話</b>：撥打 <b>111</b>（警察、救護車、消防局）；非緊急事件撥打 <b>105</b>。<br>
+
+          <!-- 三大通報專線 -->
+          <div class="space-y-1.5 font-medium leading-relaxed">
+            <div class="flex items-center gap-1.5">
+              <span class="text-[8px] text-stone-400">●</span>
+              <a href="tel:111" class="inline-block text-white bg-rose-600 px-2 py-0.5 rounded-full text-[10px] font-black shadow-xs tracking-wider flex-shrink-0 hover:bg-rose-700 transition-colors">111</a>
+              <span>：傷亡車禍、嫌犯仍在場等（警察、救護車、消防局）。</span>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <span class="text-[8px] text-stone-400">●</span>
+              <a href="tel:105" class="inline-block text-white bg-orange-500 px-2 py-0.5 rounded-full text-[10px] font-black shadow-xs tracking-wider flex-shrink-0 hover:bg-orange-600 transition-colors">105</a>
+              <span>：非緊急事件、破窗嫌犯已逃逸等。</span>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <span class="text-[8px] text-stone-400">●</span>
+              <a href="tel:*555" class="inline-block text-stone-900 bg-amber-400 px-2 py-0.5 rounded-full text-[10px] font-black shadow-xs tracking-wider flex-shrink-0 hover:bg-amber-500 transition-colors">*555</a>
+              <span>：無人傷亡，擦撞小車禍。</span>
+            </div>
+          </div>
+
+          <!-- 超速警示 -->
+          <div class="pt-2 border-t border-dashed border-rose-200/80 text-[10px] leading-relaxed">
             ● <b>超速開罰</b>：紐西蘭警方對超速極為嚴格（容許誤差極低）！罰單會寄至租車公司並直接從信用卡扣款，且加收行政手續費，切勿超速。
-          </p>
+          </div>
         </div>
 
       </div>
@@ -2623,7 +2645,8 @@
           { id: "30", text: "Google Maps 請提早下載好全區離線地圖，避免郊區臨時收不到網路訊號。" },
           { id: "31", text: "行車途中對向車輛閃燈，可能代表前方路段有警察實施測速攔查。" },
           { id: "32", text: "靠近單向隧道口路邊可能設有紅綠燈，看到紅燈務必停車等候。" },
-          { id: "33", text: "想上廁所請提早說，首頁有 'Public toilet'可供查詢。" }
+          { id: "33", text: "想上廁所請提早說，首頁有 'Public toilet'可供查詢。" },
+          { id: "34", text: "緊急電話：<div class='mt-1.5 space-y-1.5'><div class='flex items-center gap-1.5'><span class='text-[8px] text-stone-400'>●</span><b class='inline-block text-white bg-rose-600 px-2 py-0.5 rounded-full text-[11px] font-black shadow-xs tracking-wider flex-shrink-0'>111</b><span>：危及生命、重大事故、有傷亡車禍、需警察/救護/消防即時救援。</span></div><div class='flex items-center gap-1.5'><span class='text-[8px] text-stone-400'>●</span><b class='inline-block text-white bg-orange-500 px-2 py-0.5 rounded-full text-[11px] font-black shadow-xs tracking-wider flex-shrink-0'>105</b><span>：非緊急事件、車窗被砸但嫌犯已逃逸、隨身財物失竊需要報案單申請保險理賠等。</span></div><div class='flex items-center gap-1.5'><span class='text-[8px] text-stone-400'>●</span><b class='inline-block text-stone-900 bg-amber-400 px-2 py-0.5 rounded-full text-[11px] font-black shadow-xs tracking-wider flex-shrink-0'>*555</b><span>：\"限手機\"直撥通報，危險駕駛、路上落石或大型掉落物、無人受傷擦撞小車禍。</span></div></div>" }
         ]
       }
     }
