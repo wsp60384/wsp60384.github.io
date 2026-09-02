@@ -352,8 +352,7 @@
                 <span class="text-[8px] font-bold" :class="idx === 0 ? 'text-cozy-accent font-black' : 'text-stone-400'" x-text="h.time"></span>
                 <i :class="h.icon" class="text-[10px] my-0.5"></i>
                 <span class="text-[10px] font-black text-stone-800"><span x-text="h.temp"></span>°</span>
-                <span x-show="h.rain > 0" class="text-[7px] font-bold text-sky-600 leading-none mt-0.2"><span x-text="h.rain"></span>%</span>
-                <span x-show="!h.rain || h.rain === 0" class="text-[7px] text-transparent leading-none mt-0.2 select-none">-</span>
+                <span class="text-[7px] font-bold leading-none mt-0.2" :class="h.rain > 0 ? 'text-sky-600' : 'text-stone-400'"><span x-text="h.rain"></span>%</span>
               </div>
             </template>
           </div>
