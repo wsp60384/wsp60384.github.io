@@ -1258,7 +1258,7 @@
           this.hotelList.forEach(item => {
             if (!item) return;
             const title = (item.title && String(item.title).trim()) ? String(item.title).trim() : '未命名飯店';
-            const itemDate = item.date || '2026-10-24';
+            const itemDate = this.formatDateStr(item.date) || '2026-10-24';
 
             if (!hotels[title]) {
               hotels[title] = { 
@@ -1271,7 +1271,7 @@
             }
 
             hotels[title].orders.push(item);
-            if (itemDate < hotels[title].earliestDate) {
+            if (new Date(itemDate).getTime() < new Date(hotels[title].earliestDate).getTime()) {
               hotels[title].earliestDate = itemDate;
             }
 
@@ -1280,24 +1280,31 @@
           });
 
           Object.values(hotels).forEach(h => {
-            h.orders.sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
+            h.orders.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
           });
 
-          return Object.values(hotels).sort((a, b) => String(a.earliestDate || '').localeCompare(String(b.earliestDate || '')));
+          return Object.values(hotels).sort((a, b) => new Date(a.earliestDate).getTime() - new Date(b.earliestDate).getTime());
         },
 
         get activityList() {
           return (this.prepaids || []).filter(p => p && String(p.category || '').trim() === '活動票券');
         },
 
-        get sortedTransfers() {
-          return [...this.transfers].sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+        // 活動票券：改依真實日期毫秒數升冪排列（舊 -> 新）
+        get sortedActivityList() {
+          return [...this.activityList].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
         },
 
+        // 已轉帳：改依真實日期毫秒數升冪排列
+        get sortedTransfers() {
+          return [...this.transfers].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        },
+
+        // 現場記帳：改依真實日期毫秒數升冪排列
         get groupedExpenses() {
           const groups = {};
           this.expenses.forEach(item => {
-            const d = item.date || '未分類日期';
+            const d = this.formatDateStr(item.date) || '未分類日期';
             if (!groups[d]) {
               groups[d] = { date: d, items: [], totalNZD: 0, totalTWD: 0 };
             }
@@ -1305,11 +1312,7 @@
             groups[d].totalNZD += this.getItemFinalNZD(item);
             groups[d].totalTWD += this.getItemFinalTWD(item);
           });
-          return Object.values(groups).sort((a, b) => a.date.localeCompare(b.date));
-        },
-
-        get sortedActivityList() {
-          return [...this.activityList].sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+          return Object.values(groups).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
         },
 
         init() {
@@ -1407,6 +1410,38 @@
           return 19.25;
         },
 
+        // 增強型日期格式化（確保轉為 YYYY-MM-DD）
+        formatDateStr(dateVal) {
+          if (!dateVal) return "";
+          const d = new Date(dateVal);
+          if (isNaN(d.getTime())) return String(dateVal).trim();
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          return `${y}-${m}-${day}`;
+        },
+
+        // 增量雙向合併核心函式（同時自動修正日期格式）
+        mergeLists(localList, cloudList) {
+          const deletedIds = JSON.parse(localStorage.getItem('nz_deleted_ids') || '[]');
+          const map = {};
+          (localList || []).forEach(item => {
+            if (item && item.id && !deletedIds.includes(item.id)) {
+              item.date = this.formatDateStr(item.date);
+              map[item.id] = item;
+            }
+          });
+          (cloudList || []).forEach(item => {
+            if (item && item.id && !deletedIds.includes(item.id)) {
+              item.date = this.formatDateStr(item.date);
+              if (!map[item.id] || (item.updatedAt || 0) >= (map[item.id].updatedAt || 0)) {
+                map[item.id] = item;
+              }
+            }
+          });
+          return Object.values(map).filter(i => !i._deleted);
+        },
+
         async fetchCloudData() {
           this.isSyncing = true;
           this.syncStatusText = '同步中...';
@@ -1424,9 +1459,10 @@
             const json = await res.json();
 
             if (json && json.status === 'success') {
-              this.expenses = Array.isArray(json.expenses) ? json.expenses : [];
-              this.prepaids = Array.isArray(json.prepaids) ? json.prepaids : [];
-              this.transfers = Array.isArray(json.transfers) ? json.transfers : [];
+              // 雙向合併，絕不單向抹除
+              this.expenses = this.mergeLists(this.expenses, json.expenses);
+              this.prepaids = this.mergeLists(this.prepaids, json.prepaids);
+              this.transfers = this.mergeLists(this.transfers, json.transfers);
               
               this.persistLocal();
               this.syncStatusText = '雲端已同步';
@@ -1440,7 +1476,60 @@
             this.isSyncing = false;
           }
         },
-        
+
+        async deleteItem(id, type) {
+          if (!confirm('確定要刪除這筆紀錄嗎？')) return;
+
+          // 1. 找出要刪除的項目並複製一份標記 _deleted
+          let targetItem = null;
+          if (type === 'expense') targetItem = this.expenses.find(i => i.id === id);
+          else if (type === 'prepaid') targetItem = this.prepaids.find(i => i.id === id);
+          else if (type === 'transfer') targetItem = this.transfers.find(i => i.id === id);
+
+          if (!targetItem) return;
+          const payloadItem = Object.assign({}, targetItem, { _deleted: true, updatedAt: Date.now() });
+
+          // 2. 本地畫面上立即移除
+          if (type === 'expense') this.expenses = this.expenses.filter(e => e.id !== id);
+          else if (type === 'prepaid') this.prepaids = this.prepaids.filter(e => e.id !== id);
+          else if (type === 'transfer') this.transfers = this.transfers.filter(e => e.id !== id);
+          this.persistLocal();
+
+          // 3. 上傳給後端讓 Google Sheet 標記刪除
+          try {
+            this.isSyncing = true;
+            this.syncStatusText = '同步刪除中...';
+            
+            const res = await fetch(GOOGLE_SCRIPT_API_URL, {
+              method: 'POST',
+              redirect: 'follow',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify({
+                action: 'syncAll',
+                expenses: type === 'expense' ? [...this.expenses, payloadItem] : this.expenses,
+                prepaids: type === 'prepaid' ? [...this.prepaids, payloadItem] : this.prepaids,
+                transfers: type === 'transfer' ? [...this.transfers, payloadItem] : this.transfers
+              })
+            });
+            const json = await res.json();
+            if (json && json.status === 'success') {
+              // 4. 後端確認刪除成功後，才將 ID 記入永久排除清單
+              const deletedIds = JSON.parse(localStorage.getItem('nz_deleted_ids') || '[]');
+              if (!deletedIds.includes(id)) {
+                deletedIds.push(id);
+                localStorage.setItem('nz_deleted_ids', JSON.stringify(deletedIds));
+              }
+              this.syncStatusText = '雲端已同步';
+            }
+          } catch (err) {
+            console.error('刪除同步失敗:', err);
+            this.syncStatusText = '⚠️ 刪除尚未同步';
+          } finally {
+            this.isSyncing = false;
+            await this.fetchCloudData();
+          }
+        },
+                
         async syncToCloud() {
           if (this.expenses.length === 0 && this.prepaids.length === 0 && this.transfers.length === 0) {
             console.warn('本地無完整資料，已取消上傳以保護雲端資料！');
@@ -1612,6 +1701,7 @@
 
           const itemData = {
             id: this.isEditingExpense ? this.editingId : ('exp_' + Date.now()),
+            updatedAt: Date.now(),
             category: this.expenseForm.category || '餐飲美食',
             date: this.expenseForm.date,
             title: title,
@@ -1639,7 +1729,8 @@
           }
 
           this.showExpenseModal = false;
-          this.syncToCloud();
+          await this.syncToCloud();
+          await this.fetchCloudData(); // ➕ 確保把其他人剛寫入的帳目也拉進來更新介面
         },
 
         openPrepaidModal(category, item = null) {
@@ -1704,6 +1795,7 @@
 
           const itemData = {
             id: this.isEditingPrepaid ? this.editingId : ('prep_' + Date.now()),
+            updatedAt: Date.now(),
             category: this.prepaidForm.category,
             date: this.prepaidForm.date,
             title: title,
@@ -1728,7 +1820,8 @@
           }
 
           this.showPrepaidModal = false;
-          this.syncToCloud();
+          await this.syncToCloud();
+          await this.fetchCloudData();
         },
 
         openTransferModal(item = null) {
@@ -1780,6 +1873,7 @@
           const rate = await this.fetchDailyRate(this.transferForm.date);
           const itemData = {
             id: this.isEditingTransfer ? this.editingId : ('trans_' + Date.now()),
+            updatedAt: Date.now(),
             date: this.transferForm.date,
             currency: this.transferForm.currency,
             from: [...this.transferForm.fromList],
@@ -1798,7 +1892,8 @@
           }
 
           this.showTransferModal = false;
-          this.syncToCloud();
+          await this.syncToCloud();
+          await this.fetchCloudData();
         },
 
         openPersonDetailModal(person) {
@@ -1837,29 +1932,32 @@
 
           this.prepaids.forEach(prep => {
             const rate = prep.exchangeRate || 19.25;
-            if (prep.dishes) {
-              prep.dishes.forEach(d => {
-                if (d.sharedWith && d.sharedWith.includes(person) && d.sharedWith.length > 0) {
-                  const shareRaw = Number(d.price || 0) / d.sharedWith.length;
-                  const myShareTWD = prep.currency === 'TWD' ? shareRaw : (shareRaw * rate);
-                  const isHotel = prep.category === '住宿房費';
-                  result.push({
-                    id: prep.id + '_' + d.name,
-                    type: isHotel ? 'hotel' : 'activity',
-                    tag: prep.category,
-                    tagClass: isHotel ? 'bg-indigo-600' : 'bg-purple-600',
-                    date: prep.date,
-                    title: prep.title,
-                    dishName: d.name || prep.title,
-                    payer: prep.payer,
-                    shareCount: d.sharedWith.length,
-                    myShareTWD: myShareTWD
-                  });
-                }
-              });
-            }
-          });
+            // 兼容舊資料或未展開 dishes 的情況
+            const dishesList = (prep.dishes && prep.dishes.length > 0) 
+              ? prep.dishes 
+              : [{ name: prep.title, price: prep.finalTotal || prep.amount || 0, sharedWith: prep.sharedWith || [] }];
 
+            dishesList.forEach(d => {
+              if (d.sharedWith && d.sharedWith.includes(person) && d.sharedWith.length > 0) {
+                const shareRaw = Number(d.price || 0) / d.sharedWith.length;
+                const myShareTWD = prep.currency === 'TWD' ? shareRaw : (shareRaw * rate);
+                const isHotel = prep.category === '住宿房費';
+                result.push({
+                  id: prep.id + '_' + (d.name || prep.title),
+                  type: isHotel ? 'hotel' : 'activity',
+                  tag: prep.category,
+                  tagClass: isHotel ? 'bg-indigo-600' : 'bg-purple-600',
+                  date: this.formatDateStr(prep.date),
+                  title: prep.title,
+                  dishName: d.name || prep.title,
+                  payer: prep.payer,
+                  shareCount: d.sharedWith.length,
+                  myShareTWD: myShareTWD
+                });
+              }
+            });
+          });
+          
           return result.sort((a, b) => a.date.localeCompare(b.date));
         },
 
@@ -1867,15 +1965,6 @@
           const list = this.getPersonParticipationList(this.selectedPerson);
           if (this.personFilterCategory === 'all') return list;
           return list.filter(item => item.type === this.personFilterCategory);
-        },
-
-        deleteItem(id, type) {
-          if (confirm('確定要刪除這筆紀錄嗎？')) {
-            if (type === 'expense') this.expenses = this.expenses.filter(e => e.id !== id);
-            else if (type === 'prepaid') this.prepaids = this.prepaids.filter(e => e.id !== id);
-            else if (type === 'transfer') this.transfers = this.transfers.filter(t => t.id !== id);
-            this.syncToCloud();
-          }
         },
 
         getItemFinalNZD(item) {
