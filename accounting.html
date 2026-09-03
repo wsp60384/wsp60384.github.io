@@ -990,11 +990,13 @@
   <div 
     x-show="showPersonDetailModal" 
     x-transition
-    class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60"
+    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto"
     style="display: none;"
   >
-    <div @click.outside="showPersonDetailModal = false" class="bg-white rounded-3xl p-4 sm:p-6 max-w-2xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-cozy-border">
-      <div class="flex items-center justify-between pb-3 border-b border-cozy-border mb-3">
+    <div @click.outside="showPersonDetailModal = false" class="bg-white rounded-3xl p-4 sm:p-6 max-w-2xl w-full max-h-[85vh] my-auto flex flex-col shadow-2xl border border-cozy-border overflow-hidden">
+      
+      <!-- 頂部標題區 (固定不被壓縮) -->
+      <div class="flex items-center justify-between pb-3 border-b border-cozy-border mb-3 flex-shrink-0">
         <div>
           <span class="text-[10px] font-bold text-stone-400 block">個人完整帳目明細</span>
           <h2 class="text-base font-black text-stone-900 flex items-center gap-1.5">
@@ -1007,8 +1009,8 @@
         </button>
       </div>
 
-      <!-- 個人結算小卡摘要 -->
-      <div class="grid grid-cols-3 gap-2 bg-amber-50/60 p-3 rounded-2xl border border-amber-200/70 text-xs mb-3">
+      <!-- 個人結算小卡摘要 (固定不被壓縮) -->
+      <div class="grid grid-cols-3 gap-2 bg-amber-50/60 p-3 rounded-2xl border border-amber-200/70 text-xs mb-3 flex-shrink-0">
         <div>
           <span class="text-[10px] text-stone-500 block font-bold">個人應付總額</span>
           <span class="font-mono font-black text-rose-700 text-sm">NT$ <span x-text="calcCombinedPersonExpenseTWD(selectedPerson).toLocaleString()"></span></span>
@@ -1023,8 +1025,8 @@
         </div>
       </div>
 
-      <!-- 類別快速篩選按鈕列 -->
-      <div class="flex items-center gap-1.5 pb-2 mb-1 overflow-x-auto custom-scrollbar text-xs font-bold border-b border-stone-100">
+      <!-- 類別快速篩選按鈕列 (固定不被壓縮) -->
+      <div class="flex items-center gap-1.5 pb-2 mb-2 overflow-x-auto custom-scrollbar text-xs font-bold border-b border-stone-100 flex-shrink-0">
         <button 
           type="button" 
           @click="personFilterCategory = 'all'" 
@@ -1059,8 +1061,8 @@
         </button>
       </div>
 
-      <!-- 個人參與項目列表 -->
-      <div class="overflow-y-auto custom-scrollbar space-y-2.5 flex-1 text-xs pr-1 mt-1">
+      <!-- 個人參與項目列表 (僅此區塊可獨立捲動) -->
+      <div class="overflow-y-auto custom-scrollbar space-y-2.5 flex-1 text-xs pr-1 min-h-[150px]">
         <template x-for="item in filteredPersonParticipationList" :key="item.id">
           <div class="bg-stone-50 border border-stone-200 rounded-xl p-3 space-y-1.5">
             <div class="flex items-center justify-between">
@@ -1082,12 +1084,14 @@
         </template>
       </div>
 
-      <div class="pt-3 border-t border-cozy-border mt-3 flex items-center justify-between">
+      <!-- 底部小計與關閉按鈕 -->
+      <div class="pt-3 border-t border-cozy-border mt-3 flex items-center justify-between flex-shrink-0">
         <span class="text-[11px] text-stone-500 font-bold">
           當前類別小計：<b class="text-stone-900 font-mono">NT$ <span x-text="Math.round(filteredPersonParticipationList.reduce((s, i) => s + i.myShareTWD, 0)).toLocaleString()"></span></b>
         </span>
         <button @click="showPersonDetailModal = false" class="px-5 py-2 rounded-xl bg-stone-800 text-white font-black text-xs">關閉</button>
       </div>
+
     </div>
   </div>
 
