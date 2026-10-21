@@ -693,7 +693,7 @@
               <div class="flex items-center gap-2">
                 <input type="text" x-model="dish.name" placeholder="品名 (例如: 肋眼牛排 / 總額平分)" class="flex-1 bg-white border border-stone-200 rounded-lg px-2.5 py-1.5 font-bold">
                 <div class="relative w-28">
-                  <input type="number" step="0.1" x-model.number="dish.price" placeholder="金額" class="w-full bg-white border border-stone-200 rounded-lg px-2 py-1.5 font-mono font-bold text-right pr-6">
+                  <input type="number" step="any" x-model.number="dish.price" placeholder="金額" class="w-full bg-white border border-stone-200 rounded-lg px-2 py-1.5 font-mono font-bold text-right pr-6">
                   <span class="absolute right-2 top-1.5 text-[10px] text-stone-400 font-bold" x-text="expenseForm.currency"></span>
                 </div>
                 <button @click="removeExpenseDishRow(dIdx)" x-show="expenseForm.dishes.length > 1" class="text-rose-500 hover:text-rose-700 p-1">
@@ -824,7 +824,7 @@
           <div>
             <label class="font-bold text-stone-700 block mb-1">總金額</label>
             <div class="relative">
-              <input type="number" step="1" x-model.number="prepaidForm.amount" placeholder="金額" class="w-full bg-white border border-stone-200 rounded-xl p-2 font-mono font-bold text-right pr-12">
+              <input type="number" step="any" x-model.number="prepaidForm.amount" placeholder="金額" class="w-full bg-white border border-stone-200 rounded-xl p-2 font-mono font-bold text-right pr-12">
               <span class="absolute right-3 top-2 text-xs text-stone-400 font-bold" x-text="prepaidForm.currency"></span>
             </div>
           </div>
@@ -1688,9 +1688,9 @@
 
         async saveExpense() {
           const title = this.expenseForm.customTitle.trim() || '未命名消費';
-          const dishes = this.expenseForm.dishes.filter(d => (Number(d.price) || 0) > 0);
+          const dishes = this.expenseForm.dishes.filter(d => d.price !== '' && !isNaN(Number(d.price)));
           if (dishes.length === 0) {
-            alert('請填寫大於 0 的金額！');
+            alert('請填寫有效的金額！');
             return;
           }
 
@@ -1787,8 +1787,8 @@
         async savePrepaid() {
           const title = this.prepaidForm.customTitle.trim() || '未命名預付項目';
           const amount = Number(this.prepaidForm.amount) || 0;
-          if (amount <= 0) {
-            alert('請輸入大於 0 的金額！');
+          if (isNaN(amount) || amount === 0) {
+            alert('請輸入有效的非零金額！');
             return;
           }
           if (this.prepaidForm.sharedWith.length === 0) {
