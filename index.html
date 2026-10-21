@@ -503,24 +503,24 @@
                    :class="{
                      'border-sky-500 text-sky-600 bg-sky-50': getItemTag(spotItem) === '航班',
                      'border-indigo-500 text-indigo-600 bg-indigo-50': getItemTag(spotItem) === '住宿',
-                     'border-purple-500 text-purple-600 bg-purple-50': getItemTag(spotItem) === '預約活動',
+                     'border-purple-500 text-purple-600 bg-purple-50': getItemTag(spotItem) === '預訂活動',
                      'border-emerald-500 text-emerald-600 bg-emerald-50': getItemTag(spotItem) === '健行',
                      'border-pink-500 text-pink-600 bg-pink-50': getItemTag(spotItem) === '購物',
                      'border-orange-500 text-orange-600 bg-orange-50': getItemTag(spotItem) === '美食',
                      'border-red-500 text-red-600 bg-red-50': getItemTag(spotItem) === '加油',
                      'border-amber-400 text-amber-700 bg-amber-50': ['自駕','補給','休憩'].includes(getItemTag(spotItem)),
-                     'border-slate-300 text-slate-500': !['航班','住宿','預約活動','健行','美食','自駕','補給','休憩','購物','加油'].includes(getItemTag(spotItem))
+                     'border-slate-300 text-slate-500': !['航班','住宿','預訂活動','健行','美食','自駕','補給','休憩','購物','加油'].includes(getItemTag(spotItem))
                    }"
               >
                 <i x-show="getItemTag(spotItem) === '航班'" class="fa-solid fa-plane text-[9px]"></i>
                 <i x-show="getItemTag(spotItem) === '住宿'" class="fa-solid fa-bed text-[9px]"></i>
-                <i x-show="getItemTag(spotItem) === '預約活動'" class="fa-solid fa-ticket text-[9px]"></i>
+                <i x-show="getItemTag(spotItem) === '預訂活動'" class="fa-solid fa-ticket text-[9px]"></i>
                 <i x-show="getItemTag(spotItem) === '健行'" class="fa-solid fa-person-hiking text-[9px]"></i>
                 <i x-show="getItemTag(spotItem) === '美食'" class="fa-solid fa-utensils text-[9px]"></i>
                 <i x-show="getItemTag(spotItem) === '購物'" class="fa-solid fa-bag-shopping text-[9px]"></i>
                 <i x-show="getItemTag(spotItem) === '加油'" class="fa-solid fa-gas-pump text-[9px]"></i>
                 <i x-show="['自駕','補給','休憩'].includes(getItemTag(spotItem))" class="fa-solid fa-car text-[9px]"></i>
-                <i x-show="!['航班','住宿','預約活動','健行','美食','自駕','補給','休憩','購物','加油'].includes(getItemTag(spotItem))" class="fa-solid fa-location-dot text-[9px]"></i>
+                <i x-show="!['航班','住宿','預訂活動','健行','美食','自駕','補給','休憩','購物','加油'].includes(getItemTag(spotItem))" class="fa-solid fa-location-dot text-[9px]"></i>
               </div>
 
               <template x-if="spotItem.isGroup">
@@ -564,12 +564,12 @@
                                   :class="{
                                     'bg-sky-50/90 border-sky-200/80': spot.tag === '航班',
                                     'bg-indigo-50/90 border-indigo-200/80': spot.tag === '住宿',
-                                    'bg-purple-50/90 border-purple-200/80': spot.tag === '預約活動',
+                                    'bg-purple-50/90 border-purple-200/80': spot.tag === '預訂活動',
                                     'bg-emerald-50/90 border-emerald-200/80': spot.tag === '健行',
                                     'bg-orange-50/90 border-orange-200/80': spot.tag === '美食',
                                     'bg-pink-50/90 border-pink-200/80': spot.tag === '購物',
                                     'bg-amber-50/80 border-amber-200/80': ['自駕','補給','休憩'].includes(spot.tag),
-                                    'bg-cozy-card border-cozy-border': !['航班','住宿','預約活動','健行','美食','自駕','補給','休憩','購物'].includes(spot.tag)
+                                    'bg-cozy-card border-cozy-border': !['航班','住宿','預訂活動','健行','美食','自駕','補給','休憩','購物'].includes(spot.tag)
                                   }"
                                   class="rounded-xl p-3 border transition-all shadow-2xs"
                                 >
@@ -578,10 +578,10 @@
                                       <template x-if="spot.url">
                                         <a :href="spot.url" target="_blank" class="text-sm font-extrabold flex items-center gap-1 underline underline-offset-4"
                                            :class="{
-                                             'text-purple-950 decoration-purple-300 hover:text-purple-600': spot.tag === '預約活動',
+                                             'text-purple-950 decoration-purple-300 hover:text-purple-600': spot.tag === '預訂活動',
                                              'text-emerald-950 decoration-emerald-300 hover:text-emerald-600': spot.tag === '健行',
                                              'text-orange-950 decoration-orange-300 hover:text-orange-600': spot.tag === '美食',
-                                             'text-cozy-text decoration-amber-300 hover:text-cozy-accent': !['預約活動','健行','美食'].includes(spot.tag)
+                                             'text-cozy-text decoration-amber-300 hover:text-cozy-accent': !['預訂活動','健行','美食'].includes(spot.tag)
                                            }"
                                         >
                                           <span x-text="spot.name"></span>
@@ -626,13 +626,13 @@
                   :class="{
                     'bg-sky-50/90 border-sky-200/80': spotItem.tag === '航班',
                     'bg-indigo-50/90 border-indigo-200/80': spotItem.tag === '住宿',
-                    'bg-purple-50/90 border-purple-200/80': spotItem.tag === '預約活動',
+                    'bg-purple-50/90 border-purple-200/80': spotItem.tag === '預訂活動',
                     'bg-emerald-50/90 border-emerald-200/80': spotItem.tag === '健行',
                     'bg-orange-50/90 border-orange-200/80': spotItem.tag === '美食',
                     'bg-pink-50/90 border-pink-200/80': spotItem.tag === '購物',
                     'bg-red-50/80 border-red-200/80': spotItem.tag === '加油',
                     'bg-amber-50/80 border-amber-200/80': ['自駕','補給','休憩'].includes(spotItem.tag),
-                    'bg-cozy-card border-cozy-border': !['航班','住宿','預約活動','健行','美食','自駕','補給','休憩','購物','加油'].includes(spotItem.tag)
+                    'bg-cozy-card border-cozy-border': !['航班','住宿','預訂活動','健行','美食','自駕','補給','休憩','購物','加油'].includes(spotItem.tag)
                   }"
                   class="rounded-2xl p-4 border transition-all shadow-2xs"
                 >
@@ -643,11 +643,11 @@
                            :class="{
                              'text-sky-950 decoration-sky-300 hover:text-sky-600': spotItem.tag === '航班',
                              'text-indigo-950 decoration-indigo-300 hover:text-indigo-600': spotItem.tag === '住宿',
-                             'text-purple-950 decoration-purple-300 hover:text-purple-600': spotItem.tag === '預約活動',
+                             'text-purple-950 decoration-purple-300 hover:text-purple-600': spotItem.tag === '預訂活動',
                              'text-emerald-950 decoration-emerald-300 hover:text-emerald-600': spotItem.tag === '健行',
                              'text-orange-950 decoration-orange-300 hover:text-orange-600': spotItem.tag === '美食',
                              'text-pink-950 decoration-pink-300 hover:text-pink-600': spotItem.tag === '購物',
-                             'text-cozy-text decoration-amber-300 hover:text-cozy-accent': !['航班','住宿','預約活動','健行','美食','購物'].includes(spotItem.tag)
+                             'text-cozy-text decoration-amber-300 hover:text-cozy-accent': !['航班','住宿','預訂活動','健行','美食','購物'].includes(spotItem.tag)
                            }"
                         >
                           <span x-text="spotItem.name"></span>
@@ -658,12 +658,12 @@
                         <span :class="{
                           'text-sky-950 font-extrabold': spotItem.tag === '航班',
                           'text-indigo-950 font-extrabold': spotItem.tag === '住宿',
-                          'text-purple-950 font-extrabold': spotItem.tag === '預約活動',
+                          'text-purple-950 font-extrabold': spotItem.tag === '預訂活動',
                           'text-emerald-950 font-extrabold': spotItem.tag === '健行',
                           'text-orange-950 font-extrabold': spotItem.tag === '美食',
                           'text-pink-950 font-extrabold': spotItem.tag === '購物',
                           'text-red-950 font-extrabold': spotItem.tag === '加油',
-                          'text-cozy-text font-bold': !['航班','住宿','預約活動','健行','美食','購物','加油'].includes(spotItem.tag)
+                          'text-cozy-text font-bold': !['航班','住宿','預訂活動','健行','美食','購物','加油'].includes(spotItem.tag)
                         }" class="text-base" x-text="spotItem.name"></span>
                       </template>
 
@@ -680,11 +680,11 @@
                   <p :class="{
                     'text-sky-900 font-semibold': spotItem.tag === '航班',
                     'text-indigo-900 font-semibold': spotItem.tag === '住宿',
-                    'text-purple-900 font-semibold': spotItem.tag === '預約活動',
+                    'text-purple-900 font-semibold': spotItem.tag === '預訂活動',
                     'text-emerald-900 font-semibold': spotItem.tag === '健行',
                     'text-orange-900 font-semibold': spotItem.tag === '美食',
                     'text-pink-900 font-semibold': spotItem.tag === '購物',
-                    'text-cozy-sub font-medium': !['航班','住宿','預約活動','健行','美食','購物'].includes(spotItem.tag)
+                    'text-cozy-sub font-medium': !['航班','住宿','預訂活動','健行','美食','購物'].includes(spotItem.tag)
                   }" class="text-xs leading-relaxed" x-show="spotItem.note" x-html="spotItem.note"></p>
 
                   <template x-if="spotItem.alert">
@@ -1561,7 +1561,7 @@
             <i class="fa-solid fa-ticket"></i>
           </div>
           <div>
-            <h3 class="text-lg font-black text-cozy-text">全程預約活動總覽與詳細資訊</h3>
+            <h3 class="text-lg font-black text-cozy-text">全程預訂活動總覽與詳細資訊</h3>
             <p class="text-[11px] text-cozy-sub font-semibold">包含冰河健行、直升機、米佛峽灣遊船與火山口觀星 (點擊項目即可展開詳細訂單)</p>
           </div>
         </div>
@@ -1717,8 +1717,8 @@
         'Christchurch': { name: '基督城 (Christchurch)', lat: -43.5321, lng: 172.6362 },
         'Taipei': { name: '台北 (Taipei)', lat: 25.0330, lng: 121.5654 },
         'Auckland': { name: '奧克蘭 (Auckland)', lat: -36.8485, lng: 174.7633 },
-        'Hokitika': { name: '霍基蒂卡 (Hokitika)', lat: -42.7167, lng: 170.9667 },
-        'Franz Josef': { name: '法蘭士約瑟夫 (Franz Josef)', lat: -43.3872, lng: 170.1840 },
+        'Oamaru': { name: '奧瑪魯 (Oamaru)', lat: -45.0975, lng: 170.9704 },
+        'Dunedin': { name: '但尼丁 (Dunedin)', lat: -45.8788, lng: 170.5028 },
         'Wanaka': { name: '瓦納卡 (Wanaka)', lat: -44.7000, lng: 169.1500 },
         'Queenstown': { name: '皇后鎮 (Queenstown)', lat: -45.0311, lng: 168.6625 },
         'Aoraki Mount Cook National Park': { name: '庫克山 (Mount Cook)', lat: -43.7330, lng: 170.0935 },
@@ -1779,7 +1779,7 @@
             case '加油': return 'bg-red-600 text-white font-black shadow-2xs';
             case '美食': return 'bg-orange-600 text-white font-black shadow-2xs';
             case '健行': return 'bg-emerald-700 text-white font-black shadow-2xs';
-            case '預約活動': return 'bg-purple-700 text-white font-black shadow-2xs';
+            case '預訂活動': return 'bg-purple-700 text-white font-black shadow-2xs';
             case '住宿': return 'bg-indigo-700 text-white font-black shadow-2xs';
             case '購物': return 'bg-pink-600 text-white font-black shadow-2xs'; 
             default: return 'bg-slate-200 text-slate-800 font-bold';
@@ -1958,94 +1958,100 @@
         activities: [
           {
             date: "10/26 (D4)",
-            location: "Fox Glacier 福克斯冰河",
-            title: "冰河健行 & 直升機飛行體驗",
+            location: "但尼丁 Dunedin",
+            title: "皇家信天翁中心 Royal Albatross Centre",
             items: [
               {
                 open: false,
                 group: "Group 1",
-                name: "Fox Glacier 冰河健行",
-                tag: "預約活動",
-                time: "預約 11:50 梯次 (4hr)",
-                people: "7人",
-                note: "直升機冰川健行體驗",
-                url: "https://maps.app.goo.gl/kaZwf49GhLKy3Efd7",
+                name: "皇家信天翁中心 Royal Albatross Centre",
+                tag: "預訂活動",
+                time: "預訂 15:00 梯次 (1hr)",
+                people: "4人",
+                note: "信天翁解說",
+                url: "https://maps.google.com/?q=Royal+Albatross+Centre",
                 orders: [
                   {
-                    orderNo: "1742154630",
-                    link: "https://api.viator.com/ticket?code=1798590361:39c05d62d16bdfa2f1d9f0f6b1a56dfb08310765f92f3ec2b034388ea86fed58:1416287977",
-                    price: "NTD $ 96,944",
-                    participants: "KAO CHIACHUN, HSU CHIACHUN, KUO FONGYI, CHOU YICHI, KAO LIWEN, KAO TZUYUN, KAO MEIYUEH"
+                    orderNo: "1788512902",
+                    link: "https://drive.google.com/file/d/12dT0HwVRyTMIw2CKAv8sXS4lSUHYZijD/view?usp=drive_link",
+                    price: "NTD $ 2,170",
+                    participants: "KAO CHIACHUN, HSU CHIACHUN"
+                  },
+                  {
+                    orderNo: "1788513695",
+                    link: "https://drive.google.com/file/d/1MGvzz4uKKxu9kNswR5dm-TFwCTkZJ1uQ/view?usp=drive_link",
+                    price: "NTD $ 2,170",
+                    participants: "KUO FONGYI, CHOU YICHI"
                   }
                 ]
               },
               {
                 open: false,
                 group: "Group 2",
-                name: "三冰河直升機飛行 (含著陸)",
-                tag: "預約活動",
-                time: "預約 12:00 梯次 (40mins)",
-                people: "7人",
-                note: "觀覽冰河景色含冰河降落",
-                url: "https://maps.app.goo.gl/CHBDPj3CxvFm7LYR8",
+                name: "",
+                tag: "預訂活動",
+                time: "預訂 17:00 梯次 (1hr)",
+                people: "10人",
+                note: "信天翁解說",
+                url: "https://maps.google.com/?q=Royal+Albatross+Centre",
                 orders: [
                   {
-                    orderNo: "358871662",
-                    link: "https://fareharbor.com/embeds/book/thlandgh-westcoast/items/548704/booking/1174d74f-5348-4a05-b088-e12685eb9ec6/?language=en-us",
-                    price: "NTD $ 59,286",
-                    participants: "KAO LIHUA, KAOWEI YUHSIA, HSIEH TONGLIN, HSIEH MENGTING, HSIEH ICHIN"
+                    orderNo: "1788505146",
+                    link: "https://drive.google.com/file/d/1EnG5L5KXEcfU1cgrbGFSlq0WZjBUqoSu/view?usp=drive_link",
+                    price: "NTD $ 2,065",
+                    participants: "KAO TSAICHEN, SUN HSIEHWEN"
                   },
                   {
-                    orderNo: "358873804",
-                    link: "https://fareharbor.com/embeds/book/thlandgh-westcoast/items/548704/booking/5b8408fe-6f75-43f2-9e3a-4f4633ef9932/?language=en-us",
-                    price: "NTD $ 23,714",
-                    participants: "KAO TSAICHEN, SUN HSIEHWEN"
+                    orderNo: "1788506292",
+                    link: "https://drive.google.com/file/d/1VSU0jA2ElayXZnWj2r_lNCHADbCPQHT6/view?usp=drive_link",
+                    price: "NTD $ 2,221",
+                    participants: "KAO LIHUA, KAOWEI YUHSIA"
+                  },
+                  {
+                    orderNo: "1788508321",
+                    link: "https://drive.google.com/file/d/1sdDNXMFBytnKOEdBKVaQYj8Wv9lzvP72/view?usp=drive_link",
+                    price: "NTD $ 2,170",
+                    participants: "KAO TZUYUN, KAO LIWEN"
+                  },
+                  {
+                    orderNo: "1788509073",
+                    link: "https://drive.google.com/file/d/1_GrIE8RGWhibKi8C0HqJEJQIttopO8MW/view?usp=drive_link",
+                    price: "NTD $ 2,170",
+                    participants: "HSIEH TONGLIN, KAO MEIYUEH"
+                  },
+                  {
+                    orderNo: "1788510463",
+                    link: "https://drive.google.com/file/d/1mH2r2miB2hq-wnnEnkLVXQ8XyVq8ybBX/view?usp=drive_link",
+                    price: "NTD $ 2,105",
+                    participants: "HSIEH MENGTING, HSIEH ICHIN"
                   }
                 ]
               }
             ]
           },
           {
-            date: "10/27 (D5)",
-            location: "Franz Josef 法蘭士約瑟夫冰河",
-            title: "冰河健行 & 直升機飛行體驗",
+            date: "10/26 (D4)",
+            location: "Blue Penguins Pukekura",
+            title: "藍企鵝普凱庫拉 Blue Penguins Pukekura",
             items: [
               {
                 open: false,
                 group: "Group 1",
-                name: "Franz Josef Glacier 冰河健行",
-                tag: "預約活動",
-                time: "預約 07:30 梯次 (4hr)",
-                people: "6人",
-                note: "法蘭士約瑟夫冰河健行",
-                url: "https://maps.app.goo.gl/F8juq59YZztNDSky9",
+                name: "藍企鵝普凱庫拉 Blue Penguins Pukekura",
+                tag: "預訂活動",
+                time: "預訂 19:00 梯次 (2 hr 45 min)",
+                people: "14人",
+                note: "企鵝回巢",
+                url: "https://maps.google.com/?q=Blue+Penguins+Pukekura",
                 orders: [
                   {
-                    orderNo: "1742490883",
-                    link: "https://api.viator.com/ticket?code=1799089785:0454e5f767abf312a9dca473d3229c1be986242ef01be5527027b53d84a8d703:1416790201",
-                    price: "NTD $ 90,282",
-                    participants: "KAO CHIACHUN, HSU CHIACHUN, KUO FONGYI, CHOU YICHI, KAO LIHUA, SUN HSIEHWEN"
+                    orderNo: "RKURTDY",
+                    link: "https://drive.google.com/file/d/1uFNSAgNxblrSTJorypopOwhYcrfCe97U/view?usp=drive_link",
+                    price: "NTD $ 25,501",
+                    participants: "KAO CHIACHUN, HSU CHIACHUN, KUO FONGYI, CHOU YICHI, KAO LIWEN, KAO TZUYUN, KAO MEIYUEH, KAO LIHUA, KAOWEI YUHSIA, HSIEH TONGLIN, HSIEH MENGTING, HSIEH ICHIN, KAO TSAICHEN, SUN HSIEHWEN"
                   }
                 ]
               },
-              {
-                open: false,
-                group: "Group 2",
-                name: "三冰河直升機飛行 (含著陸)",
-                tag: "預約活動",
-                time: "預約 08:15 梯次 (45mins)",
-                people: "8人",
-                note: "觀覽冰河景色含冰河降落",
-                url: "https://maps.app.goo.gl/gXBkiHEUVYR6Qn5n9",
-                orders: [
-                  {
-                    orderNo: "1742491583",
-                    link: "https://api.viator.com/ticket?code=1799094463:b864af5f09a194e5610e5bfaeec01de8b0d79bd4442a4f6476f6d286409e75da:1416794937",
-                    price: "NTD $ 89,711",
-                    participants: "KAOWEI YUHSIA, HSIEH TONGLIN, HSIEH MENGTING, HSIEH ICHIN, KAO TSAICHEN, KAO LIWEN, KAO TZUYUN, KAO MEIYUEH"
-                  }
-                ]
-              }
             ]
           },
           {
@@ -2057,8 +2063,8 @@
                 open: false,
                 group: "全員",
                 name: "Milford Sound Boutique Small Boat Cruise",
-                tag: "預約活動",
-                time: "預約 12:45 巡航 (約 2hr)",
+                tag: "預訂活動",
+                time: "預訂 12:45 巡航 (約 2hr)",
                 people: "14人",
                 note: "峽灣小型船巡航導覽",
                 url: "https://maps.app.goo.gl/GJuP9cpBcViVBUwX6",
@@ -2081,8 +2087,8 @@
                 open: false,
                 group: "全員",
                 name: "Glacier Explorers",
-                tag: "預約活動",
-                time: "預約 08:45~11:30",
+                tag: "預訂活動",
+                time: "預訂 08:45~11:30",
                 people: "14人",
                 note: "需走一段 1.5km/25分 到乘船處，原路來回",
                 url: "https://maps.google.com/?q=Glacier Explorer",
@@ -2106,8 +2112,8 @@
                 open: false,
                 group: "全員",
                 name: "Crater Stargazing 觀星體驗（中文）",
-                tag: "預約活動",
-                time: "預約 23:30",
+                tag: "預訂活動",
+                time: "預訂 23:30",
                 people: "14人",
                 note: "Dark Sky Project 火山口夜間專業觀星導覽",
                 url: "https://maps.google.com/?q=Dark+Sky+Project",
@@ -2144,9 +2150,9 @@
           { 
             open: false,
             date: "10/25 (D3)", 
-            city: "Hokitika 霍基蒂卡", 
-            hotelName: "Beachfront Hotel Hokitika（霍基蒂卡海濱酒店）", 
-            mapUrl: "https://maps.google.com/?q=Beachfront+Hotel+Hokitika+New+Zealand",
+            city: "奧馬魯 Oamaru", 
+            hotelName: "Teschemakers Resort（特斯切梅克斯度假村）", 
+            mapUrl: "https://maps.google.com/?q=Teschemakers+Resort",
             orders: [
               { orderNo: "1616330818613973", link: "https://drive.google.com/file/d/1U8lreLB7quTRebOXWQRrZkpEqcK9fOeN/view?usp=drive_link", bookName: "KAO LIHUA", roomType: "海景豪華特大床房", price: "NT$ 13,185", note: "", guests: "KAO LIHUA, KAOWEI YUHSIA" },
               { orderNo: "1616330818613973", link: "https://drive.google.com/file/d/1U8lreLB7quTRebOXWQRrZkpEqcK9fOeN/view?usp=drive_link", bookName: "KUO FONGYI", roomType: "海景豪華特大床房", price: "NT$ 13,185", note: "", guests: "KUO FONGYI, CHOU YICHI" },
@@ -2159,9 +2165,9 @@
           { 
             open: false,
             date: "10/26 (D4)", 
-            city: "Franz Josef 法蘭士約瑟夫", 
-            hotelName: "Aspen Court Franz Josef Motel（阿斯彭閣法蘭茲約瑟夫汽車旅館）", 
-            mapUrl: "https://maps.google.com/?q=Aspen+Court+Franz+Josef+Motel",
+            city: "但尼丁 Dunedin", 
+            hotelName: "Distinction Dunedin Hotel（大不同達尼丁酒店）", 
+            mapUrl: "https://maps.google.com/?q=Distinction+Dunedin+Hotel",
             orders: [
               { orderNo: "1616331423132569", link: "https://drive.google.com/file/d/1T4fz1hHvtcsDvqOuvaiwJkfCJCLEP36_/view?usp=drive_link", bookName: "KAO CHIACHUN", roomType: "One Bedroom Apartment", price: "NT$ 22,860", note: "1 King & 1 Single", guests: "KAO CHIACHUN, HSU CHIACHUN" },
               { orderNo: "1616331423132569", link: "https://drive.google.com/file/d/1T4fz1hHvtcsDvqOuvaiwJkfCJCLEP36_/view?usp=drive_link", bookName: "KUO FONGYI", roomType: "One Bedroom Apartment", price: "NT$ 22,860", note: "2 King beds", guests: "KUO FONGYI, CHOU YICHI" },
@@ -2306,106 +2312,86 @@
           {
             dayCode: "D3",
             date: "10/25(日)",
-            title: "飛抵基督城 → Castle Hill Rocks (巨石群) → 霍基蒂卡 Hokitika",
+            title: "飛抵基督城 → Geraldine 小鎮 → 奧馬魯 Oamaru" ,
             startLocation: "Christchurch",
-            stay: "Beachfront Hotel Hokitika",
-            stayUrl: "https://maps.google.com/?q=Beachfront+Hotel+Hokitika+New+Zealand",
+            stay: "Teschemakers Resort",
+            stayUrl: "https://maps.google.com/?q=Teschemakers+Resort",
             meals: { 
               b: "旅館", bUrl: "", 
-              l: "Alpine Parrot Cafe and Bar", lUrl: "https://maps.google.com/?q=Alpine+Parrot+Cafe+and+Bar+Hokitika", 
-              d: "Fat Pipi Pizza", dUrl: "https://maps.google.com/?q=Fat+Pipi+Pizza" 
+              l: "The Village Inn Sports Bar & Restaurant Geraldin" , lUrl: "https://maps.google.com/?q=The+Village+Inn+Sports+Bar+&+Restaurant+Geraldine", 
+              d: "Star and Garter Restaurant", dUrl: "https://maps.google.com/?q=Star+and+Garter+Restaurant" 
             },
             spots: [
               { name: "Kuriri Café & Eatery", tag: "美食", note: "飯店早餐 05:00~", url: "https://maps.google.com/?q=Kuriri+Café+&+Eatery" },
               { name: "NZ0527 奧克蘭 AKL 08:50 - 基督城 CHC 10:15", tag: "航班", note: "飛行時間 1 小時 25 分鐘", url: "" },
               { name: "基督城機場辦理租車", tag: "自駕", note: "Car 1: <a href='https://drive.google.com/file/d/1AJd_nyT-vpfiRvTdZ6pZlPazbbgWMzl8/view?usp=drive_link' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>R1M330<i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a> (KAO CHIACHUN) <br> Car 2: <a href='https://drive.google.com/file/d/1bEVDqOa-8Eb0aakPZTBlxfWDbolJPeDM/view?usp=drive_link' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>R1P7M1<i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a>(KUO FONGYI) <br> Car 3:<a href='https://drive.google.com/file/d/15lkZVA-U72JKsD71s8r9uReWSrQGzBUL/view?usp=drive_link' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>R1S5JB<i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a> (HSIEH TONGLIN)", alert: "已預訂",url: "https://maps.google.com/?q=Ezi+Car+Rental+Christchurch+Airport" },
               { name: "PAK'nSAVE Hornby 超市補給", tag: "補給", note: "補水、零食、買沙蠅水...等", url: "https://maps.google.com/?q=-43.543267, 172.523031" },
-              { name: "Sheffield Pies - Sheffield store", tag: "美食", driveTime: "開車 45 分鐘", note: "外帶鹹派", url: "https://maps.google.com/?q=Sheffield+Pies+Sheffield" },
-              { name: "Pippa’s Lookout", tag: "景點", driveTime: "開車 30 分鐘", note: "景觀展望台 (有廁所)", url: "https://maps.google.com/?q=Pippa’s+Lookout" },
-              { name: "Castle Hill Rocks (巨石群)", tag: "景點", driveTime: "開車 10 分鐘", note: "納尼亞傳奇取景地 (有廁所)", url: "https://maps.google.com/?q=Castle+Hill+Carpark+New+Zealand" },
-              { name: "Arthur's Pass Scenic Lookout", tag: "景點", driveTime: "開車 40 分鐘", note: "亞瑟隘口觀景台", url: "https://maps.google.com/?q=Arthurs+Pass+Scenic+Lookout" },
-              { name: "Alpine Parrot Cafe and Bar", tag: "美食", note: "午餐", url: "https://maps.google.com/?q=Alpine+Parrot+Cafe+and+Bar+Hokitika" },
-              { name: "Devils Punchbowl Waterfall （不走的可附近找地方休息）", tag: "健行", note: "看瀑布，來回約 40~60 分鐘 (不少樓梯)", url: "https://maps.google.com/?q=Devils+Punchbowl+Waterfall" },
-              { name: "Hokitika (NPD 加油站)", tag: "加油", driveTime: "開車 1 小時 30 分鐘", note: "提前加滿油,冰河區域油價貴", url: "https://maps.google.com/?q=NPD+Hokitika" },
-              { name: "Fat Pipi Pizza", tag: "美食", note: "晚餐", url: "https://maps.google.com/?q=Fat+Pipi+Pizza" },
-              { name: "Glow Worm Dell 藍光螢火蟲", tag: "景點", note: "免費藍光螢火蟲步道", url: "https://maps.google.com/?q=Glow+Worm+Dell+Hokitika" },
-              { name: "Beachfront Hotel Hokitika", tag: "住宿", note: "當日住宿飯店", url: "https://maps.google.com/?q=Beachfront+Hotel+Hokitika+New+Zealand" }
+              { name: "Geraldine 小鎮", tag: "購物", driveTime: "開車約 1 小時 50 分", note: "Barker's Foodstore & Eatery / Summit and Flow NZ / Geraldine Cheese Company / Super Liquor Geraldine / Joosh / Southbound Specialty Coffee", url: "https://maps.app.goo.gl/1f7qCgvVzpxJG9GW6" },
+              { name: "The Village Inn Sports Bar & Restaurant Geraldine", tag: "美食", note: "午餐", url: "https://maps.google.com/?q=The+Village+Inn+Sports+Bar+&+Restaurant+Geraldine" },
+              { name: "奧馬魯 Oamaru", tag: "景點", driveTime: "開車約 1 小時 45 分" , note: "休息走走", url: "https://maps.google.com/?q=Oamaru+Harbour+Free+Carpark" },
+              { name: "Star and Garter Restaurant", tag: "美食", note: "晚餐", url: "https://maps.google.com/?q=Star+and+Garter+Restaurant" },
+              { name: "Teschemakers Resort", tag: "住宿", note: "當日住宿飯店", url: "https://maps.google.com/?q=Teschemakers+Resort" }
             ]
           },
           {
             dayCode: "D4",
             date: "10/26(一)",
-            weekday: "(紐西蘭勞動節放假)",
-            title: "霍基蒂卡 Hokitika → Fox Glacier 福克斯冰河",
-            startLocation: "Hokitika",
-            stay: "Aspen Court Franz Josef",
-            stayUrl: "https://maps.google.com/?q=Aspen+Court+Franz+Josef+Motel",
+            weekday: "(紐西蘭勞動節放假,路邊停車不用錢)",
+            title: "奧馬魯 Oamaru → 摩拉基圓石 Moeraki Boulders Beach → 卡提奇燈塔 Katiki Point Lighthouse → 但尼丁 Dunedin",
+            startLocation: "Oamaru",
+            stay: "Distinction Dunedin Hotel",
+            stayUrl: "https://maps.google.com/?q=Distinction+Dunedin+Hotel",
             meals: { 
-              b: "Clocktower Cafe Bar 29 Weld St", bUrl: "https://maps.google.com/?q=Clocktower+Cafe+Bar+29+Weld+St+Hokitika+New+Zealand", 
-              l: "Matheson Cafe(或直升機報到處對面餐廳咖啡店，自行決定)", lUrl: "https://maps.google.com/?q=Lake+Matheson+parking", 
-              d: "Betsey Jane Eatery & Bar", dUrl: "https://maps.google.com/?q=Betsey+Jane+Eatery+%26+Bar" 
+              b: "Moeraki Boulders Cafe", bUrl: "https://maps.google.com/?q=Moeraki+Boulders+Cafe", 
+              l: "N/A", lUrl: "", 
+              d: "Toroa cafe", dUrl: "https://maps.google.com/?q=Toroa+cafe" 
             },
             spots: [
-              { name: "Clocktower Cafe Bar (29 Weld St)", tag: "美食", note: "早餐 ＃不想早起者可外帶車上吃", url: "https://maps.google.com/?q=Clocktower+Cafe+Bar+Hokitika+New+Zealand" },
-              { name: "最晚 08:30 出發", tag: "自駕", driveTime: "開車約 2 小時 30 分鐘", url: "" },
+              { name: "Moeraki Boulders Cafe", tag: "美食", driveTime: "開車 30 分", note: "早餐", url: "https://maps.google.com/?q=Moeraki+Boulders+Cafe" },
+              { name: "Moeraki Boulders Beach", tag: "景點", note: "看海灘圓石", url: "https://maps.google.com/?q=Moeraki+Boulders+Beach" },
+              { name: "Katiki Point Lighthouse", tag: "景點", driveTime: "開車 15 分", note: "看海豹", url: "https://maps.google.com/?q=Katiki+Point+Lighthouse" },
+              { name: "Distinction Dunedin Hotel", tag: "住宿", driveTime: "開車 1 小時 10 分鐘", note: "先寄放行李", url: "https://maps.google.com/?q=Distinction+Dunedin+Hotel"},             
+              { name: "Toroa cafe", tag: "美食", driveTime: "開車 45 分鐘", note: "晚餐", url: "https://maps.google.com/?q=Toroa+cafe" },
               {
-                isGroup: true,
+              	isGroup: true,
                 groups: [
                   {
                     groupTitle: "Group 1",
                     items: [
-                      { name: "Fox Glacier 福克斯冰河健行", tag: "預約活動", alert: "預約 11:50 梯次 (4hr)", note: "直升機冰川健行體驗，受雲量/天候影響，不保證出發", url: "https://maps.google.com/?q=Fox+Glacier+Guiding+Glacier+Tours+%26+Adventures" }
-                    ]
+				     { name: "皇家信天翁中心 Royal Albatross Centre", tag: "景點", alert: "已預訂 15:00(約 1 hr)", url: "https://maps.google.com/?q=Royal+Albatross+Centre" }                    
+				    ]
                   },
                   {
                     groupTitle: "Group 2",
                     items: [
-                      { name: "三冰河直升機飛行 (含著陸)", tag: "預約活動", alert: "預約 12:00 梯次 (40mins)", note: "觀覽冰河景色含冰河降落，受雲量/天候影響，不保證出發", url: "https://maps.google.com/?q=The+Helicopter+Line+Fox+Glacier" }
+                      { name: "皇家信天翁中心 Royal Albatross Centre", tag: "景點", alert: "已預訂 17:00(約 1 hr), 先吃飯", url: "https://maps.google.com/?q=Royal+Albatross+Centre" }
                     ]
                   }
-                ]
-              },
-              { name: "Lake Matheson 馬松森湖", tag: "景點", note: "Group 1 等待時間可到湖邊喝咖啡走走散步", url: "https://maps.google.com/?q=Lake+Matheson+parking" },
-              { name: "Betsey Jane Eatery & Bar", tag: "美食", note: "晚餐", url: "https://maps.google.com/?q=Betsey+Jane+Eatery+%26+Bar" },
-              { name: "Aspen Court Franz Josef Motel", tag: "住宿", note: "當日住宿飯店", url: "https://maps.google.com/?q=Aspen+Court+Franz+Josef+Motel" }
+                ],
+              }, 
+              { name: "Blue Penguins Pukekura", tag: "景點", alert: "已預訂 19:00(約 2 hr 45 min)",note: "傍晚天氣冷，帶保暖跟防水外套or雨衣", url: "https://maps.google.com/?q=Blue+Penguins+Pukekura" },
+              { name: "Distinction Dunedin Hotel", tag: "住宿", driveTime: "開車 45 分鐘", note: "當日住宿飯店", url: "https://maps.google.com/?q=Distinction+Dunedin+Hotel"},
             ]
           },
           {
             dayCode: "D5",
             date: "10/27(二)",
-            title: "Franz Josef 法蘭士約瑟夫冰河 → 景觀公路 → 瓦納卡 Wanaka",
-            startLocation: "Franz Josef",
+            title: "但尼丁 Dunedin → 克倫威爾 Cromwell Heritage Precinct → 瓦納卡 Wanaka",
+            startLocation: "Dunedin",
             stay: "ASURE Brookvale Motel",
             stayUrl: "https://maps.google.com/?q=ASURE+Brookvale+Motel",
             meals: { 
-              b: "Full Of Beans (06:30開)", bUrl: "https://maps.google.com/?q=Full+Of+Beans+Franz+Josef", 
-              l: "Matheson Cafe", lUrl: "https://maps.google.com/?q=Lake+Matheson+parking", 
+              b: "The Standard Kitchen", bUrl: "https://maps.google.com/?q=The+Standard+Kitchen", 
+              l: "Pinot Junction -Lakeside Cafe", lUrl: "https://maps.google.com/?q=Pinot+Junction+-+Lakeside+Cafe", 
               d: "Muttonbird (預訂 19:30)", dUrl: "https://maps.google.com/?q=Muttonbird+Wanaka" 
             },
             spots: [
-              { name: "Full Of Beans (06:30開)", tag: "美食", note: "早餐 ＃因為活動很早，吃不吃自行決定", url: "https://maps.google.com/?q=Full+Of+Beans+Franz+Josef" },
-              {
-                isGroup: true,
-                groups: [
-                  {
-                    groupTitle: "Group 1",
-                    items: [
-                      { name: "Franz Josef Glacier 冰河健行", tag: "預約活動", alert: "預約 07:30 梯次 (4hr)", note: "法蘭士約瑟夫冰河健行，受雲量/天候影響，不保證出發", url: "https://maps.google.com/?q=Franz Josef Glacier Guides" }
-                    ]
-                  },
-                  {
-                    groupTitle: "Group 2",
-                    items: [
-                      { name: "三冰河直升機飛行 (含著陸)", tag: "預約活動", alert: "預約 08:15 梯次 (45mins)", note: "觀覽冰河景色含冰河降落，受雲量/天候影響，不保證出發", url: "https://maps.google.com/?q=Glacier+Country+Helicopters" }
-                    ]
-                  }
-                ]
-              },
-              { name: "Matheson Cafe", tag: "美食", driveTime: "開車 40 分鐘", note: "午餐", url: "https://maps.google.com/?q=Lake+Matheson+parking" },
-              { name: "Knights Point Lookout 武士角觀景台", tag: "景點", driveTime: "開車 1 小時 15 分鐘", note: "停車休息拍照 (有廁所)", url: "https://maps.google.com/?q=Knights+Point+Lookout" },
-              { name: "Makarora Public Toilets", tag: "休憩", note: "公廁休憩點", driveTime: "開車 1 小時 40 分鐘", url: "https://maps.app.goo.gl/a8ScFMsxHxwJk8fHA" },
-              { name: "Lake Hawea Lookout 哈威亞湖觀景台", tag: "景點", driveTime: "開車 40 分鐘", note: "停車休息拍照", url: "https://maps.app.goo.gl/NCbFjbbBYRQ878Rg6" },
-              { name: "Muttonbird (預訂 19:30)", tag: "美食", alert: "已預訂 19:30 晚餐", note: "晚餐", url: "https://maps.google.com/?q=Muttonbird+Wanaka" },
+              { name: "The Standard Kitchen", tag: "美食", note: "午餐", url: "https://maps.google.com/?q=The+Standard+Kitchen" },
+              { name: "Baldwin Street 鮑德溫街", tag: "景點", driveTime: "開車 10 分", note: "世界最陡街道", url: "https://maps.google.com/?q=Baldwin+Street+-+The+Steepest+Street+in+the+World" },
+              { name: "Pinot Junction -Lakeside Cafe", tag: "美食", driveTime: "開車 3 小時 10 分鐘", note: "午餐", url: "https://maps.google.com/?q=Pinot+Junction+-+Lakeside+Cafe" },
+              { name: "克倫威爾 Cromwell Heritage Precinct", tag: "景點", note: "掏金復古小鎮", url: "https://maps.google.com/?q=Cromwell+Heritage+Precinct" },
+              { name: "Wānaka Willow Tree (孤獨樹)", tag: "景點", driveTime: "開車 1 小時", note: "", url: "https://maps.google.com/?q=Wānaka+Willow+Tree" },
+              { name: "Muttonbird", tag: "美食", alert: "已預訂 19:30 晚餐", note: "晚餐", url: "https://maps.google.com/?q=Muttonbird+Wanaka" },
               { name: "ASURE Brookvale Motel", tag: "住宿", note: "當日住宿飯店", url: "https://maps.google.com/?q=ASURE+Brookvale+Motel" }
             ]
           },
@@ -2445,12 +2431,12 @@
                     groupTitle: "Group 2",
                     items: [
                       { name: "Isthmus Peak Track", tag: "健行", driveTime: "開車 30 分鐘", note: "來回 16km 原路折返，總爬升 1,155m (約 5-6hr)", url: "https://maps.google.com/?q=Isthmus+Peak+Trail+Small+Parking" },
-                      { name: "Skydive Wanaka 高空跳傘", tag: "預約活動", alert: "預約 12:30", driveTime: "開車 10 分鐘", note: "15000呎", url: "https://maps.google.com/?q=Skydive+Wanaka" }
+                      { name: "Skydive Wanaka 高空跳傘", tag: "預訂活動", alert: "預訂 12:30", driveTime: "開車 10 分鐘", note: "15000呎", url: "https://maps.google.com/?q=Skydive+Wanaka" }
                     ]
                   }
                 ]
               },                      
-              { name: "Essence Restaurant by ROKI Collection", tag: "美食", note: "晚餐, 米其林＊＊ <br> 07:30pm, TSAICHEN, KAO (6人） <br> 08:00pm, MEIYUEH, KAO（4人） <br> 08:30pm, CHIACHUN, KAO（4人）" , alert: "已預約", url: "https://maps.google.com/?q=Essence+Restaurant+by+ROKI+Collection" },                    
+              { name: "Essence Restaurant by ROKI Collection", tag: "美食", note: "晚餐, 米其林＊＊ <br> 07:30pm, TSAICHEN, KAO (6人） <br> 08:00pm, MEIYUEH, KAO（4人） <br> 08:30pm, CHIACHUN, KAO（4人）" , alert: "已預訂", url: "https://maps.google.com/?q=Essence+Restaurant+by+ROKI+Collection" },                    
               { name: "Beacon Sky (Queenstown)", tag: "住宿", note: "當日住宿飯店 (民宿), <a href='https://m.duve.co/g/MV4Kev3qhV?id=post&gId=7qCxirqY-&affType=100&nflp=1' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>停車場車位號與鑰匙密碼 <i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a> , Wi-Fi: Luxe Stay 1002345 / QTownView03", url: "https://maps.google.com/?q=-45.034791, 168.652370" }
             ]
           },
@@ -2469,14 +2455,14 @@
             spots: [ 
               { name: "Queenstown Hill Walking Track（自由參加)", tag: "健行", note: "來回 5km 原路折返，爬升 450m (約 2~2.5hr)", url: "https://maps.google.com/?q=Queenstown+Hill+Walking+Track" },
               { name: "09:10 出發 ", tag: "自駕", url: "" },  
-              { name: "The Boat Shed Cafe", tag: "美食", driveTime: "開車約 10 分鐘", note: "早午餐 漢堡有名 <br> 09:30am, TSAICHEN, KAO (8人) <br> 09:45am, CHIACHUN, KAO（6人）", alert: "已預約" , url: "https://maps.google.com/?q=The+Boat+Shed+Cafe+Queenstown" },
+              { name: "The Boat Shed Cafe", tag: "美食", driveTime: "開車約 10 分鐘", note: "早午餐 漢堡有名 <br> 09:30am, TSAICHEN, KAO (8人) <br> 09:45am, CHIACHUN, KAO（6人）", alert: "已預訂" , url: "https://maps.google.com/?q=The+Boat+Shed+Cafe+Queenstown" },
               { name: "鹿園高地 Deer Park Heights Queenstown", tag: "景點", note: "如在車上餵食，食物不要丟太靠近車子，有牌子寫不能下車的區段請不要下車，飼料現金NZD$2", url: "https://maps.google.com/?q=Deer+Park+Heights+Queenstown" },
               { name: "車開回民宿停", tag: "自駕", url: "" }, 
-              { name: "Skyline Gondola & Luge 溜溜車", tag: "景點", note: "纜車與斜坡滑車", alert: "預約14:30, 已購票", url: "https://maps.google.com/?q=Skyline+Queenstown" },
+              { name: "Skyline Gondola & Luge 溜溜車", tag: "景點", note: "纜車與斜坡滑車", alert: "已預訂 14:30, 已購票", url: "https://maps.google.com/?q=Skyline+Queenstown" },
               { name: "Kiwi Birdlife Park 奇異鳥公園", tag: "景點", note: "保育類奇異鳥生態體驗", url: "https://maps.google.com/?q=Kiwi+Birdlife+Park" },
               { name: "Fergburger 著名漢堡", tag: "美食", note: "CNN 評比全世界最好吃漢堡 (營業 07:00~02:30)", url: "https://maps.google.com/?q=Fergburger" },
               { name: "自由活動 or 碼頭步道散步", tag: "景點", note: "Patagonia Chocolates 冰淇淋 / 逛街", url: "https://maps.google.com/?q=Patagonia+Chocolates+Queenstown" },
-              { name: "Winnies Gourmet Pizza Bar", tag: "美食", note: "晚餐", alert: "預約 19:00" , url: "https://maps.google.com/?q=Winnies+Gourmet+Pizza+Bar+Queenstown"},
+              { name: "Winnies Gourmet Pizza Bar", tag: "美食", note: "晚餐", alert: "已預訂 19:00" , url: "https://maps.google.com/?q=Winnies+Gourmet+Pizza+Bar+Queenstown"},
               { name: "Beacon Sky (Queenstown)", tag: "住宿", note: "當日住宿飯店 (民宿), <a href='https://m.duve.co/g/MV4Kev3qhV?id=post&gId=7qCxirqY-&affType=100&nflp=1' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>停車場車位號與鑰匙密碼 <i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a> , Wi-Fi: Luxe Stay 1002345 / QTownView03", url: "https://maps.app.goo.gl/ywcD33auGSh2kFZd7" }
             ]
           },
@@ -2498,7 +2484,7 @@
               { name: "Te Anau (Allied 加油站)", tag: "加油", note: "加油", url: "https://maps.google.com/?q=Allied+Te+Anau" },
               { name: "Mirror Lakes 鏡湖", tag: "景點", note: "停車拍照", url: "https://maps.google.com/?q=Mirror+Lakes" },
               { name: "米佛峽灣 Milford Sound 停車場", tag: "自駕", driveTime: "開車約 2 小時", note: "停車一小時 NZD $10 + 交易費 $0.5", url: "https://maps.google.com/?q=Milford+Sound+Public+Carpark＋米爾福德峽灣收費停車場" },
-              { name: "Milford Sound Boutique Small Boat Cruise", tag: "預約活動", alert: "預約 12:45 巡航 (約 2hr)", note: "峽灣遊船", url: "https://maps.google.com/?q=Milford+Sound+Boutique+Small+Boat+Cruise" },
+              { name: "Milford Sound Boutique Small Boat Cruise", tag: "預訂活動", alert: "已預訂 12:45 巡航 (約 2hr)", note: "峽灣遊船", url: "https://maps.google.com/?q=Milford+Sound+Boutique+Small+Boat+Cruise" },
               { name: "Hundred Falls 冰河 U 型谷", tag: "景點", note: "停車拍照", url: "https://maps.google.com/?q=Hundred+Falls+Milford+Sound" },
               { name: "Luxmore Souvenirs 南方禮品中心", tag: "購物", note: "禮品", driveTime: "開車約 2 小時",url: "https://maps.google.com/?q=Luxmore+Souvenirs" },
               { name: "The Fat Duck", tag: "美食", note: "下午餐", url: "https://maps.google.com/?q=The+Fat+Duck+Te+Anau" },
@@ -2545,7 +2531,7 @@
             },
             spots: [
               { name: "Alpine Restaurant", tag: "美食", note: "飯店早餐 06:30~", url: "https://maps.google.com/?q=Alpine+Restaurant" },
-              { name: "Glacier Explorer", tag: "預約活動", alert: "預約 08:45~11:30", note: "需步行1.5km（25分鐘內)＋搭船1小時，原路來回", url: "https://maps.google.com/?q=Glacier+Explorer" },
+              { name: "Glacier Explorer", tag: "預訂活動", alert: "已預訂 08:45~11:30", note: "需步行1.5km（25分鐘內)＋搭船1小時，原路來回", url: "https://maps.google.com/?q=Glacier+Explorer" },
               { name: "Tasman Lake Track 塔斯曼湖步道（備用行程）", tag: "健行", driveTime: "開車 15 分鐘", note: "來回約 1 小時", url: "https://maps.google.com/?q=Tasman+Glacier+Car+Park+New+Zealand" },
               { name: "Mt Cook Alpine Salmon Shop", tag: "美食", driveTime: "開車約 55 分鐘", note: "生魚片", url: "https://maps.google.com/?q=Mt+Cook+Alpine+Salmon+Shop" },
               { name: "Mt John Observatory 約翰山天文台", tag: "景點", driveTime: "開車 50 分鐘", note: "賞魯冰花，停車費$8 (Card Only)", url: "https://maps.google.com/?q=Mt+John+Observatory" },
@@ -2553,7 +2539,7 @@
               { name: "The Church of the Good Shepherd", tag: "景點", note: "善良牧羊人教堂 (教堂內禁止拍照)", url: "https://maps.google.com/?q=The+Church+of+the+ Good+Shepherd+New+Zealand" },
               { name: "The Sheepdog Memorial", tag: "景點", note: "牧羊犬雕像", url: "https://maps.google.com/?q=The+Sheepdog+Memorial" },
               { name: "TLV Restaurant & Bar", tag: "美食", alert: "已預訂 19:00" , note: "晚餐 <br> TSAICHEN, KAO (10人）<br> CHIACHUN, KAO（4人）" , url: "https://maps.google.com/?q=TLV+Restaurant+%26+Bar+Lake+Tekapo" },
-              { name: "Crater Stargazing 觀星體驗", tag: "預約活動", alert: "預約 23:30", note: "Dark Sky Project 火山口夜間觀星，受雲量/天候影響，不保證可見", url: "https://maps.google.com/?q=Dark+Sky+Project" },
+              { name: "Crater Stargazing 觀星體驗", tag: "預訂活動", alert: "已預訂 23:30", note: "Dark Sky Project 火山口夜間觀星，受雲量/天候影響，不保證可見", url: "https://maps.google.com/?q=Dark+Sky+Project" },
               { name: "Peppers Bluewater Resort Lake Tekapo", tag: "住宿", note: "當日住宿飯店", url: "https://maps.google.com/?q=Peppers+Bluewater+Resort+Lake+Tekapo" }
             ]
           },
@@ -2571,7 +2557,6 @@
             },
             spots: [
               { name: "Fairlie Bakehouse 鹹派", tag: "美食", driveTime: "開車約 40 分鐘", note: "牛肉鹹派、培根鮭魚鹹派", url: "https://maps.google.com/?q=Fairlie+Bakehouse" },
-              { name: "Geraldine 小鎮", tag: "購物", driveTime: "開車約 45 分鐘", note: "Barker's Foodstore & Eatery / Summit and Flow NZ / Geraldine Cheese Company / Super Liquor Geraldine / Joosh / Southbound Specialty Coffee", url: "https://maps.app.goo.gl/1f7qCgvVzpxJG9GW6" },
               { name: "基督城市區自由活動", tag: "景點", driveTime: "總車程約 1 小時 45 分鐘", note: "<a href='https://maps.app.goo.gl/Z16azBY9PWaC4VTN8' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>紙教堂 <i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a> / <a href='https://maps.app.goo.gl/nohYDvovTS3BFjWk9' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>基督城大教堂 (修復中) <i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a>/ <a href='https://maps.app.goo.gl/VzTnFjQT82owfvTi9' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>追億橋 <i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a>  / <a href='https://maps.app.goo.gl/DLrwz8fKtsuNvcti9' target='_blank' class='underline decoration-amber-400 hover:text-cozy-accent font-bold'>河畔市場 <i class='fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75'></i></a> / 百貨區自由逛", url: "https://maps.google.com/?q=Barker's+Foodstore+%26+Eatery" },
               { name: "Twenty Seven Steps", tag: "美食" , alert: "已預訂 18:30", note: "晚餐 <br> TSAICHEN, KAO (8人）<br> CHIACHUN, KAO（6人）", url: "https://maps.google.com/?q=Twenty+Seven+Steps" },
               { name: "Distinction Christchurch Hotel", tag: "住宿", note: "當日住宿飯店 <br> 隔天飛機很早，請睡前先把托運行李整理好。", url: "https://maps.google.com/?q=Distinction+Christchurch+Hotel" }
