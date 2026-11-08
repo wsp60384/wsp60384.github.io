@@ -1986,26 +1986,23 @@
           return item.currency === 'TWD' ? total : (total * rate);
         },
 
-        calcCombinedPersonExpenseNZD(person) {
-          return this.calcExpenseNZD(this.expenses, person) + this.calcExpenseNZD(this.prepaids, person);
-        },
-
-        calcCombinedPersonExpenseTWD(person) {
-          return Math.round(this.calcExpenseTWD(this.expenses, person) + this.calcExpenseTWD(this.prepaids, person));
-        },
-
+        
         calcExpenseNZD(list, person) {
           let total = 0;
-          list.forEach(item => {
+          (list || []).forEach(item => {
+            if (!item) return;
             const mult = item.feeMultiplier || 1;
-            const rate = item.exchangeRate || 19.25;
-            if (item.dishes) {
+            const rate = Number(item.exchangeRate) || 19.25;
+            if (item.dishes && item.dishes.length > 0) {
               item.dishes.forEach(d => {
                 if (d.sharedWith && d.sharedWith.includes(person) && d.sharedWith.length > 0) {
                   const share = (Number(d.price || 0) * mult) / d.sharedWith.length;
                   total += item.currency === 'NZD' ? share : (share / rate);
                 }
               });
+            } else if (item.sharedWith && item.sharedWith.includes(person) && item.sharedWith.length > 0) {
+              const share = Number(item.finalTotal || item.amount || 0) / item.sharedWith.length;
+              total += item.currency === 'NZD' ? share : (share / rate);
             }
           });
           return total;
@@ -2013,27 +2010,44 @@
 
         calcExpenseTWD(list, person) {
           let total = 0;
-          list.forEach(item => {
+          (list || []).forEach(item => {
+            if (!item) return;
             const mult = item.feeMultiplier || 1;
-            const rate = item.exchangeRate || 19.25;
-            if (item.dishes) {
+            const rate = Number(item.exchangeRate) || 19.25;
+            if (item.dishes && item.dishes.length > 0) {
               item.dishes.forEach(d => {
                 if (d.sharedWith && d.sharedWith.includes(person) && d.sharedWith.length > 0) {
                   const share = (Number(d.price || 0) * mult) / d.sharedWith.length;
                   total += item.currency === 'TWD' ? share : (share * rate);
                 }
               });
+            } else if (item.sharedWith && item.sharedWith.includes(person) && item.sharedWith.length > 0) {
+              const share = Number(item.finalTotal || item.amount || 0) / item.sharedWith.length;
+              total += item.currency === 'TWD' ? share : (share * rate);
             }
           });
           return total;
         },
 
+        calcCombinedPersonExpenseNZD(person) {
+          return this.calcExpenseNZD(this.expenses, person) + this.calcExpenseNZD(this.prepaids, person);
+        },
+
+        calcCombinedPersonExpenseTWDRaw(person) {
+          return this.calcExpenseTWD(this.expenses, person) + this.calcExpenseTWD(this.prepaids, person);
+        },
+
+        calcCombinedPersonExpenseTWD(person) {
+          return Math.round(this.calcCombinedPersonExpenseTWDRaw(person));
+        },
+
         calcPersonCreditNZD(person) {
-          const expPaid = this.expenses.filter(e => e.payer === person).reduce((s, e) => s + this.getItemFinalNZD(e), 0);
-          const prepPaid = this.prepaids.filter(p => p.payer === person).reduce((s, p) => s + this.getItemFinalNZD(p), 0);
+          const expPaid = this.expenses.filter(e => e && e.payer === person).reduce((s, e) => s + this.getItemFinalNZD(e), 0);
+          const prepPaid = this.prepaids.filter(p => p && p.payer === person).reduce((s, p) => s + this.getItemFinalNZD(p), 0);
           
           let transferredOut = 0;
           this.transfers.forEach(t => {
+            if (!t) return;
             const fromArr = Array.isArray(t.from) ? t.from : [t.from];
             if (fromArr.includes(person) && fromArr.length > 0) {
               transferredOut += this.getItemFinalNZD(t) / fromArr.length;
@@ -2043,19 +2057,24 @@
           return expPaid + prepPaid + transferredOut;
         },
 
-        calcPersonCreditTWD(person) {
-          const expPaid = this.expenses.filter(e => e.payer === person).reduce((s, e) => s + this.getItemFinalTWD(e), 0);
-          const prepPaid = this.prepaids.filter(p => p.payer === person).reduce((s, p) => s + this.getItemFinalTWD(p), 0);
+        calcPersonCreditTWDRaw(person) {
+          const expPaid = this.expenses.filter(e => e && e.payer === person).reduce((s, e) => s + this.getItemFinalTWD(e), 0);
+          const prepPaid = this.prepaids.filter(p => p && p.payer === person).reduce((s, p) => s + this.getItemFinalTWD(p), 0);
           
           let transferredOut = 0;
           this.transfers.forEach(t => {
+            if (!t) return;
             const fromArr = Array.isArray(t.from) ? t.from : [t.from];
             if (fromArr.includes(person) && fromArr.length > 0) {
               transferredOut += this.getItemFinalTWD(t) / fromArr.length;
             }
           });
 
-          return Math.round(expPaid + prepPaid + transferredOut);
+          return expPaid + prepPaid + transferredOut;
+        },
+
+        calcPersonCreditTWD(person) {
+          return Math.round(this.calcPersonCreditTWDRaw(person));
         },
 
         calcFinalBalanceNZD(person) {
@@ -2064,7 +2083,7 @@
           
           let receivedIn = 0;
           this.transfers.forEach(t => {
-            if (t.to === person) {
+            if (t && t.to === person) {
               receivedIn += this.getItemFinalNZD(t);
             }
           });
@@ -2072,19 +2091,24 @@
           return credit - (expense + receivedIn);
         },
 
-        calcFinalBalanceTWD(person) {
-          const credit = this.calcPersonCreditTWD(person);
-          const expense = this.calcCombinedPersonExpenseTWD(person);
+        calcFinalBalanceTWDRaw(person) {
+          const credit = this.calcPersonCreditTWDRaw(person);
+          const expense = this.calcCombinedPersonExpenseTWDRaw(person);
           
           let receivedIn = 0;
           this.transfers.forEach(t => {
-            if (t.to === person) {
+            if (t && t.to === person) {
               receivedIn += this.getItemFinalTWD(t);
             }
           });
 
-          return Math.round(credit - (expense + receivedIn));
+          return credit - (expense + receivedIn);
         },
+
+        calcFinalBalanceTWD(person) {
+          return Math.round(this.calcFinalBalanceTWDRaw(person));
+        },
+
 
         getFinalSettlementTextTWD(person) {
           const diff = this.calcFinalBalanceTWD(person);
